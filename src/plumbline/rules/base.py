@@ -97,8 +97,15 @@ class AnalysisContext:
         end_line: int | None = None,
     ) -> FindingDraft:
         return _build_draft(
-            self.rule, self.config, self._analysis.tree, self.file, node, message,
-            severity=severity, confidence=confidence, end_line=end_line,
+            self.rule,
+            self.config,
+            self._analysis.tree,
+            self.file,
+            node,
+            message,
+            severity=severity,
+            confidence=confidence,
+            end_line=end_line,
         )
 
 
@@ -126,8 +133,15 @@ class ProjectContext:
     ) -> FindingDraft:
         tree = self._by_file[file].tree
         return _build_draft(
-            self.rule, self.config, tree, file, node, message,
-            severity=severity, confidence=confidence, end_line=end_line,
+            self.rule,
+            self.config,
+            tree,
+            file,
+            node,
+            message,
+            severity=severity,
+            confidence=confidence,
+            end_line=end_line,
         )
 
 
@@ -228,9 +242,7 @@ def discover_rules() -> list[Rule]:
 
     found: dict[str, Rule] = {}
     module_of: dict[str, str] = {}
-    infos = sorted(
-        pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."), key=lambda m: m.name
-    )
+    infos = sorted(pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."), key=lambda m: m.name)
     for info in infos:
         try:
             module = importlib.import_module(info.name)
