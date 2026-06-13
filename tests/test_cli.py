@@ -23,10 +23,11 @@ def test_scan_clean_repo_exits_zero(tmp_path: Path) -> None:
     assert "gate passed" in result.output
 
 
-def test_rules_command_reports_none_loaded(tmp_path: Path) -> None:
+def test_rules_command_lists_discovered_rules(tmp_path: Path) -> None:
     result = CliRunner().invoke(main, ["rules"])
     assert result.exit_code == 0
-    assert "No rules loaded." in result.output
+    assert "PLB-RES-001" in result.output
+    assert "rule(s) loaded." in result.output
 
 
 def test_invalid_config_exits_two(tmp_path: Path) -> None:
@@ -41,6 +42,20 @@ def test_missing_path_exits_two(tmp_path: Path) -> None:
     # click validates path existence -> usage error, exit 2.
     result = CliRunner().invoke(main, ["scan", str(tmp_path / "nope")])
     assert result.exit_code == 2
+
+
+def test_scan_single_file_path_is_analyzed(tmp_path: Path) -> None:
+    # Regression: a file path (not a dir) must actually be scanned.
+    f = tmp_path / "agent.py"
+    f.write_text(
+        "from openai import OpenAI\n"
+        "c = OpenAI()\n"
+        "c.chat.completions.create(model='m', timeout=None)\n"
+    )
+    result = CliRunner().invoke(main, ["scan", str(f)])
+    assert result.exit_code == 1  # PLB-RES-001 fires -> gate fails
+    assert "PLB-RES-001" in result.output
+    assert "1 file(s)" in result.output
 
 
 def test_scan_reports_analyzer_error(tmp_path: Path) -> None:

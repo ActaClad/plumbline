@@ -9,6 +9,7 @@ import pytest
 from plumbline.adapters.base import SemanticIndex
 from plumbline.config import Config, RulesConfig
 from plumbline.core.ast_layer import parse
+from plumbline.core.taint import TaintView
 from plumbline.model import Confidence, FindingDraft, Pillar, Severity
 from plumbline.rules.base import (
     AnalysisContext,
@@ -39,16 +40,20 @@ def _rule(rule_id: str = "PLB-RES-001", **kw: object) -> Rule:
 
 def _ctx(src: str, rule: Rule, config: Config | None = None) -> AnalysisContext:
     st = parse("app/agent.py", src)
-    analysis = FileAnalysis(file="app/agent.py", tree=st, semantics=SemanticIndex([]))
+    analysis = FileAnalysis(
+        file="app/agent.py", tree=st, semantics=SemanticIndex([]), taint=TaintView({}, {})
+    )
     return AnalysisContext(analysis, rule, config or Config())
 
 
 # --- discovery ----------------------------------------------------------------
 
 
-def test_discover_rules_empty_tree_returns_list() -> None:
-    # No rule modules exist yet in M0 -> discovery must succeed and return [].
-    assert discover_rules() == []
+def test_discover_rules_finds_res_001() -> None:
+    # Discovery returns a sorted, validated list; PLB-RES-001 is the first rule.
+    ids = [r.id for r in discover_rules()]
+    assert "PLB-RES-001" in ids
+    assert ids == sorted(ids)
 
 
 # --- validation (ADR-0005 D2) -------------------------------------------------
