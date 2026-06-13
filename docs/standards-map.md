@@ -20,7 +20,7 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 
 | Rule ID | Pillar | Severity | Confidence | Standards | Precision |
 |---|---|---|---|---|---|
-| PLB-RES-001 | Reliability | Blocker | High | — | TBD |
+| PLB-RES-001 | Reliability | Blocker | Medium* | — | TBD (M3) |
 | PLB-RES-002 | Reliability | Critical | High | — | TBD |
 | PLB-RES-005 | Reliability | Critical | High | — | TBD |
 | PLB-RES-007 | Reliability | Critical | Medium | — | TBD |
@@ -44,6 +44,9 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 | PLB-SEC-007 | Security | Critical | High | CWE-918 | TBD |
 | PLB-GOV-001 | Security | Critical | Medium | NIST-AI-RMF:MAP | TBD |
 
+> \* RES-001 ships at **Medium** until a precision number lands in `/benchmark`
+> (CLAUDE.md §1.3); its catalog target is High. Promotion happens in M3.
+>
 > This lists the High-confidence launch set plus key mappings. Extend it to
 > every rule as they are implemented — the full rule list is in
 > `rule-catalog.md`. A published OWASP-coverage matrix is strong marketing;
