@@ -20,6 +20,7 @@ from .adapters import ADAPTERS
 from .adapters.base import SemanticIndex, collect_semantics
 from .config import Config, GateVerdict, evaluate_gate
 from .core.ast_layer import ParseError, parse
+from .core.taint import TaintView, analyze_taint
 from .model import AnalyzerError, Finding, FindingDraft, assign_fingerprints, finding_sort_key
 from .rules.base import AnalysisContext, FileAnalysis, ProjectContext, Rule, RuleScope
 
@@ -111,7 +112,12 @@ def _analyze_file(root: Path, rel: str, errors: list[AnalyzerError]) -> FileAnal
     except Exception as exc:  # noqa: BLE001 — adapter crash is contained
         errors.append(AnalyzerError(file=rel, stage="adapter", message=str(exc)))
         semantics = SemanticIndex([])
-    return FileAnalysis(file=rel, tree=tree, semantics=semantics)
+    try:
+        taint = analyze_taint(tree, semantics)
+    except Exception as exc:  # noqa: BLE001 — taint crash is contained
+        errors.append(AnalyzerError(file=rel, stage="taint", message=str(exc)))
+        taint = TaintView({}, {})
+    return FileAnalysis(file=rel, tree=tree, semantics=semantics, taint=taint)
 
 
 def scan(root: Path, config: Config, rules: Sequence[Rule]) -> ScanResult:

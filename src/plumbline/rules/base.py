@@ -22,6 +22,7 @@ from typing import Final, final
 from ..adapters.base import SemanticIndex
 from ..config import Config
 from ..core.ast_layer import SourceTree
+from ..core.taint import TaintView
 from ..model import (
     Confidence,
     FindingDraft,
@@ -55,13 +56,12 @@ class RuleScope(enum.Enum):
 @final
 @dataclass(frozen=True, slots=True)
 class FileAnalysis:
-    """The per-file analysis products, computed once and shared by every rule.
-    (`taint` is added in M1 when the taint engine lands — implementation-plan M1.)
-    """
+    """The per-file analysis products, computed once and shared by every rule."""
 
     file: str  # POSIX-relative
     tree: SourceTree
     semantics: SemanticIndex
+    taint: TaintView
 
 
 class AnalysisContext:
@@ -86,6 +86,10 @@ class AnalysisContext:
     @property
     def semantics(self) -> SemanticIndex:
         return self._analysis.semantics
+
+    @property
+    def taint(self) -> TaintView:
+        return self._analysis.taint
 
     def finding(
         self,

@@ -50,7 +50,10 @@ def scan_command(paths: tuple[Path, ...], config_path: Path | None) -> None:
     if paths:
         from dataclasses import replace
 
-        config = replace(config, scan=replace(config.scan, include=tuple(str(p) for p in paths)))
+        # Absolute includes so the engine's root/include join is path-correct
+        # whether a file or a directory was given.
+        includes = tuple(str(p.resolve()) for p in paths)
+        config = replace(config, scan=replace(config.scan, include=includes))
 
     result = scan(root, config, rules)
     _report(result)
