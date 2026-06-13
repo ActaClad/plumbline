@@ -1,20 +1,22 @@
 """`plumb` CLI entrypoint (ADR-0007 D5).
 
 Exit codes: 0 gate passed · 1 gate failed · 2 usage/config error ·
-3 internal/rule-load error. The full CLI reporter lands in M1/M2; M0 ships a
-clear text summary so the pipeline runs end-to-end.
+3 internal/rule-load error.
 """
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 import click
 from rich.console import Console
 
-from .config import ConfigError, load_config
+from .config import Config, ConfigError, load_config
 from .engine import ScanResult, scan
-from .rules.base import RuleLoadError, discover_rules
+from .reporters import cli as cli_reporter
+from .reporters.sarif import write_sarif
+from .rules.base import Rule, RuleLoadError, discover_rules
 
 _err = Console(stderr=True)
 _out = Console()
@@ -29,7 +31,10 @@ def main() -> None:
 @main.command("scan")
 @click.argument("paths", nargs=-1, type=click.Path(exists=True, path_type=Path))
 @click.option("--config", "config_path", type=click.Path(path_type=Path), help="Config file path.")
-def scan_command(paths: tuple[Path, ...], config_path: Path | None) -> None:
+@click.option("--sarif", "sarif_path", type=click.Path(path_type=Path), help="Write SARIF here.")
+def scan_command(
+    paths: tuple[Path, ...], config_path: Path | None, sarif_path: Path | None
+) -> None:
     """Scan PATHS (default: current directory) for reliability/architecture defects."""
     root = _scan_root(paths)
     try:
@@ -48,15 +53,15 @@ def scan_command(paths: tuple[Path, ...], config_path: Path | None) -> None:
 
     config = loaded.config
     if paths:
-        from dataclasses import replace
-
         # Absolute includes so the engine's root/include join is path-correct
         # whether a file or a directory was given.
         includes = tuple(str(p.resolve()) for p in paths)
         config = replace(config, scan=replace(config.scan, include=includes))
 
     result = scan(root, config, rules)
-    _report(result)
+    cli_reporter.render(_out, _err, result)
+
+    _maybe_write_sarif(result, rules, config, sarif_path)
     raise SystemExit(0 if result.gate.passed else 1)
 
 
@@ -86,26 +91,15 @@ def _scan_root(paths: tuple[Path, ...]) -> Path:
     return (first if first.is_dir() else first.parent).resolve()
 
 
-def _report(result: ScanResult) -> None:
-    for f in result.findings:
-        loc = f"{f.file}:{f.line}"
-        _out.print(
-            f"[bold]{f.rule_id}[/bold] [dim]{f.severity.label}/{f.confidence.label}[/dim] "
-            f"{loc}\n  {f.message}"
-        )
-    for e in result.analyzer_errors:
-        _err.print(f"[yellow]analyzer error[/yellow] ({e.stage}) {e.file}: {e.message}")
-
-    n = len(result.findings)
-    verb = "finding" if n == 1 else "findings"
-    gate = "[green]gate passed[/green]" if result.gate.passed else "[red]gate failed[/red]"
-    _out.print(
-        f"\n{n} {verb} across {result.files_scanned} file(s); "
-        f"{result.rules_loaded} rule(s) loaded. {gate}"
-    )
-    if not result.gate.passed:
-        for reason in result.gate.reasons:
-            _out.print(f"  [red]✗[/red] {reason}")
+def _maybe_write_sarif(
+    result: ScanResult, rules: list[Rule], config: Config, sarif_path: Path | None
+) -> None:
+    path = sarif_path
+    if path is None and "sarif" in config.output.formats:
+        path = Path(config.output.sarif_path)
+    if path is not None:
+        write_sarif(result, rules, str(path))
+        _err.print(f"[dim]wrote SARIF to {path}[/dim]")
 
 
 if __name__ == "__main__":  # pragma: no cover
