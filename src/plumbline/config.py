@@ -327,9 +327,7 @@ def load_config(scan_root: Path, explicit_path: Path | None = None) -> ConfigLoa
 
     if dotfile.is_file():
         if pyproject_has_table:
-            notices.append(
-                "both .plumbline.toml and [tool.plumbline] exist; using .plumbline.toml"
-            )
+            notices.append("both .plumbline.toml and [tool.plumbline] exist; using .plumbline.toml")
         return ConfigLoad(parse_config(dotfile.read_text()), str(dotfile), tuple(notices))
 
     if pyproject_has_table:

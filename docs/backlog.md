@@ -36,6 +36,16 @@ milestones in `specs/architecture.md`) — it's the catch-net.
 - Engine parallelism (per-file workers) — only behind the double-run
   byte-equality determinism test (detailed-design §3).
 
+## Discovered during M0
+
+- **Full `.gitignore` semantics.** `[scan].respect_gitignore` defaults true but
+  M0 only honors the built-in `default_excludes` set + `[scan].exclude` globs;
+  real nested/negated gitignore parsing is deferred. The config flag is accepted
+  but not yet fully effective — surfaced here per CLAUDE.md §2.
+- **PROMPT_BUILD / AGENT_LOOP tags** are defined in the vocabulary but the
+  openai_sdk adapter does not yet emit them; add when their consuming rules
+  (PRM, AGT) are built (M4).
+
 ## Skill-pack export (ADR-0011) follow-ons
 
 - Additional render targets beyond `claude-skill`: `cursor-rules` and a

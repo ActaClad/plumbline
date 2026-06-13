@@ -83,9 +83,7 @@ def test_no_timeout_anywhere_falls_back_to_sdk_default() -> None:
 
 def test_timeout_on_client_is_resolved() -> None:
     src = (
-        "from openai import OpenAI\n"
-        "c = OpenAI(timeout=30)\n"
-        "c.chat.completions.create(model='m')\n"
+        "from openai import OpenAI\nc = OpenAI(timeout=30)\nc.chat.completions.create(model='m')\n"
     )
     n = _one(src, SemanticTag.LLM_CALL)
     assert n.attrs["timeout"] == Known(30)
@@ -127,11 +125,7 @@ def test_timeout_unresolvable_is_unknown() -> None:
 
 def test_unresolvable_client_yields_unknown_timeout_not_sdk_default() -> None:
     # Client comes from a parameter -> provider unknown -> cannot claim a default.
-    src = (
-        "from openai import OpenAI\n"
-        "def f(c):\n"
-        "    c.chat.completions.create(model='m')\n"
-    )
+    src = "from openai import OpenAI\ndef f(c):\n    c.chat.completions.create(model='m')\n"
     assert _attr(src, SemanticTag.LLM_CALL, "timeout") is UNKNOWN
 
 

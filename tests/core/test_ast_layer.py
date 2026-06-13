@@ -57,9 +57,7 @@ def test_function_scope_created_with_params() -> None:
 def test_nested_function_scope_parent_chain() -> None:
     src = "def outer():\n    def inner():\n        x = 1\n"
     st = parse("a.py", src)
-    inner_assign = next(
-        n for n in ast.walk(st.tree) if isinstance(n, ast.Assign)
-    )
+    inner_assign = next(n for n in ast.walk(st.tree) if isinstance(n, ast.Assign))
     scope = st.scope_of(inner_assign)
     assert scope.kind is ScopeKind.FUNCTION
     assert scope.parent is not None and scope.parent.kind is ScopeKind.FUNCTION
