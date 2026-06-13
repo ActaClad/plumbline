@@ -57,6 +57,10 @@ packages = ["src/plumbline"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Fixtures are realistic (sometimes deliberately imperfect) sample programs that
+# double as documentation of the pattern — not project source. They must parse,
+# but their import order / style is intentionally not linted or reformatted.
+extend-exclude = ["fixtures"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "C4"]

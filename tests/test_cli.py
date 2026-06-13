@@ -63,3 +63,56 @@ def test_scan_reports_analyzer_error(tmp_path: Path) -> None:
     result = CliRunner().invoke(main, ["scan", str(tmp_path)])
     assert result.exit_code == 0
     assert "analyzer error" in result.output
+
+
+_DISABLED = (
+    "from openai import OpenAI\nc = OpenAI()\n"
+    "c.chat.completions.create(model='m', timeout=None){suffix}\n"
+)
+
+
+def test_strict_analyzer_errors_fails_gate(tmp_path: Path) -> None:
+    _write(tmp_path, "bad.py", "def f(:\n")
+    ok = CliRunner().invoke(main, ["scan", str(tmp_path)])
+    strict = CliRunner().invoke(main, ["scan", str(tmp_path), "--strict-analyzer-errors"])
+    assert ok.exit_code == 0
+    assert strict.exit_code == 1
+
+
+def test_scan_writes_json_and_sarif(tmp_path: Path) -> None:
+    _write(tmp_path, "agent.py", _DISABLED.format(suffix=""))
+    sarif, js = tmp_path / "o.sarif", tmp_path / "o.json"
+    result = CliRunner().invoke(
+        main, ["scan", str(tmp_path / "agent.py"), "--sarif", str(sarif), "--json", str(js)]
+    )
+    assert result.exit_code == 1
+    assert sarif.is_file() and js.is_file()
+
+
+def test_baseline_then_scan_passes(tmp_path: Path) -> None:
+    _write(tmp_path, "agent.py", _DISABLED.format(suffix=""))
+    bl = tmp_path / ".plumbline-baseline.json"
+    made = CliRunner().invoke(main, ["baseline", str(tmp_path), "--output", str(bl)])
+    assert made.exit_code == 0 and bl.is_file()
+    # With the finding baselined, a scan using that baseline passes the gate.
+    cfg = tmp_path / ".plumbline.toml"
+    cfg.write_text(f'[baseline]\nfile = "{bl.name}"\n')
+    rescan = CliRunner().invoke(main, ["scan", str(tmp_path)])
+    assert rescan.exit_code == 0
+    assert "suppressed" in rescan.output
+
+
+def test_inline_suppression_passes_gate(tmp_path: Path) -> None:
+    _write(tmp_path, "agent.py", _DISABLED.format(suffix="  # plumb: ignore[PLB-RES-001]"))
+    result = CliRunner().invoke(main, ["scan", str(tmp_path / "agent.py")])
+    assert result.exit_code == 0
+    assert "suppressed" in result.output
+
+
+def test_bad_baseline_exits_two(tmp_path: Path) -> None:
+    _write(tmp_path, "agent.py", "x = 1\n")
+    (tmp_path / ".plumbline.toml").write_text('[baseline]\nfile = "bl.json"\n')
+    (tmp_path / "bl.json").write_text('{"version":1,"algorithm":"v2","findings":[]}')
+    result = CliRunner().invoke(main, ["scan", str(tmp_path)])
+    assert result.exit_code == 2
+    assert "config error" in result.output

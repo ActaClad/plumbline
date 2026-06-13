@@ -36,6 +36,11 @@ def render(out: Console, err: Console, result: ScanResult) -> None:
     _render_summary(out, result)
 
 
+def _suppressed_note(result: ScanResult) -> str:
+    n = len(result.suppressed)
+    return f" [dim]({n} suppressed)[/dim]" if n else ""
+
+
 def _render_finding(out: Console, f: Finding) -> None:
     color = _COLOR.get(f.severity, "white")
     loc = f"{f.file}:{f.line}" + (f":{f.column + 1}" if f.column is not None else "")
@@ -59,7 +64,7 @@ def _render_summary(out: Console, result: ScanResult) -> None:
     )
     out.print(
         f"\n{n} {verb} across {result.files_scanned} file(s); "
-        f"{result.rules_loaded} rule(s) loaded. {gate}"
+        f"{result.rules_loaded} rule(s) loaded.{_suppressed_note(result)} {gate}"
     )
     if not result.gate.passed:
         for reason in result.gate.reasons:
