@@ -18,6 +18,7 @@ from typing import final
 
 from .adapters import ADAPTERS
 from .adapters.base import SemanticIndex, collect_semantics
+from .baseline import load_baseline_fingerprints
 from .config import Config, GateVerdict, evaluate_gate
 from .core.ast_layer import ParseError, parse
 from .core.taint import TaintView, analyze_taint
@@ -45,8 +46,19 @@ _DEFAULT_EXCLUDE_DIRS: frozenset[str] = frozenset(
 
 @final
 @dataclass(frozen=True, slots=True)
+class SuppressedFinding:
+    """A finding that fired but was suppressed (ADR-0006). Reported, but excluded
+    from the gate and scoring. `kind` matches SARIF: external (baseline) | inSource."""
+
+    finding: Finding
+    kind: str  # "external" | "inSource"
+
+
+@final
+@dataclass(frozen=True, slots=True)
 class ScanResult:
-    findings: tuple[Finding, ...]
+    findings: tuple[Finding, ...]  # active (non-suppressed) findings only
+    suppressed: tuple[SuppressedFinding, ...]
     analyzer_errors: tuple[AnalyzerError, ...]
     gate: GateVerdict
     files_scanned: int
@@ -146,16 +158,57 @@ def scan(root: Path, config: Config, rules: Sequence[Rule]) -> ScanResult:
     findings = _dedupe(assign_fingerprints(drafts))
     findings.sort(key=finding_sort_key)
 
-    gate = evaluate_gate(findings, config.gate)
+    active, suppressed = _apply_suppressions(root, config, analyses, findings, errors)
+
+    gate = evaluate_gate(active, config.gate)  # suppressed excluded (ADR-0006)
     semantic_nodes = sum(len(a.semantics) for a in analyses)
     return ScanResult(
-        findings=tuple(findings),
+        findings=tuple(active),
+        suppressed=tuple(suppressed),
         analyzer_errors=tuple(errors),
         gate=gate,
         files_scanned=len(analyses),
         rules_loaded=len(rules),
         semantic_node_count=semantic_nodes,
     )
+
+
+def _apply_suppressions(
+    root: Path,
+    config: Config,
+    analyses: list[FileAnalysis],
+    findings: list[Finding],
+    errors: list[AnalyzerError],
+) -> tuple[list[Finding], list[SuppressedFinding]]:
+    """Partition findings into active and suppressed (baseline + inline, ADR-0006).
+
+    Baseline beats inline when both match. Bare `# plumb: ignore` directives are
+    reported as analyzer errors — blanket suppression must not be silent (D6).
+    """
+    baseline_fps = load_baseline_fingerprints(root / config.baseline.file)
+    inline: dict[tuple[str, int], frozenset[str]] = {}
+    for a in analyses:
+        for lineno, ids in a.tree.suppressions.by_line.items():
+            inline[(a.file, lineno)] = ids
+        for lineno in a.tree.suppressions.invalid_lines:
+            errors.append(
+                AnalyzerError(
+                    file=a.file,
+                    stage="suppression",
+                    message=f"bare '# plumb: ignore' on line {lineno} has no rule id; ignored",
+                )
+            )
+
+    active: list[Finding] = []
+    suppressed: list[SuppressedFinding] = []
+    for f in findings:
+        if f.fingerprint in baseline_fps:
+            suppressed.append(SuppressedFinding(f, "external"))
+        elif f.rule_id in inline.get((f.file, f.line), frozenset()):
+            suppressed.append(SuppressedFinding(f, "inSource"))
+        else:
+            active.append(f)
+    return active, suppressed
 
 
 def _run(

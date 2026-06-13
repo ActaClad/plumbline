@@ -36,6 +36,24 @@ milestones in `specs/architecture.md`) — it's the catch-net.
 - Engine parallelism (per-file workers) — only behind the double-run
   byte-equality determinism test (detailed-design §3).
 
+## Rule ideas
+
+- **"Relies on SDK-default timeout" — Medium advisory (RES).** Distinct from
+  PLB-RES-001 (which fires only on explicit `timeout=None`): flag LLM calls that
+  rely on the SDK's finite-but-long default timeout (OpenAI/Anthropic ~600s),
+  which can still exhaust a worker pool under load. Medium/advisory so it does
+  not gate idiomatic code; complements RES-001's High/Blocker explicit-disable
+  case. (Requested 2026-06-13.)
+
+## Discovered during M1
+
+- **SARIF `codeFlows` for taint findings.** ADR-0006 D3 wants taint witness
+  paths emitted as `codeFlows`. The witness lives in `TaintView`, not on the
+  `Finding` (whose fields are fixed by ADR-0002), so emitting it needs a
+  `Finding` schema addition (an optional code-flow), which is an ADR. Defer
+  until the first taint-based rule that wants it (M6 SEC rules); no current
+  finding carries a witness, so there is nothing to emit yet.
+
 ## Discovered during M0
 
 - **Full `.gitignore` semantics.** `[scan].respect_gitignore` defaults true but

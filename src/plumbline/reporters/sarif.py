@@ -14,7 +14,7 @@ from typing import Any
 
 from .. import __version__
 from ..engine import ScanResult
-from ..model import Confidence, Finding, Pillar, Severity
+from ..model import Confidence, Finding, Pillar, Severity, finding_sort_key
 from ..rules.base import Rule
 
 SARIF_SCHEMA_URI = "https://json.schemastore.org/sarif-2.1.0.json"
@@ -42,7 +42,12 @@ def to_sarif(result: ScanResult, rules: Sequence[Rule]) -> dict[str, Any]:
     rule_index = {r.id: i for i, r in enumerate(ordered_rules)}
 
     driver_rules = [_rule_descriptor(r) for r in ordered_rules]
-    results = [_result(f, rule_index) for f in result.findings]
+    # Active and suppressed findings are both emitted as results; suppressed ones
+    # carry a `suppressions` array (ADR-0006). Sort the union for determinism.
+    rows: list[tuple[Finding, str | None]] = [(f, None) for f in result.findings]
+    rows += [(sf.finding, sf.kind) for sf in result.suppressed]
+    rows.sort(key=lambda row: finding_sort_key(row[0]))
+    results = [_result(f, rule_index, suppression=kind) for f, kind in rows]
     notifications = [_notification(e.file, e.stage, e.message) for e in result.analyzer_errors]
 
     invocation: dict[str, Any] = {"executionSuccessful": True}
@@ -102,7 +107,9 @@ def _rule_descriptor(rule: Rule) -> dict[str, Any]:
     }
 
 
-def _result(finding: Finding, rule_index: dict[str, int]) -> dict[str, Any]:
+def _result(
+    finding: Finding, rule_index: dict[str, int], *, suppression: str | None = None
+) -> dict[str, Any]:
     region: dict[str, Any] = {"startLine": finding.line}
     if finding.column is not None:
         region["startColumn"] = finding.column + 1  # SARIF is 1-based (ADR-0006 D3)
@@ -129,6 +136,8 @@ def _result(finding: Finding, rule_index: dict[str, int]) -> dict[str, Any]:
     }
     if finding.rule_id in rule_index:
         result["ruleIndex"] = rule_index[finding.rule_id]
+    if suppression is not None:
+        result["suppressions"] = [{"kind": suppression}]
     return result
 
 
