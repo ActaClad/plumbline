@@ -13,6 +13,7 @@ import click
 from rich.console import Console
 
 from .baseline import BaselineError, write_baseline
+from .benchmark import render_report, run_benchmark
 from .config import Config, ConfigError, load_config
 from .engine import ScanResult, scan
 from .reporters import cli as cli_reporter
@@ -75,6 +76,28 @@ def baseline_command(
     target = out_path or (root / config.baseline.file)
     write_baseline(target, findings)
     _out.print(f"Wrote {len(findings)} finding(s) to baseline [bold]{target}[/bold].")
+
+
+@main.command("benchmark")
+@click.argument(
+    "corpus",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default="benchmark/corpus",
+)
+@click.option("--md", "md_path", type=click.Path(path_type=Path), help="Write the report here.")
+def benchmark_command(corpus: Path, md_path: Path | None) -> None:
+    """Measure per-rule precision/recall against the labeled corpus."""
+    try:
+        rules = discover_rules()
+    except RuleLoadError as exc:
+        _err.print(f"[red]rule load error:[/red] {exc}")
+        raise SystemExit(3) from exc
+    report = run_benchmark(corpus, rules)
+    text = render_report(report)
+    _out.print(text)
+    if md_path is not None:
+        md_path.write_text(text, encoding="utf-8")
+        _err.print(f"[dim]wrote report to {md_path}[/dim]")
 
 
 @main.command("rules")
