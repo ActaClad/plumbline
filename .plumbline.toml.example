@@ -1,0 +1,42 @@
+# .plumbline.toml — example configuration. Copy to your repo root and edit.
+# Uncommented values below are the defaults; all keys are optional.
+# Equivalently, use a [tool.plumbline] table in pyproject.toml.
+
+[scan]
+# Roots to scan, relative to the repo root. .gitignore is respected by default,
+# and a built-in set of excludes (.venv, node_modules, build dirs, hidden dirs)
+# applies unless default_excludes = false.
+include = ["."]
+exclude = []
+respect_gitignore = true
+default_excludes = true
+
+[gate]
+# The Quality Gate wired into CI. Default: fail on any Blocker, or any
+# High-confidence Critical. Tighten or loosen per your risk appetite.
+fail_on_severity = ["Blocker"]
+fail_on_high_confidence_severity = ["Critical"]
+
+[rules]
+# Disable rules, override severity, or pass per-rule params.
+disabled = []
+# [rules.severity_override]
+# "PLB-COST-001" = "Minor"
+# [rules.params."PLB-MDL-003"]
+# temperature_threshold = 0.3
+
+[baseline]
+# Accept existing findings without failing the gate (adopt incrementally).
+file = ".plumbline-baseline.json"
+
+[output]
+# Any of: cli, sarif, json, html.
+formats = ["cli"]
+sarif_path = "plumbline.sarif"
+json_path = "plumbline.json"
+html_path = "plumbline.html"
+
+[ai]
+# Optional remediation enrichment. OFF by default. Detection is always
+# deterministic regardless of this setting; this only tailors fix TEXT.
+enrich_remediation = false
