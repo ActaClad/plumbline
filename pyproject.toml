@@ -57,10 +57,12 @@ packages = ["src/plumbline"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-# Fixtures are realistic (sometimes deliberately imperfect) sample programs that
-# double as documentation of the pattern — not project source. They must parse,
-# but their import order / style is intentionally not linted or reformatted.
-extend-exclude = ["fixtures"]
+# Fixtures and the benchmark corpus are realistic (sometimes deliberately
+# imperfect) sample programs — not project source. They must parse, but their
+# style is not linted/reformatted. Crucially, the corpus carries inline
+# `# plumb-expect:` markers whose LINE POSITION is load-bearing, so reformatting
+# (which would wrap calls and move the markers) must not touch them.
+extend-exclude = ["fixtures", "benchmark/corpus"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
