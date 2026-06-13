@@ -69,15 +69,22 @@ where applicable.
 ```bash
 pip install actaclad-plumbline
 
-# scan a project
+# scan a project — the Quality Gate runs by default
+# (exit 1 on any Blocker or High-confidence Critical), so it's CI-ready as-is
 plumb scan ./my-agent-app
 
-# fail CI on serious findings (default gate: no Blockers, no High-confidence Criticals)
-plumb scan ./my-agent-app --gate
+# emit SARIF for GitHub code scanning / IDEs (and/or JSON)
+plumb scan ./my-agent-app --sarif plumbline.sarif --json plumbline.json
 
-# emit SARIF for GitHub code scanning / IDEs
-plumb scan ./my-agent-app --format sarif --output plumbline.sarif
+# adopt incrementally on an existing repo: accept today's findings, gate on new ones
+plumb baseline ./my-agent-app        # writes .plumbline-baseline.json
+plumb scan ./my-agent-app            # only *new* findings fail the gate
+
+# list loaded rules
+plumb rules
 ```
+
+Wiring it into CI takes one job — see [`docs/ci-integration.md`](docs/ci-integration.md).
 
 Supported today: Python, with adapters for the raw OpenAI/Anthropic SDKs,
 LangChain/LangGraph, and CrewAI. (More frameworks and languages on the roadmap —
