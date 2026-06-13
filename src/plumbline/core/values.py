@@ -94,6 +94,26 @@ def root_name_of(node: ast.expr) -> str | None:
             return None
 
 
+def resolve_qualified(st: SourceTree, func: ast.expr) -> tuple[str, str] | None:
+    """Resolve a call target to its (module, qualname) via the import map.
+
+    `OpenAI()` after `from openai import OpenAI` -> ("openai", "OpenAI").
+    `openai.OpenAI()` after `import openai`       -> ("openai", "OpenAI").
+    `oa.OpenAI()` after `import openai as oa`      -> ("openai", "OpenAI").
+    Returns None when the target is not a name imported into this module.
+    """
+    if isinstance(func, ast.Name):
+        info = st.imports.get(func.id)
+        if info is not None and info.qualname:
+            return (info.module, info.qualname)
+        return None
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+        info = st.imports.get(func.value.id)
+        if info is not None and info.qualname == "":  # `import <module>`
+            return (info.module, func.attr)
+    return None
+
+
 def single_assignment(st: SourceTree, scope: Scope, name: str) -> ast.expr | None:
     """The sole RHS expression bound to `name` in the nearest enclosing scope,
     or None if the name is unbound, a parameter, or assigned more than once."""
