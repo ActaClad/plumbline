@@ -38,14 +38,15 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 | PLB-OBS-001 | Harness | Major | Medium | NIST-AI-RMF:MEASURE | n/a (advisory, project-scope) |
 | PLB-COST-001 | Reliability | Major | High | — | 100% (2 TP / 0 FP) |
 | PLB-PRM-001 | Architecture | Critical | High | OWASP-LLM01 | TBD |
-| PLB-SEC-001 | Security | Blocker | High | OWASP-LLM01, OWASP-LLM02 | TBD |
-| PLB-SEC-002 | Security | Blocker | High | CWE-95 | TBD |
-| PLB-SEC-003 | Security | Blocker | High | CWE-78 | TBD |
-| PLB-SEC-004 | Security | Blocker | High | CWE-798 | TBD |
-| PLB-SEC-005 | Security | Blocker | High | CWE-89 | TBD |
-| PLB-SEC-006 | Security | Critical | High | OWASP-LLM02, CWE-79 | TBD |
-| PLB-SEC-007 | Security | Critical | High | CWE-918 | TBD |
-| PLB-GOV-001 | Security | Critical | Medium | NIST-AI-RMF:MAP | TBD |
+| PLB-SEC-001 | Security | Blocker | — | OWASP-LLM01, OWASP-LLM02 | deferred (flags architecture; needs a mediation signal) |
+| PLB-SEC-002 | Security | Blocker | High | CWE-95, OWASP-LLM01 | 100% (1 TP / 0 FP) |
+| PLB-SEC-003 | Security | Blocker | High | CWE-78, OWASP-LLM01 | 100% (1 TP / 0 FP) |
+| PLB-SEC-004 | Security | Blocker | High | CWE-798 | 100% (1 TP / 0 FP) |
+| PLB-SEC-005 | Security | Blocker | High | CWE-89 | 100% (1 TP / 0 FP) |
+| PLB-SEC-006 | Security | Critical | High | OWASP-LLM02, CWE-79 | 100% (1 TP / 0 FP) |
+| PLB-SEC-007 | Security | Critical | Medium | CWE-918 | n/a (advisory; allow-lists invisible) |
+| PLB-GOV-001 | Security | Critical | Medium | NIST-AI-RMF:MAP | n/a (advisory) |
+| PLB-GOV-002 | Security | Major | Medium | NIST-AI-RMF:MAP | n/a (advisory) |
 
 > Precision numbers come from `/benchmark` (regenerate `benchmark/precision.md`
 > with `plumb benchmark`). Implemented rules show their measured precision;
