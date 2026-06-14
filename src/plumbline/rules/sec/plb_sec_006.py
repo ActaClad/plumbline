@@ -59,7 +59,7 @@ RULE = Rule(
     category="SEC",
     pillar=Pillar.SECURITY,
     severity=Severity.CRITICAL,
-    confidence=Confidence.MEDIUM,  # -> High via the /benchmark commit
+    confidence=Confidence.HIGH,  # measured 100% precision in /benchmark
     why_it_matters=(
         "Model output rendered through an unescaped HTML sink is reflected/stored XSS."
     ),
