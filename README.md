@@ -70,11 +70,14 @@ where applicable.
 pip install actaclad-plumbline
 
 # scan a project — the Quality Gate runs by default
-# (exit 1 on any Blocker or High-confidence Critical), so it's CI-ready as-is
+# (exit 1 on any Blocker or High-confidence Critical), so it's CI-ready as-is.
+# Prints findings + the Readiness Score (a 0–100 dashboard; the gate, not the
+# score, decides pass/fail).
 plumb scan ./my-agent-app
 
-# emit SARIF for GitHub code scanning / IDEs (and/or JSON)
-plumb scan ./my-agent-app --sarif plumbline.sarif --json plumbline.json
+# emit SARIF for GitHub code scanning / IDEs, JSON for tooling, and a
+# self-contained offline HTML report
+plumb scan ./my-agent-app --sarif plumbline.sarif --json plumbline.json --html report.html
 
 # adopt incrementally on an existing repo: accept today's findings, gate on new ones
 plumb baseline ./my-agent-app        # writes .plumbline-baseline.json
