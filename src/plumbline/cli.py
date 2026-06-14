@@ -12,6 +12,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 
+from . import __version__
 from .baseline import BaselineError, write_baseline
 from .benchmark import render_report, run_benchmark
 from .config import Config, ConfigError, load_config
@@ -22,6 +23,7 @@ from .reporters.html import write_html
 from .reporters.json import write_json
 from .reporters.sarif import write_sarif
 from .rules.base import Rule, RuleLoadError, discover_rules
+from .skills.export import PACK_FORMAT, write_skill_pack
 
 _err = Console(stderr=True)
 _out = Console()
@@ -116,6 +118,45 @@ def benchmark_command(corpus: Path, md_path: Path | None) -> None:
     if md_path is not None:
         md_path.write_text(text, encoding="utf-8")
         _err.print(f"[dim]wrote report to {md_path}[/dim]")
+
+
+@main.command("export-skills")
+@click.option(
+    "--out",
+    "out_dir",
+    type=click.Path(path_type=Path),
+    default="skill-pack",
+    show_default=True,
+    help="Directory to write the skill pack into.",
+)
+@click.option(
+    "--format",
+    "fmt",
+    type=click.Choice([PACK_FORMAT]),
+    default=PACK_FORMAT,
+    show_default=True,
+    help="Render target.",
+)
+@click.option(
+    "--fixtures",
+    "fixtures_dir",
+    type=click.Path(path_type=Path),
+    default="fixtures",
+    help="Fixtures root used for the bad/good examples.",
+)
+def export_skills_command(out_dir: Path, fmt: str, fixtures_dir: Path) -> None:
+    """Export the rules as a generation-time skill pack (prevention, NOT the gate)."""
+    try:
+        rules = discover_rules()
+    except RuleLoadError as exc:
+        _err.print(f"[red]rule load error:[/red] {exc}")
+        raise SystemExit(3) from exc
+    written = write_skill_pack(out_dir, rules, fixtures_dir, __version__)
+    _out.print(
+        f"Wrote a {fmt} pack of {len(rules)} rule(s) to [bold]{out_dir}[/bold] "
+        f"({len(written)} files)."
+    )
+    _err.print("[dim]This pack is prevention, not a gate — run 'plumb scan' to verify.[/dim]")
 
 
 @main.command("rules")

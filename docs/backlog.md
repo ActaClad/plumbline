@@ -214,9 +214,18 @@ no precision regression. Shipped: AGT-001, AGT-002, TOOL-001 (all High, measured
 
 ## Skill-pack export (ADR-0011) follow-ons
 
+Shipped: `plumb export-skills` (claude-skill format) — SKILL.md + per-rule pages
++ manifest.json, deterministic, from the live rule registry. Follow-ons:
+
 - Additional render targets beyond `claude-skill`: `cursor-rules` and a
-  single-file `agents-md`.
+  single-file `agents-md` (the `--format` flag is already in place).
 - Auto-publish the skill-pack as a versioned release asset in CI.
+- **Fixtures must be on disk for the bad/good examples.** The exporter reads
+  `fixtures/<rule_id>/` at export time, so a bare `pip install` (which doesn't
+  ship test fixtures) produces rule pages *without* the embedded examples (the
+  metadata + remediation still render). Either package fixtures as data, or have
+  `export-skills` fall back to the remediation's inline Bad/Good snippets. The
+  intended use today is exporting from a source checkout.
 
 ## Nice-to-have (unscheduled)
 

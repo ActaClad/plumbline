@@ -116,6 +116,26 @@ Quality Gate is what you wire into CI).
 - **Genuinely open.** Apache-2.0. The rule catalog is a community asset; adding
   a rule takes an afternoon.
 
+## Prevent, don't just detect: the skill pack
+
+The same knowledge each Plumbline rule encodes is useful *while you write code*,
+not only at review. `plumb export-skills` renders the live rule set — metadata,
+fix guidance, and the real bad/good fixtures — into a portable markdown pack you
+can drop into an agentic coding tool (Claude Code, Cursor, …) so it **generates**
+timeout-wrapped, bounded-loop, validated-I/O code by default:
+
+```bash
+plumb export-skills --out skill-pack
+# -> skill-pack/SKILL.md, skill-pack/rules/PLB-*.md, skill-pack/manifest.json
+```
+
+**This pack is prevention, not the gate.** It helps a model write better code;
+it is *not* a linter and *not* a CI check. Prevention is allowed to be
+probabilistic because the deterministic engine catches what slips through — so
+keep running `plumb scan` as the authoritative, gating verification. The pack
+assists authoring; the engine remains the sole verification authority
+([ADR-0011](docs/adr/0011-skill-pack-export.md)).
+
 ## Design-time and runtime: Plumbline + AgentGuard
 
 Plumbline is the **design-time** half of a pair. It checks your code is sound
