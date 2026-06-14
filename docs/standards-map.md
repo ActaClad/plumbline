@@ -20,20 +20,21 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 
 | Rule ID | Pillar | Severity | Confidence | Standards | Precision |
 |---|---|---|---|---|---|
-| PLB-RES-001 | Reliability | Blocker | Medium* | — | TBD (M3) |
-| PLB-RES-002 | Reliability | Critical | High | — | TBD |
-| PLB-RES-005 | Reliability | Critical | High | — | TBD |
+| PLB-RES-001 | Reliability | Blocker | High | — | 100% (2 TP / 0 FP) |
+| PLB-RES-002 | Reliability | Critical | High | — | 100% (2 TP / 0 FP) |
+| PLB-RES-005 | Reliability | Critical | High | — | 100% (1 TP / 0 FP) |
 | PLB-RES-007 | Reliability | Critical | Medium | — | TBD |
 | PLB-AGT-001 | Architecture | Blocker | High | OWASP-AGENTIC | TBD |
 | PLB-AGT-004 | Architecture | Critical | High | — | TBD |
+| PLB-MDL-001 | Reliability | Major | Medium | — | n/a (advisory) |
 | PLB-MDL-002 | Reliability | Critical | High | — | TBD |
-| PLB-OUT-001 | Reliability | Critical | High | — | TBD |
+| PLB-OUT-001 | Reliability | Critical | High | — | 100% (1 TP / 0 FP) |
 | PLB-OUT-003 | Reliability | Major | High | — | TBD |
 | PLB-TOOL-001 | Architecture | Major | High | — | TBD |
 | PLB-TOOL-002 | Architecture | Critical | High | CWE-20 | TBD |
 | PLB-EVAL-001 | Harness | Major | High | NIST-AI-RMF:MEASURE | TBD |
 | PLB-OBS-001 | Harness | Major | High | NIST-AI-RMF:MEASURE | TBD |
-| PLB-COST-001 | Reliability | Major | High | — | TBD |
+| PLB-COST-001 | Reliability | Major | High | — | 100% (2 TP / 0 FP) |
 | PLB-PRM-001 | Architecture | Critical | High | OWASP-LLM01 | TBD |
 | PLB-SEC-001 | Security | Blocker | High | OWASP-LLM01, OWASP-LLM02 | TBD |
 | PLB-SEC-002 | Security | Blocker | High | CWE-95 | TBD |
@@ -44,8 +45,9 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 | PLB-SEC-007 | Security | Critical | High | CWE-918 | TBD |
 | PLB-GOV-001 | Security | Critical | Medium | NIST-AI-RMF:MAP | TBD |
 
-> \* RES-001 ships at **Medium** until a precision number lands in `/benchmark`
-> (CLAUDE.md §1.3); its catalog target is High. Promotion happens in M3.
+> Precision numbers come from `/benchmark` (regenerate `benchmark/precision.md`
+> with `plumb benchmark`). Implemented rules show their measured precision;
+> unimplemented rows show `TBD`.
 >
 > This lists the High-confidence launch set plus key mappings. Extend it to
 > every rule as they are implemented — the full rule list is in

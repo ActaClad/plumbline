@@ -69,11 +69,14 @@ def test_report_is_deterministic(tmp_path: Path) -> None:
     assert render_report(run_benchmark(root, RULES)) == render_report(run_benchmark(root, RULES))
 
 
-def test_real_corpus_res001_meets_high_precision() -> None:
-    # The committed corpus must keep RES-001 above the High threshold.
+def test_every_high_confidence_rule_meets_precision_on_corpus() -> None:
+    # The committed corpus is the gate: any rule shipping at High must hold
+    # >= 90% precision (and in practice 0 FP) here (CLAUDE.md §1.3).
     report = run_benchmark(REPO_ROOT / "benchmark" / "corpus", RULES)
-    m = report.for_rule("PLB-RES-001")
-    assert m is not None
-    assert m.true_positives >= 4
-    assert m.false_positives == 0
-    assert m.meets_high
+    high_rules = [r.id for r in RULES if r.confidence.label == "High"]
+    assert high_rules, "expected at least one High-confidence rule"
+    for rid in high_rules:
+        m = report.for_rule(rid)
+        assert m is not None and m.true_positives >= 1, f"{rid}: no TP in corpus"
+        assert m.false_positives == 0, f"{rid}: false positives in corpus"
+        assert m.meets_high, f"{rid}: below the High precision threshold"

@@ -45,6 +45,25 @@ milestones in `specs/architecture.md`) — it's the catch-net.
   not gate idiomatic code; complements RES-001's High/Blocker explicit-disable
   case. (Requested 2026-06-13.)
 
+## Deferred from M3 (reliability core) — need substrate or are heuristic
+
+- **PLB-RES-003 (retry without backoff)** and **PLB-RES-006 (no 429 handling)**:
+  need detection of retry constructs (tenacity, `@retry`, hand-rolled loops).
+  With only the raw-SDK adapter there is no retry construct to inspect (the SDK
+  retries internally with backoff). Add alongside retry-construct semantics.
+- **PLB-RES-008 (unbounded memory growth)**: heuristic (list `.append` in a
+  loop/handler with no trim); Medium. Build once there's a `MEMORY_APPEND`
+  signal or a careful loop-pattern detector — risks noise otherwise.
+- **PLB-OUT-003 (no empty/refused/truncated handling)**: needs finish-reason /
+  empty-content flow detection; "no check" is hard to do precisely. Heuristic.
+- **PLB-RES-004 (no fallback / single provider)**: project-scope, but detecting
+  a *fallback path* statically is genuinely heuristic and noisy. Defer until a
+  precise fallback-pattern signal exists; MDL-001 is the M3 project-scope
+  showcase instead.
+- **PLB-MDL-002 (deprecated model id)**: feasible (string match against a
+  maintained deprecated-model list) but needs a packaged, versioned data file.
+  Add with the data file + its refresh process.
+
 ## Discovered during M1
 
 - **SARIF `codeFlows` for taint findings.** ADR-0006 D3 wants taint witness
