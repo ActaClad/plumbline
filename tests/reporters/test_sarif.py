@@ -24,6 +24,8 @@ def _scan_with_finding(tmp_path: Path) -> object:
         # max_tokens set so only RES-001 fires (one finding to assert on).
         "c.chat.completions.create(model='m', timeout=None, max_tokens=256)\n"
     )
+    # Harness evidence so EVAL-001/OBS-001 (project-scope) stay silent.
+    (tmp_path / "_harness.py").write_text("import deepeval\nimport opentelemetry\n")
     return scan(tmp_path, Config(), RULES)
 
 
