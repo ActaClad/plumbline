@@ -64,6 +64,41 @@ milestones in `specs/architecture.md`) — it's the catch-net.
   maintained deprecated-model list) but needs a packaged, versioned data file.
   Add with the data file + its refresh process.
 
+## Deferred from M4 (adapters + AGT/TOOL) — substrate or heuristic
+
+The M4 task list named AGT-001/002/003/004/005/006 and TOOL-001…004; the M4
+**DoD** gates only on AGT-001 firing across three frameworks + adapter goldens +
+no precision regression. Shipped: AGT-001, AGT-002, TOOL-001 (all High, measured
+100%). Deferred, with reasons (surfaced per CLAUDE.md §2):
+
+- **PLB-TOOL-002 (tool args used without validation)** and **PLB-TOOL-004 (tool
+  output to prompt without sanitization)**: these are taint rules needing
+  substrate that does not exist yet — a tool-argument taint *source* (seed
+  `TOOL_DEF` params like web-handler params), a `PROMPT_BUILD` sink emission, and
+  a validation/sanitizer sink catalog. That catalog overlaps the M6 SEC sinks;
+  building it is an ADR-worthy decision. Defer to a taint-substrate milestone
+  (with M6) rather than ship heuristic taint rules at low precision.
+- **PLB-AGT-004 (no global run timeout / token budget)**: for framework agents,
+  `max_iterations` already bounds the run in steps, so a separate wall-clock /
+  token-budget rule risks firing on every bare executor (noise). Needs design:
+  when is a wall-clock budget genuinely required vs. redundant with the step
+  cap? Defer until that line is drawn.
+- **PLB-AGT-003 (unbounded recursion in planner / sub-agent spawning)**: needs a
+  self-/sub-agent-invocation signal and a depth-parameter check; inherently
+  heuristic. Medium when built.
+- **PLB-AGT-005 (no verification/critique node)** and **PLB-AGT-006 (no HITL gate
+  before irreversible action)**: graph-shape heuristics over AGENT graphs — high
+  false-positive surface without a richer graph model. Medium; build with a
+  dedicated graph-structure pass.
+- **Aliased tool-decorator detection.** The langchain/crewai adapters match the
+  `@tool` decorator by its local name; `from crewai.tools import tool as t` then
+  `@t` is missed. resolve_qualified-based decorator resolution would make it
+  alias-proof (as it already is for constructors). Low priority (rare).
+- **Mixed-/inline-client `.invoke()` linking.** LangChain `LLM_CALL` is tagged
+  only when the receiver links to a model construction by single assignment;
+  LCEL pipes (`chain = prompt | model`) and inline `ChatOpenAI().invoke()` are
+  under-tagged (precision over recall). Revisit with richer expression tracking.
+
 ## Discovered during M1
 
 - **SARIF `codeFlows` for taint findings.** ADR-0006 D3 wants taint witness
@@ -79,9 +114,10 @@ milestones in `specs/architecture.md`) — it's the catch-net.
   M0 only honors the built-in `default_excludes` set + `[scan].exclude` globs;
   real nested/negated gitignore parsing is deferred. The config flag is accepted
   but not yet fully effective — surfaced here per CLAUDE.md §2.
-- **PROMPT_BUILD / AGENT_LOOP tags** are defined in the vocabulary but the
-  openai_sdk adapter does not yet emit them; add when their consuming rules
-  (PRM, AGT) are built (M4).
+- **PROMPT_BUILD tag** is defined in the vocabulary but no adapter emits it yet;
+  add when its consuming rules (PRM, and the deferred TOOL-004 taint sink) are
+  built. (AGENT_LOOP — also listed here originally — now ships via the M4
+  derived-semantics pass, ADR-0012.)
 
 ## Skill-pack export (ADR-0011) follow-ons
 
