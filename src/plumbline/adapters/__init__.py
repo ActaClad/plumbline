@@ -7,10 +7,11 @@ unlike rules (which are convention-discovered). Higher priority wins a
 from __future__ import annotations
 
 from .base import Adapter
+from .crewai import CrewAIAdapter
 from .langchain import LangChainAdapter
 from .openai_sdk import OpenAISDKAdapter
 
 #: The registry. Order is documentation; conflict resolution uses `priority`.
-ADAPTERS: tuple[Adapter, ...] = (LangChainAdapter(), OpenAISDKAdapter())
+ADAPTERS: tuple[Adapter, ...] = (LangChainAdapter(), CrewAIAdapter(), OpenAISDKAdapter())
 
 __all__ = ["ADAPTERS", "Adapter"]
