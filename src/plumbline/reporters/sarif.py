@@ -16,6 +16,7 @@ from .. import __version__
 from ..engine import ScanResult
 from ..model import Confidence, Finding, Pillar, Severity, finding_sort_key
 from ..rules.base import Rule
+from ..scoring import compute_scores
 
 SARIF_SCHEMA_URI = "https://json.schemastore.org/sarif-2.1.0.json"
 SARIF_VERSION = "2.1.0"
@@ -54,6 +55,15 @@ def to_sarif(result: ScanResult, rules: Sequence[Rule]) -> dict[str, Any]:
     if notifications:
         invocation["toolExecutionNotifications"] = notifications
 
+    scores = compute_scores(result.findings, result.semantic_node_count)
+    run_props: dict[str, Any] = {
+        "plumbline/scoringModel": scores.model,
+        "plumbline/readinessScore": scores.readiness,  # null when N/A (ADR-0008 D3)
+        "plumbline/pillarScores": {
+            p.name: (scores.pillars.get(p) if scores.applicable else None) for p in Pillar
+        },
+    }
+
     return {
         "$schema": SARIF_SCHEMA_URI,
         "version": SARIF_VERSION,
@@ -70,6 +80,7 @@ def to_sarif(result: ScanResult, rules: Sequence[Rule]) -> dict[str, Any]:
                 "columnKind": "unicodeCodePoints",
                 "originalUriBaseIds": {"SRCROOT": {"uri": "file:///"}},
                 "invocations": [invocation],
+                "properties": run_props,
                 "results": results,
             }
         ],

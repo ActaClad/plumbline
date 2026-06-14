@@ -1,7 +1,7 @@
 """Human-readable terminal reporter (architecture.md §6).
 
 Groups findings by file, shows what/where/why/how for each, and ends with the
-gate verdict. Severity-colored via rich. M1 scope; HTML/score summary land in M7.
+gate verdict and the Readiness Score summary. Severity-colored via rich.
 """
 
 from __future__ import annotations
@@ -9,7 +9,8 @@ from __future__ import annotations
 from rich.console import Console
 
 from ..engine import ScanResult
-from ..model import Finding, Severity
+from ..model import Finding, Pillar, Severity
+from ..scoring import compute_scores
 
 _COLOR: dict[Severity, str] = {
     Severity.BLOCKER: "bold red",
@@ -69,3 +70,13 @@ def _render_summary(out: Console, result: ScanResult) -> None:
     if not result.gate.passed:
         for reason in result.gate.reasons:
             out.print(f"  [red]✗[/red] {reason}")
+    _render_scores(out, result)
+
+
+def _render_scores(out: Console, result: ScanResult) -> None:
+    scores = compute_scores(result.findings, result.semantic_node_count)
+    if not scores.applicable:
+        out.print("[dim]Readiness Score: N/A (no LLM/agent code detected)[/dim]")
+        return
+    breakdown = "  ".join(f"{p.name.capitalize()} {scores.pillars[p]}" for p in Pillar)
+    out.print(f"[bold]Readiness Score: {scores.readiness}/100[/bold] [dim]·[/dim] {breakdown}")
