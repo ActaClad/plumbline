@@ -23,6 +23,16 @@ milestones in `specs/architecture.md`) — it's the catch-net.
 - **Trace ingestion / AgentGuard bridge** (M9 / Phase 2) — turns static "risk"
   flags into runtime-confirmed "incident" findings.
 
+## Known doc divergences (cosmetic, immutable ADRs)
+
+- **ADR-0012 D3 worked example.** The row `while n < MAX: … n += 1 →
+  has_iteration_cap=Known(True)` describes the *intent*; the implementation
+  returns `UNKNOWN` for any non-constant `while` test (counter detection runs
+  only on truthy-constant `while True`). Both yield the same outcome — AGT-001
+  stays silent (conservative, no false positive) — so the divergence is
+  cosmetic. The ADR is immutable; this note records it. If a future change wants
+  `Known(True)` there (e.g. for scoring), supersede ADR-0012.
+
 ## Open questions to resolve via ADR before building
 
 - ~~Exact pillar-score formula and Readiness Score weighting~~ — resolved by
@@ -83,6 +93,10 @@ no precision regression. Shipped: AGT-001, AGT-002, TOOL-001 (all High, measured
   token-budget rule risks firing on every bare executor (noise). Needs design:
   when is a wall-clock budget genuinely required vs. redundant with the step
   cap? Defer until that line is drawn.
+- **PLB-TOOL-003 (tool has no error handling / can crash the agent run)**: a
+  control-flow rule like RES-005 (a tool body making external calls with no
+  try/except returning a structured error). Needs no new substrate — buildable
+  next. Deferred only to keep the M4 diff reviewable; pull forward early in M5.
 - **PLB-AGT-003 (unbounded recursion in planner / sub-agent spawning)**: needs a
   self-/sub-agent-invocation signal and a depth-parameter check; inherently
   heuristic. Medium when built.
