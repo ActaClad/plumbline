@@ -51,7 +51,7 @@ RULE = Rule(
     category="AGT",
     pillar=Pillar.ARCHITECTURE,
     severity=Severity.CRITICAL,
-    confidence=Confidence.MEDIUM,  # promoted to High via the /benchmark commit (ADR-0012)
+    confidence=Confidence.HIGH,  # measured 100% precision in /benchmark (ADR-0012)
     why_it_matters=(
         "A model-driven `while True` with no reachable break/return can only exit by crashing."
     ),
