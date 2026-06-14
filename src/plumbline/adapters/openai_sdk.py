@@ -70,8 +70,12 @@ class OpenAISDKAdapter:
                 out.append(self._client_create(ctx, node, _CLIENT_CTORS[qualified]))
                 continue
             tail = _attr_tail(node.func)
+            # `<client>.beta.threads.messages.create(...)` is the Assistants API
+            # ADDING a message to a thread — NOT a generation. Exclude it (it ends
+            # in messages.create but `threads` is in the chain).
+            is_thread_message = "threads" in tail
             if _matches(tail, _UNAMBIGUOUS_CALL_TAILS) or (
-                sdk_in_file and _matches(tail, _AMBIGUOUS_CALL_TAILS)
+                sdk_in_file and _matches(tail, _AMBIGUOUS_CALL_TAILS) and not is_thread_message
             ):
                 out.append(self._llm_call(ctx, node))
             elif tail[-len(_EMBED_TAIL) :] == list(_EMBED_TAIL):

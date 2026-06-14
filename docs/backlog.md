@@ -93,6 +93,25 @@ wiring (ADR-0015). Additive follow-ons:
   report and SARIF could surface it too (SARIF deliberately keeps the static rule
   remediation as the machine contract).
 
+## Known detection edges (disclosed from the hardening pass)
+
+- **External real-repo validation is still undone.** Every measured "100%
+  precision" is on a corpus + a realistic app *authored by the same agent that
+  wrote the rules*, so it can only surface false positives we already thought to
+  construct. The original aspiration — point Plumbline at ≥10 real OSS agentic
+  repos and triage — remains the real precision/recall test. v0.1 ships without
+  it; do not read "hardened" as "validated in the wild".
+- **OpenAI Assistants API generations are not detected (recall gap).**
+  `client.beta.threads.runs.create(...)` is the actual Assistants generation; its
+  tail is `runs.create`, not in the call-tail set, so it is untagged. (The
+  related `threads.messages.create` FALSE positive — it only adds a message — is
+  now excluded.) Add Assistants-API run tags when that surface matters.
+- **Test harness `run_project_rule` does not compute `project_roots`**, so it
+  diverges from `scan()` on ADR-0016 project-triggering. Benign today (every
+  project-rule fixture imports the SDK in-file) and the real engine path is
+  covered by `test_cross_module`; tighten the harness if a cross-module
+  project-rule fixture is ever added.
+
 ## Cross-module detection residuals (ADR-0016) — named, not fixed
 
 Project-level triggering (ADR-0016) fixed cross-module detection for the raw
