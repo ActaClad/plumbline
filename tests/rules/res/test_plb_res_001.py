@@ -14,8 +14,8 @@ def test_metadata() -> None:
     assert RULE.id == "PLB-RES-001"
     assert RULE.category == "RES"
     assert RULE.severity.label == "Blocker"
-    # Medium until /benchmark measures precision (CLAUDE.md §1.3); -> High in M3.
-    assert RULE.confidence.label == "Medium"
+    # Promoted to High: 100% precision measured in /benchmark (CLAUDE.md §1.3).
+    assert RULE.confidence.label == "High"
 
 
 def test_message_names_the_disabled_timeout() -> None:

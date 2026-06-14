@@ -17,7 +17,8 @@ def _scan_finding(tmp_path: Path) -> object:
     (tmp_path / "agent.py").write_text(
         "from openai import OpenAI\n"
         "c = OpenAI()\n"
-        "c.chat.completions.create(model='m', timeout=None)\n"
+        # max_tokens set so only RES-001 fires (one finding to assert on).
+        "c.chat.completions.create(model='m', timeout=None, max_tokens=256)\n"
     )
     return scan(tmp_path, Config(), RULES)
 
@@ -46,7 +47,8 @@ def test_json_includes_suppressed(tmp_path: Path) -> None:
     (tmp_path / "agent.py").write_text(
         "from openai import OpenAI\n"
         "c = OpenAI()\n"
-        "c.chat.completions.create(model='m', timeout=None)  # plumb: ignore[PLB-RES-001]\n"
+        "c.chat.completions.create(model='m', timeout=None, max_tokens=256)"
+        "  # plumb: ignore[PLB-RES-001]\n"
     )
     obj = to_json_obj(scan(tmp_path, Config(), RULES))
     assert obj["findings"] == []

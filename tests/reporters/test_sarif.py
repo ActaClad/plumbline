@@ -21,7 +21,8 @@ def _scan_with_finding(tmp_path: Path) -> object:
     (tmp_path / "agent.py").write_text(
         "from openai import OpenAI\n"
         "c = OpenAI()\n"
-        "c.chat.completions.create(model='m', timeout=None)\n"
+        # max_tokens set so only RES-001 fires (one finding to assert on).
+        "c.chat.completions.create(model='m', timeout=None, max_tokens=256)\n"
     )
     return scan(tmp_path, Config(), RULES)
 
