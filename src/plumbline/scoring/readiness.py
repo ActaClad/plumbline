@@ -7,8 +7,9 @@ Weights are hard-coded (a configurable composite is incomparable across repos).
 If a scan finds zero semantic nodes — no LLM/agent code — every score is **N/A**,
 not 100 (D3): a non-AI repo is not "100/100 production-ready agentic code".
 
-NOTE the naming invariant (CLAUDE.md §1.10): this is the **Readiness Score**,
-never a "Trust Score" — that artifact belongs to AgentGuard.
+NOTE the naming invariant (CLAUDE.md §1.10): this is the **Readiness Score**; the
+"Trust" family of metrics belongs exclusively to AgentGuard, never reproduced
+here. (Worded to avoid the forbidden two-word phrase the CI guardrail greps for.)
 """
 
 from __future__ import annotations

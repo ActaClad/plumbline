@@ -100,6 +100,23 @@ def test_taint_finding_emits_codeflows(tmp_path: Path) -> None:
     assert steps[-1]["location"]["message"]["text"] == "parsed by json.loads()"
 
 
+def test_sarif_run_carries_readiness_scores(tmp_path: Path) -> None:
+    result = _scan_with_finding(tmp_path)
+    sarif = to_sarif(result, RULES)  # type: ignore[arg-type]
+    jsonschema.validate(sarif, SCHEMA)  # run.properties is schema-valid
+    props = sarif["runs"][0]["properties"]
+    assert props["plumbline/scoringModel"] == "adr-0008"
+    assert isinstance(props["plumbline/readinessScore"], int)
+    assert "SECURITY" in props["plumbline/pillarScores"]
+
+
+def test_sarif_scores_null_when_no_agentic_code(tmp_path: Path) -> None:
+    (tmp_path / "plain.py").write_text("x = 1\n")
+    sarif = to_sarif(scan(tmp_path, Config(), RULES), RULES)  # type: ignore[arg-type]
+    props = sarif["runs"][0]["properties"]
+    assert props["plumbline/readinessScore"] is None  # N/A as null (ADR-0008 D3)
+
+
 def test_codeflow_sarif_is_byte_deterministic(tmp_path: Path) -> None:
     # The codeFlows array is an ordered list (not key-sorted by json.dumps), so
     # its determinism is a distinct invariant from the witness-free path

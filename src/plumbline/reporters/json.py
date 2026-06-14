@@ -10,12 +10,14 @@ import json
 from typing import Any
 
 from ..engine import ScanResult
-from ..model import Finding
+from ..model import Finding, Pillar
+from ..scoring import Scores, compute_scores
 
 JSON_VERSION = 1
 
 
 def to_json_obj(result: ScanResult) -> dict[str, Any]:
+    scores = compute_scores(result.findings, result.semantic_node_count)
     return {
         "version": JSON_VERSION,
         "findings": [_finding(f) for f in result.findings],
@@ -26,6 +28,7 @@ def to_json_obj(result: ScanResult) -> dict[str, Any]:
             {"file": e.file, "stage": e.stage, "message": e.message} for e in result.analyzer_errors
         ],
         "gate": {"passed": result.gate.passed, "reasons": list(result.gate.reasons)},
+        "scores": _scores(scores),
         "summary": {
             "files_scanned": result.files_scanned,
             "rules_loaded": result.rules_loaded,
@@ -33,6 +36,16 @@ def to_json_obj(result: ScanResult) -> dict[str, Any]:
             "finding_count": len(result.findings),
             "suppressed_count": len(result.suppressed),
         },
+    }
+
+
+def _scores(scores: Scores) -> dict[str, Any]:
+    """N/A is represented as null (ADR-0008 D3), never a misleading 100."""
+    return {
+        "model": scores.model,
+        "applicable": scores.applicable,
+        "readiness": scores.readiness,
+        "pillars": {p.name: (scores.pillars.get(p) if scores.applicable else None) for p in Pillar},
     }
 
 
@@ -63,4 +76,8 @@ def _finding(f: Finding) -> dict[str, Any]:
         "standards": list(f.standards),
         "remediation": f.remediation,
         "fingerprint": f.fingerprint,
+        "code_flow": [
+            {"file": s.file, "line": s.line, "column": s.column, "message": s.message}
+            for s in f.code_flow
+        ],
     }

@@ -49,6 +49,23 @@ def test_json_is_valid_and_deterministic(tmp_path: Path) -> None:
     json.loads(a)  # parses
 
 
+def test_json_includes_scores(tmp_path: Path) -> None:
+    obj = to_json_obj(_scan_finding(tmp_path))  # type: ignore[arg-type]
+    scores = obj["scores"]
+    assert scores["model"] == "adr-0008"
+    assert scores["applicable"] is True
+    assert isinstance(scores["readiness"], int)
+    assert set(scores["pillars"]) == {"RELIABILITY", "ARCHITECTURE", "HARNESS", "SECURITY"}
+
+
+def test_json_scores_na_when_no_agentic_code(tmp_path: Path) -> None:
+    (tmp_path / "plain.py").write_text("def add(a, b):\n    return a + b\n")
+    obj = to_json_obj(scan(tmp_path, Config(), RULES))
+    assert obj["scores"]["applicable"] is False
+    assert obj["scores"]["readiness"] is None
+    assert obj["scores"]["pillars"]["SECURITY"] is None  # N/A as null (ADR-0008 D3)
+
+
 def test_json_includes_suppressed(tmp_path: Path) -> None:
     (tmp_path / "agent.py").write_text(
         "from openai import OpenAI\n"
