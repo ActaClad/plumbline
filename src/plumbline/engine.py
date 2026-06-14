@@ -21,6 +21,7 @@ from .adapters.base import SemanticIndex, collect_semantics
 from .baseline import load_baseline_fingerprints
 from .config import Config, GateVerdict, evaluate_gate
 from .core.ast_layer import ParseError, parse
+from .core.derive import derive_semantics
 from .core.taint import TaintView, analyze_taint
 from .model import AnalyzerError, Finding, FindingDraft, assign_fingerprints, finding_sort_key
 from .rules.base import AnalysisContext, FileAnalysis, ProjectContext, Rule, RuleScope
@@ -120,8 +121,10 @@ def _analyze_file(root: Path, rel: str, errors: list[AnalyzerError]) -> FileAnal
         errors.append(AnalyzerError(file=rel, stage="parse", message=str(exc)))
         return None
     try:
-        semantics = SemanticIndex(collect_semantics(tree, ADAPTERS))
-    except Exception as exc:  # noqa: BLE001 — adapter crash is contained
+        collected = collect_semantics(tree, ADAPTERS)
+        collected.extend(derive_semantics(tree, collected))
+        semantics = SemanticIndex(collected)
+    except Exception as exc:  # noqa: BLE001 — adapter/derivation crash is contained
         errors.append(AnalyzerError(file=rel, stage="adapter", message=str(exc)))
         semantics = SemanticIndex([])
     try:
