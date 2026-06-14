@@ -61,6 +61,17 @@ def test_anthropic_messages_create_is_llm_call() -> None:
     assert _attr(src, SemanticTag.LLM_CALL, "model") == Known("claude")
 
 
+def test_assistants_thread_message_create_is_not_an_llm_call() -> None:
+    # `<client>.beta.threads.messages.create(...)` ADDS a message to a thread; it
+    # is not a generation and must not be tagged (would otherwise FP RES/COST).
+    src = (
+        "from openai import OpenAI\n"
+        "c = OpenAI()\n"
+        "c.beta.threads.messages.create(thread_id='t', role='user', content='hi')\n"
+    )
+    assert [n for n in _annotate(src) if n.tag is SemanticTag.LLM_CALL] == []
+
+
 def test_responses_create_is_llm_call() -> None:
     src = "from openai import OpenAI\nc = OpenAI()\nc.responses.create(model='gpt-4o')\n"
     assert _attr(src, SemanticTag.LLM_CALL, "model") == Known("gpt-4o")
