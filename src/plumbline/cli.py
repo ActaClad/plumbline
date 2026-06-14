@@ -16,6 +16,7 @@ from .baseline import BaselineError, write_baseline
 from .benchmark import render_report, run_benchmark
 from .config import Config, ConfigError, load_config
 from .engine import ScanResult, scan
+from .enrichment import build_enricher, enrich_result
 from .reporters import cli as cli_reporter
 from .reporters.html import write_html
 from .reporters.json import write_json
@@ -58,11 +59,23 @@ def scan_command(
     config, rules = _load(root, config_path, paths)
 
     result = _run_scan(root, config, rules)
+    # The gate/exit code below are decided on the DETERMINISTIC result, before
+    # any AI runs. Enrichment only rewrites remediation text (ADR-0015 D1).
+    failed = not result.gate.passed or (strict_analyzer_errors and result.analyzer_errors)
+    result = _maybe_enrich(result, config)
+
     cli_reporter.render(_out, _err, result)
     _write_outputs(result, rules, config, sarif_path, json_path, html_path)
-
-    failed = not result.gate.passed or (strict_analyzer_errors and result.analyzer_errors)
     raise SystemExit(1 if failed else 0)
+
+
+def _maybe_enrich(result: ScanResult, config: Config) -> ScanResult:
+    """Optional AI remediation enrichment (ADR-0015). Off by default; never
+    touches detection/gate. Enabled-but-unavailable emits a notice, not silence."""
+    enricher, notice = build_enricher(config)
+    if notice is not None:
+        _err.print(f"[yellow]notice:[/yellow] {notice}")
+    return enrich_result(result, enricher) if enricher is not None else result
 
 
 @main.command("baseline")
