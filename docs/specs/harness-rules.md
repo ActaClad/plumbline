@@ -72,20 +72,21 @@ enable tracing via env vars / auto-instrumentation, ignore this."*
 Anchored to the first `LLM_CALL`. Ships Medium; the env-var blind spot is the
 reason it is advisory and the reason its finding self-discloses.
 
-## PLB-EVAL-003 — Prompt/model changes not gated by eval in CI (PROPOSED / DEFERRED)
+## PLB-EVAL-003 — Prompt/model changes not gated by eval in CI (Major / Medium)
 
-**Status: not implemented.** Requires the non-Python evidence channel of
-ADR-0013 (Proposed). Detector design, for approval:
+**Status: implemented** (ADR-0013 Accepted at the M5 review). Uses
+`ProjectContext.evidence.ci_files` — the text of a fixed, closed set of known CI
+config paths (`core/evidence.py`). EVAL-003 is a **sanctioned grep rule**
+(CLAUDE.md §1.2, `grep_rule=True`): dataflow does not apply to CI YAML, so it
+scans CI text for a test/eval invocation token (`pytest`, `tox`, `nox`, an
+eval-framework name, `make test`, an `eval`/`evals` target, …).
 
-Using `ProjectContext.evidence.ci_files` (text of a fixed set of known CI config
-paths), EVAL-003 is a **sanctioned grep rule** (CLAUDE.md §1.2, marked
-`grep_rule=True`): it fires when LLM/agent code exists, ≥1 CI file exists, and
-**no** CI file text contains an evaluation/test invocation token (`pytest`,
-`tox`, an eval-framework name, an `evals`/`eval` make/script target). Medium.
-
-**Approval question (ADR-0013 D3):** EVAL-003's marginal signal over EVAL-001 is
-"you wrote evals but don't run them in CI." If that does not justify a non-Python
-substrate, reject ADR-0013 and drop EVAL-003; EVAL-001 carries the pillar.
+**Fires when:** LLM/agent code exists, ≥1 CI file exists, and **no** CI file text
+contains a test/eval token. It deliberately stays silent when there is **no CI at
+all** — that case is EVAL-001's ("no eval suite"), not this rule's. Anchored to
+the first `LLM_CALL`; carries the scan-scope caveat; Medium/advisory. Its
+marginal signal over EVAL-001 is precisely "you have evals but CI doesn't run
+them" (ADR-0013 D3).
 
 ## Deferred from M5 (backlogged with reasons)
 

@@ -34,6 +34,7 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 | PLB-TOOL-001 | Architecture | Major | High | — | 100% (2 TP / 0 FP) |
 | PLB-TOOL-002 | Architecture | Critical | High | CWE-20 | TBD |
 | PLB-EVAL-001 | Harness | Major | Medium | NIST-AI-RMF:MEASURE | n/a (advisory, project-scope) |
+| PLB-EVAL-003 | Harness | Major | Medium | NIST-AI-RMF:MEASURE | n/a (advisory, project-scope; grep rule) |
 | PLB-OBS-001 | Harness | Major | Medium | NIST-AI-RMF:MEASURE | n/a (advisory, project-scope) |
 | PLB-COST-001 | Reliability | Major | High | — | 100% (2 TP / 0 FP) |
 | PLB-PRM-001 | Architecture | Critical | High | OWASP-LLM01 | TBD |
