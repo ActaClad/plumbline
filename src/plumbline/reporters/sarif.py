@@ -1,9 +1,9 @@
 """SARIF 2.1.0 reporter (ADR-0006).
 
 Output validates against the vendored SARIF 2.1.0 schema (tested) and is
-byte-reproducible — no timestamps (ADR-0002 D3, ADR-0006 D3). M1 emits the core
-structure (driver rules, results, locations, fingerprints, analyzer-error
-notifications); baseline suppressions and codeFlows are completed in M2.
+byte-reproducible — no timestamps (ADR-0002 D3, ADR-0006 D3). Emits driver
+rules, results, locations, fingerprints, suppressions, analyzer-error
+notifications, and — for taint rules — source→sink `codeFlows` (ADR-0014).
 """
 
 from __future__ import annotations
@@ -136,9 +136,32 @@ def _result(
     }
     if finding.rule_id in rule_index:
         result["ruleIndex"] = rule_index[finding.rule_id]
+    if finding.code_flow:
+        result["codeFlows"] = _code_flows(finding)
     if suppression is not None:
         result["suppressions"] = [{"kind": suppression}]
     return result
+
+
+def _code_flows(finding: Finding) -> list[dict[str, Any]]:
+    """One codeFlow / threadFlow, source→sink in `code_flow` order (ADR-0014 D3)."""
+    locations = []
+    for step in finding.code_flow:
+        region: dict[str, Any] = {"startLine": step.line}
+        if step.column is not None:
+            region["startColumn"] = step.column + 1  # SARIF is 1-based
+        locations.append(
+            {
+                "location": {
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": step.file, "uriBaseId": "SRCROOT"},
+                        "region": region,
+                    },
+                    "message": {"text": step.message},
+                }
+            }
+        )
+    return [{"threadFlows": [{"locations": locations}]}]
 
 
 def _notification(file: str, stage: str, message: str) -> dict[str, Any]:

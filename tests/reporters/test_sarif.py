@@ -79,3 +79,22 @@ def test_no_timestamps_emitted(tmp_path: Path) -> None:
     # Byte-reproducibility forbids timestamps (ADR-0006 D3).
     text = render_sarif(_scan_with_finding(tmp_path), RULES)  # type: ignore[arg-type]
     assert "endTimeUtc" not in text and "startTimeUtc" not in text
+
+
+def test_taint_finding_emits_codeflows(tmp_path: Path) -> None:
+    # OUT-001 is a taint rule; its witness must surface as schema-valid codeFlows
+    # (ADR-0014). source (LLM_OUTPUT) -> sink (json.loads).
+    (tmp_path / "a.py").write_text(
+        "from openai import OpenAI\n"
+        "c = OpenAI()\n"
+        "import json\n"
+        "r = c.chat.completions.create(model='m', timeout=5, max_tokens=10)\n"
+        "data = json.loads(r.choices[0].message.content)\n"
+    )
+    result = scan(tmp_path, Config(), RULES)
+    sarif = to_sarif(result, RULES)  # type: ignore[arg-type]
+    jsonschema.validate(sarif, SCHEMA)
+    out = next(r for r in sarif["runs"][0]["results"] if r["ruleId"] == "PLB-OUT-001")
+    steps = out["codeFlows"][0]["threadFlows"][0]["locations"]
+    assert len(steps) >= 2  # at least source + sink
+    assert steps[-1]["location"]["message"]["text"] == "parsed by json.loads()"

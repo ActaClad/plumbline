@@ -25,6 +25,7 @@ from ..core.ast_layer import SourceTree
 from ..core.evidence import EMPTY_EVIDENCE, ProjectEvidence
 from ..core.taint import TaintView
 from ..model import (
+    CodeFlowStep,
     Confidence,
     FindingDraft,
     Pillar,
@@ -100,6 +101,7 @@ class AnalysisContext:
         severity: Severity | None = None,
         confidence: Confidence | None = None,
         end_line: int | None = None,
+        code_flow: tuple[CodeFlowStep, ...] = (),
     ) -> FindingDraft:
         return _build_draft(
             self.rule,
@@ -111,6 +113,7 @@ class AnalysisContext:
             severity=severity,
             confidence=confidence,
             end_line=end_line,
+            code_flow=code_flow,
         )
 
 
@@ -143,6 +146,7 @@ class ProjectContext:
         severity: Severity | None = None,
         confidence: Confidence | None = None,
         end_line: int | None = None,
+        code_flow: tuple[CodeFlowStep, ...] = (),
     ) -> FindingDraft:
         tree = self._by_file[file].tree
         return _build_draft(
@@ -155,6 +159,7 @@ class ProjectContext:
             severity=severity,
             confidence=confidence,
             end_line=end_line,
+            code_flow=code_flow,
         )
 
 
@@ -169,6 +174,7 @@ def _build_draft(
     severity: Severity | None,
     confidence: Confidence | None,
     end_line: int | None,
+    code_flow: tuple[CodeFlowStep, ...] = (),
 ) -> FindingDraft:
     # Effective severity: per-rule config override unless the call overrides it
     # explicitly (ADR-0002 D1, ADR-0007).
@@ -194,6 +200,7 @@ def _build_draft(
         standards=rule.standards,
         remediation=rule.remediation,
         anchor=tree.anchor_text(node),
+        code_flow=code_flow,
     )
 
 

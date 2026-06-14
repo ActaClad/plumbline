@@ -7,6 +7,7 @@ import dataclasses
 from plumbline.model import (
     ABSENT,
     UNKNOWN,
+    CodeFlowStep,
     Confidence,
     FindingDraft,
     Known,
@@ -38,6 +39,25 @@ def _draft(rule_id: str, file: str, anchor: str, line: int, column: int = 0) -> 
         remediation="r",
         anchor=anchor,
     )
+
+
+def test_code_flow_does_not_change_fingerprint() -> None:
+    # ADR-0014 D2: the witness path must never enter the fingerprint, or baselines
+    # churn whenever taint propagation shifts. Two drafts identical but for a
+    # code_flow must produce the same fingerprint.
+    plain = _draft("PLB-OUT-001", "a.py", "x = json.loads(y)", 3)
+    with_flow = dataclasses.replace(
+        plain,
+        code_flow=(
+            CodeFlowStep("a.py", 1, 0, "LLM_OUTPUT from create()"),
+            CodeFlowStep("a.py", 3, 4, "parsed by json.loads()"),
+        ),
+    )
+    [fp_plain] = assign_fingerprints([plain])
+    [fp_flow] = assign_fingerprints([with_flow])
+    assert fp_plain.fingerprint == fp_flow.fingerprint
+    assert fp_flow.code_flow  # but the witness IS carried onto the Finding
+    assert not fp_plain.code_flow
 
 
 # --- enums --------------------------------------------------------------------

@@ -14,6 +14,7 @@ import ast
 from ...core.taint import TaintLabel
 from ...model import Confidence, FindingDraft, Pillar, Severity
 from .._ast_helpers import enclosing_try_body, try_catches
+from .._taint_flow import witness_flow
 from ..base import AnalysisContext, Rule
 
 REMEDIATION = """\
@@ -50,6 +51,9 @@ def detect(ctx: AnalysisContext) -> list[FindingDraft]:
                 node,
                 "LLM output is parsed with json.loads and no error handling; a malformed "
                 "generation will raise and crash the request.",
+                code_flow=witness_flow(
+                    ctx.taint, ctx.file, arg, TaintLabel.LLM_OUTPUT, node, "parsed by json.loads()"
+                ),
             )
         )
     return findings
