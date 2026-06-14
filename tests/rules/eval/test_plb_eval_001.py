@@ -34,6 +34,12 @@ def test_eval_framework_counts_as_a_suite() -> None:
     assert run_project_rule(RULE, fixture_dir(RULE) / "good_with_framework") == []
 
 
+def test_package_dotted_import_is_recognized() -> None:
+    # The realistic layout: tests/ doing `from myapp.agent import ...`. A miss
+    # here would make EVAL-001 a false positive on well-tested package repos.
+    assert run_project_rule(RULE, fixture_dir(RULE) / "good_package_layout") == []
+
+
 def test_no_finding_without_agentic_code(tmp_path) -> None:
     (tmp_path / "plain.py").write_text("def add(a, b):\n    return a + b\n")
     assert run_project_rule(RULE, tmp_path) == []
