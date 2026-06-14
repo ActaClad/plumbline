@@ -13,6 +13,7 @@ from plumbline.adapters import ADAPTERS
 from plumbline.adapters.base import SemanticIndex, collect_semantics
 from plumbline.config import Config
 from plumbline.core.ast_layer import parse
+from plumbline.core.derive import derive_semantics
 from plumbline.core.taint import analyze_taint
 from plumbline.model import Finding, assign_fingerprints
 from plumbline.rules.base import (
@@ -29,7 +30,9 @@ FIXTURES = REPO_ROOT / "fixtures"
 
 def _file_analysis(rel: str, source: str) -> FileAnalysis:
     tree = parse(rel, source)
-    semantics = SemanticIndex(collect_semantics(tree, ADAPTERS))
+    collected = collect_semantics(tree, ADAPTERS)
+    collected.extend(derive_semantics(tree, collected))  # AGENT_LOOP (ADR-0012)
+    semantics = SemanticIndex(collected)
     taint = analyze_taint(tree, semantics)
     return FileAnalysis(file=rel, tree=tree, semantics=semantics, taint=taint)
 
