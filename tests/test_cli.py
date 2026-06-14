@@ -98,6 +98,16 @@ def test_ai_enabled_without_key_emits_notice(tmp_path: Path, monkeypatch) -> Non
     assert "static remediation" in result.output  # but the user is told
 
 
+def test_export_skills_writes_a_pack(tmp_path: Path) -> None:
+    out = tmp_path / "pack"
+    result = CliRunner().invoke(main, ["export-skills", "--out", str(out)])
+    assert result.exit_code == 0
+    assert (out / "SKILL.md").exists()
+    assert (out / "manifest.json").exists()
+    assert any((out / "rules").glob("PLB-*.md"))
+    assert "prevention" in result.output.lower()  # positioning surfaced
+
+
 def test_rules_command_lists_discovered_rules(tmp_path: Path) -> None:
     result = CliRunner().invoke(main, ["rules"])
     assert result.exit_code == 0
