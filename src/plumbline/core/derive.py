@@ -26,7 +26,11 @@ def derive_semantics(tree: SourceTree, collected: Sequence[SemanticNode]) -> lis
     llm_call_ids = {id(sn.node) for sn in collected if sn.tag is SemanticTag.LLM_CALL}
     out: list[SemanticNode] = []
     for node in ast.walk(tree.tree):
-        if isinstance(node, ast.While | ast.For) and _body_has_llm_call(node, llm_call_ids):
+        if (
+            isinstance(node, ast.While | ast.For)
+            and _body_has_llm_call(node, llm_call_ids)
+            and not _is_interactive(node)
+        ):
             out.append(
                 SemanticNode(
                     SemanticTag.AGENT_LOOP,
@@ -68,6 +72,19 @@ def _walk_within_loop(stmts: Sequence[ast.stmt]) -> list[ast.AST]:
 
 def _body_has_llm_call(node: ast.While | ast.For, llm_call_ids: set[int]) -> bool:
     return any(id(n) in llm_call_ids for n in _walk_within_loop(_loop_body(node)))
+
+
+def _is_interactive(node: ast.While | ast.For) -> bool:
+    """A loop driven by a blocking human/external read (`input()`) each turn is
+    an interactive REPL, not an autonomous agent loop — its iteration count is
+    bounded by the human, not the model. Excluding it removes the most common
+    `while True` false positive for AGT-001/002 (ADR-0012 D2 population
+    narrowing). A blocking-queue worker (`q.get()`) is a known residual — see
+    docs/backlog.md."""
+    for n in _walk_within_loop(_loop_body(node)):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "input":
+            return True
+    return False
 
 
 # --------------------------------------------------------------------------- #
