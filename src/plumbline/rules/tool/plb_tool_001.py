@@ -56,7 +56,7 @@ RULE = Rule(
     category="TOOL",
     pillar=Pillar.ARCHITECTURE,
     severity=Severity.MAJOR,
-    confidence=Confidence.MEDIUM,  # promoted to High via the /benchmark commit
+    confidence=Confidence.HIGH,  # measured 100% precision in /benchmark
     why_it_matters=(
         "An untyped tool lets the model pass malformed arguments that crash it at runtime."
     ),

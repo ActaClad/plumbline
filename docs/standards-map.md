@@ -24,13 +24,14 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 | PLB-RES-002 | Reliability | Critical | High | — | 100% (2 TP / 0 FP) |
 | PLB-RES-005 | Reliability | Critical | High | — | 100% (1 TP / 0 FP) |
 | PLB-RES-007 | Reliability | Critical | Medium | — | TBD |
-| PLB-AGT-001 | Architecture | Blocker | High | OWASP-AGENTIC | TBD |
+| PLB-AGT-001 | Architecture | Blocker | High | OWASP-AGENTIC | 100% (3 TP / 0 FP) |
+| PLB-AGT-002 | Architecture | Critical | High | — | 100% (1 TP / 0 FP) |
 | PLB-AGT-004 | Architecture | Critical | High | — | TBD |
 | PLB-MDL-001 | Reliability | Major | Medium | — | n/a (advisory) |
 | PLB-MDL-002 | Reliability | Critical | High | — | TBD |
 | PLB-OUT-001 | Reliability | Critical | High | — | 100% (1 TP / 0 FP) |
 | PLB-OUT-003 | Reliability | Major | High | — | TBD |
-| PLB-TOOL-001 | Architecture | Major | High | — | TBD |
+| PLB-TOOL-001 | Architecture | Major | High | — | 100% (2 TP / 0 FP) |
 | PLB-TOOL-002 | Architecture | Critical | High | CWE-20 | TBD |
 | PLB-EVAL-001 | Harness | Major | High | NIST-AI-RMF:MEASURE | TBD |
 | PLB-OBS-001 | Harness | Major | High | NIST-AI-RMF:MEASURE | TBD |

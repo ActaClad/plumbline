@@ -70,7 +70,7 @@ RULE = Rule(
     category="AGT",
     pillar=Pillar.ARCHITECTURE,
     severity=Severity.BLOCKER,
-    confidence=Confidence.MEDIUM,  # promoted to High via the /benchmark commit (ADR-0012)
+    confidence=Confidence.HIGH,  # measured 100% precision in /benchmark (ADR-0012)
     why_it_matters=(
         "An agent loop with no hard iteration cap runs away — unbounded cost, may never terminate."
     ),
