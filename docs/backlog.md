@@ -93,6 +93,21 @@ wiring (ADR-0015). Additive follow-ons:
   report and SARIF could surface it too (SARIF deliberately keeps the static rule
   remediation as the machine contract).
 
+## Cross-module detection residuals (ADR-0016) — named, not fixed
+
+Project-level triggering (ADR-0016) fixed cross-module detection for the raw
+OpenAI SDK (the dominant pattern). Two residuals remain, disclosed:
+
+- **Framework cross-module linking.** `from .llm import model; model.invoke()`
+  still can't link `model` to its `ChatOpenAI()` construction in another file, so
+  LangChain/CrewAI calls through a centralized handle stay untagged. Needs
+  cross-module symbol resolution — a larger change than project-triggering.
+- **Anthropic cross-module `messages.create`.** Because `.messages.create` is
+  ambiguous with Twilio's SMS API, it is tagged only when openai/anthropic is
+  imported in the same file. A centralized *Anthropic* client used cross-module
+  is therefore missed (OpenAI, the common case, is caught). Closing this needs a
+  receiver-typing signal to tell an Anthropic client from a Twilio one.
+
 ## Deferred from M6 (security pillar) — needs a sharper signal
 
 Shipped: SEC-002/003/004/005/006 (High), SEC-007 + GOV-001/002 (Medium); SARIF

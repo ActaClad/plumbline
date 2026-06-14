@@ -27,6 +27,7 @@ _INVOKE_METHODS: frozenset[str] = frozenset({"kickoff", "kickoff_async"})
 class CrewAIAdapter:
     name = "crewai"
     priority = 20
+    project_triggered = False  # name-based matching; stays per-file (ADR-0016 D1)
     trigger_imports = frozenset({"crewai", "crewai_tools"})
 
     def annotate(self, ctx: SourceTree) -> Iterable[SemanticNode]:

@@ -60,6 +60,7 @@ _INVOKE_METHODS: frozenset[str] = frozenset({"invoke", "ainvoke", "stream", "ast
 class LangChainAdapter:
     name = "langchain"
     priority = 20
+    project_triggered = False  # name-based matching; stays per-file (ADR-0016 D1)
     trigger_imports = frozenset(
         {
             "langchain",
