@@ -17,6 +17,7 @@ from .benchmark import render_report, run_benchmark
 from .config import Config, ConfigError, load_config
 from .engine import ScanResult, scan
 from .reporters import cli as cli_reporter
+from .reporters.html import write_html
 from .reporters.json import write_json
 from .reporters.sarif import write_sarif
 from .rules.base import Rule, RuleLoadError, discover_rules
@@ -37,6 +38,9 @@ def main() -> None:
 @click.option("--sarif", "sarif_path", type=click.Path(path_type=Path), help="Write SARIF here.")
 @click.option("--json", "json_path", type=click.Path(path_type=Path), help="Write JSON here.")
 @click.option(
+    "--html", "html_path", type=click.Path(path_type=Path), help="Write an HTML report here."
+)
+@click.option(
     "--strict-analyzer-errors",
     is_flag=True,
     help="Fail the gate (exit 1) if any file/rule raised an analyzer error.",
@@ -46,6 +50,7 @@ def scan_command(
     config_path: Path | None,
     sarif_path: Path | None,
     json_path: Path | None,
+    html_path: Path | None,
     strict_analyzer_errors: bool,
 ) -> None:
     """Scan PATHS (default: current directory) for reliability/architecture defects."""
@@ -54,7 +59,7 @@ def scan_command(
 
     result = _run_scan(root, config, rules)
     cli_reporter.render(_out, _err, result)
-    _write_outputs(result, rules, config, sarif_path, json_path)
+    _write_outputs(result, rules, config, sarif_path, json_path, html_path)
 
     failed = not result.gate.passed or (strict_analyzer_errors and result.analyzer_errors)
     raise SystemExit(1 if failed else 0)
@@ -166,6 +171,7 @@ def _write_outputs(
     config: Config,
     sarif_path: Path | None,
     json_path: Path | None,
+    html_path: Path | None = None,
 ) -> None:
     sarif = sarif_path or (
         Path(config.output.sarif_path) if "sarif" in config.output.formats else None
@@ -177,6 +183,9 @@ def _write_outputs(
     if js is not None:
         write_json(result, str(js))
         _err.print(f"[dim]wrote JSON to {js}[/dim]")
+    if html_path is not None:
+        write_html(result, str(html_path))
+        _err.print(f"[dim]wrote HTML report to {html_path}[/dim]")
 
 
 if __name__ == "__main__":  # pragma: no cover
