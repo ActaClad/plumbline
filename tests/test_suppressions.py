@@ -21,6 +21,9 @@ _DISABLED = (
 
 def _write(root: Path, suffix: str = "") -> None:
     (root / "agent.py").write_text(_DISABLED.format(suffix=suffix))
+    # Harness evidence so the project-scope absence rules (EVAL-001/OBS-001) stay
+    # silent and these assertions isolate RES-001.
+    (root / "_harness.py").write_text("import deepeval\nimport opentelemetry\n")
 
 
 def test_finding_active_without_suppression(tmp_path: Path) -> None:

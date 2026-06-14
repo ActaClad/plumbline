@@ -13,6 +13,11 @@ from plumbline.rules.base import discover_rules
 RULES = discover_rules()
 
 
+def _harness(tmp_path: Path) -> None:
+    # Silence the project-scope absence rules so RES-001 is the only finding.
+    (tmp_path / "_harness.py").write_text("import deepeval\nimport opentelemetry\n")
+
+
 def _scan_finding(tmp_path: Path) -> object:
     (tmp_path / "agent.py").write_text(
         "from openai import OpenAI\n"
@@ -20,6 +25,7 @@ def _scan_finding(tmp_path: Path) -> object:
         # max_tokens set so only RES-001 fires (one finding to assert on).
         "c.chat.completions.create(model='m', timeout=None, max_tokens=256)\n"
     )
+    _harness(tmp_path)
     return scan(tmp_path, Config(), RULES)
 
 
@@ -50,6 +56,7 @@ def test_json_includes_suppressed(tmp_path: Path) -> None:
         "c.chat.completions.create(model='m', timeout=None, max_tokens=256)"
         "  # plumb: ignore[PLB-RES-001]\n"
     )
+    _harness(tmp_path)
     obj = to_json_obj(scan(tmp_path, Config(), RULES))
     assert obj["findings"] == []
     assert len(obj["suppressed"]) == 1
