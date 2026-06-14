@@ -74,6 +74,22 @@ milestones in `specs/architecture.md`) — it's the catch-net.
   maintained deprecated-model list) but needs a packaged, versioned data file.
   Add with the data file + its refresh process.
 
+## Deferred from M8 (AI remediation) — additive polish
+
+Shipped: the enrichment firewall, AnthropicEnricher, off-by-default config, CLI
+wiring (ADR-0015). Additive follow-ons:
+
+- **Configurable model / provider.** `AIConfig` only carries `enrich_remediation`;
+  the model is hard-coded and the provider is Anthropic-only. Add `[ai] model`
+  and an OpenAI enricher behind the same `Enricher` protocol when wanted (changes
+  the config schema → touches ADR-0007's example-TOML lock).
+- **Batch / cached enrichment.** One API call per finding is simple but chatty;
+  batch by rule, or cache by fingerprint so re-scans don't re-enrich unchanged
+  findings.
+- **HTML/SARIF AI labelling.** The CLI and JSON mark `(AI-assisted)`; the HTML
+  report and SARIF could surface it too (SARIF deliberately keeps the static rule
+  remediation as the machine contract).
+
 ## Deferred from M6 (security pillar) — needs a sharper signal
 
 Shipped: SEC-002/003/004/005/006 (High), SEC-007 + GOV-001/002 (Medium); SARIF
