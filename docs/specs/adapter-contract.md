@@ -63,8 +63,8 @@ This is the single most important convention for precision.
 |---|---|---|
 | `LLM_CALL` | `model`, `timeout`, `tools` | `temperature`, `max_tokens`, `max_retries`, `stream`, `messages` (node ref) |
 | `LLM_CLIENT_CREATE` | `timeout`, `max_retries` | `base_url`, `provider` |
-| `AGENT_CREATE`/`AGENT_INVOKE` | `max_iterations` | `timeout`, `token_budget` |
-| `AGENT_LOOP` | `bounded` (`Set(True/False)`/`Unknown`) | `bound_expr` (node ref) |
+| `AGENT_CREATE`/`AGENT_INVOKE` | `max_iterations`, `max_iterations_source` | `framework`, `timeout`, `token_budget` |
+| `AGENT_LOOP` | `has_iteration_cap`, `has_goal_exit` (each `Set`/`Unknown`, ADR-0012 D3) | — |
 | `TOOL_DEF` | `name`, `has_schema` | `params` (node refs) |
 | `RETRIEVER_CALL` | `k` | `store_type` |
 | `EMBEDDING_CALL` | `model` | — |
@@ -132,7 +132,11 @@ near-identical):
 | `<client>.chat.completions.create(...)`, `<client>.responses.create(...)`, `<client>.messages.create(...)` | `LLM_CALL` |
 | `<client>.embeddings.create(...)` | `EMBEDDING_CALL` |
 | messages/list construction passed to an `LLM_CALL` | `PROMPT_BUILD` |
-| a `while`/`for` whose body contains an `LLM_CALL` and dispatch on tool/function-call results | `AGENT_LOOP` |
+
+> **Amended by ADR-0012:** an earlier draft listed `AGENT_LOOP` here. A
+> hand-rolled agent loop is framework-independent (its `LLM_CALL` may be tagged
+> by any adapter), so `AGENT_LOOP` is now produced by the **derived-semantics
+> pass** (§10), not by this adapter.
 
 Resolution examples (these are fixture-backed acceptance tests):
 
@@ -164,3 +168,63 @@ it does — the rule targets *unbounded* calls; the rule's spec text governs).
 4. Run the full rule suite over the new adapter's fixtures — existing rules
    gain coverage; any rule that misfires on idiomatic usage of the new
    framework is a precision bug to fix **before** merge.
+
+## 8. The `langchain` adapter (LangChain / LangGraph)
+
+**Version assumption:** LangChain ≥ 0.1 / LangGraph ≥ 0.1. The frameworks churn
+their public API hard (`initialize_agent` is deprecated in favour of LCEL /
+LangGraph; class locations move between `langchain`, `langchain_core`,
+`langchain_openai`, `langchain_community`). The adapter matches by the trailing
+construct name and attribute tail, not by exact import path, so an aliased or
+relocated import still resolves. Priority **20** (framework adapter > raw SDK).
+`trigger_imports = {"langchain", "langchain_core", "langchain_openai",
+"langchain_anthropic", "langchain_community", "langgraph"}`.
+
+| Pattern (incl. aliased forms) | Emits | Notes |
+|---|---|---|
+| `ChatOpenAI(...)`, `ChatAnthropic(...)`, `AzureChatOpenAI(...)`, `ChatVertexAI(...)` | `LLM_CLIENT_CREATE` | `provider` normalized (`openai`/`anthropic`/…); these are also models, but in LCEL the construct is the client |
+| `<model>.invoke(...)`, `.ainvoke(...)`, `.stream(...)`, `.batch(...)` on a chat model | `LLM_CALL` | `model` resolved from the client construction when linkable |
+| `AgentExecutor(...)`, `initialize_agent(...)` | `AGENT_CREATE` | `max_iterations` default **15**; resolved per ADR-0012 D4 |
+| `create_react_agent(...)`, `create_tool_calling_agent(...)`, `StateGraph(...).compile(...)` | `AGENT_CREATE` | LangGraph; bounded by a default `recursion_limit` (**25**) — recorded as `max_iterations = Known(25)`, `source="framework_default"` |
+| `<agent>.invoke(...)`, `.ainvoke(...)`, `.run(...)`, `.stream(...)` on an agent/graph | `AGENT_INVOKE` | `max_iterations` re-read from a `config={"recursion_limit": N}` kwarg when present |
+| `@tool` decorator; `Tool(...)`, `StructuredTool.from_function(...)` | `TOOL_DEF` | `has_schema` from `args_schema=` / a typed function signature (ADR-0012-adjacent; consumed by TOOL-001) |
+
+`max_iterations` provenance follows ADR-0012 D4: bare construction →
+`Known(<finite default>)` + `source="framework_default"`; explicit
+`max_iterations=None` → `Known(None)` + `source="explicit"`; unresolvable →
+`UNKNOWN`. Correctness depends only on a finite default *existing*, not its
+exact value (the numbers above are the current defaults, stated for the reader).
+
+## 9. The `crewai` adapter (CrewAI)
+
+**Version assumption:** CrewAI ≥ 0.1. Priority **20**.
+`trigger_imports = {"crewai", "crewai_tools"}`.
+
+| Pattern | Emits | Notes |
+|---|---|---|
+| `Agent(...)` | `AGENT_CREATE` | `max_iter` is CrewAI's per-agent cap; finite framework default (**25**). Read into `max_iterations` (normalized key) per ADR-0012 D4 |
+| `Crew(...)` | `AGENT_CREATE` | orchestration object; `max_iterations` taken from `max_iter`/`max_rpm` when present, else `framework_default` (an agent-bounded crew is bounded) |
+| `<crew>.kickoff(...)`, `.kickoff_async(...)` | `AGENT_INVOKE` | — |
+| `Task(...)` | — | not tagged in v1 (no rule consumes it yet) |
+| `@tool` decorator; `BaseTool` subclass | `TOOL_DEF` | `has_schema` from `args_schema` / typed `_run` signature |
+
+## 10. Derived semantics (`core/derive.py`, ADR-0012 D1)
+
+After every adapter has run, the engine runs one deterministic derivation pass
+over `(SourceTree, collected nodes)` to compute **cross-cutting** tags that no
+single adapter can see. It is pure (no I/O, no adapter calls) and its output is
+appended before indexing. v1 derives exactly one tag:
+
+**`AGENT_LOOP`** — a `while`/`for` statement whose body (excluding nested
+function/class defs) transitively contains ≥1 `LLM_CALL` (ADR-0012 D2). It
+carries two independent tri-state properties (ADR-0012 D3):
+
+- `has_iteration_cap` — `Known(True)` for `for`-over-`range`/literal or a
+  counter-guarded `while`; `Known(False)` for `while True:`/`while 1:` with no
+  counter; `UNKNOWN` otherwise.
+- `has_goal_exit` — `Known(True)` for any `for`, any non-constant `while`, or a
+  truthy-constant `while` with a reachable `break`/`return`; `Known(False)` for
+  a truthy-constant `while` with none; (never `UNKNOWN` in v1).
+
+A loop with no `LLM_CALL` inside it is never tagged — narrowing the population
+is the precision mechanism. Anchor: the loop statement node.
