@@ -194,6 +194,10 @@ class Finding:
     remediation: str
     fingerprint: str
     code_flow: tuple[CodeFlowStep, ...] = ()  # taint witness (ADR-0014); fingerprint-excluded
+    # AI-assisted remediation label (ADR-0015). Set post-fingerprinting by the
+    # enrichment layer via dataclasses.replace — NOT on FindingDraft, NOT in
+    # assign_fingerprints, so it is fingerprint-safe by construction.
+    remediation_is_ai: bool = False
 
 
 @final

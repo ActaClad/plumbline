@@ -54,7 +54,8 @@ def _render_finding(out: Console, f: Finding) -> None:
     out.print(f"    [dim]why:[/dim] {f.why_it_matters}")
     fix = f.remediation.strip().splitlines()
     if fix:
-        out.print(f"    [dim]fix:[/dim] {fix[0]}")
+        tag = " [magenta](AI-assisted)[/magenta]" if f.remediation_is_ai else ""
+        out.print(f"    [dim]fix:[/dim]{tag} {fix[0]}")
 
 
 def _render_summary(out: Console, result: ScanResult) -> None:

@@ -73,6 +73,12 @@ strict = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
 
+# `anthropic` is the optional [ai] extra, not installed in CI and lazy-imported
+# inside the enrichment layer only (ADR-0015 D3). It is never on the detection path.
+[[tool.mypy.overrides]]
+module = "anthropic.*"
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
