@@ -73,6 +73,16 @@ def test_zero_semantic_nodes_is_not_applicable() -> None:
     assert scores.pillars == {}
 
 
+def test_readiness_rounds_half_up_at_exact_half() -> None:
+    # Reliability 90 (one Critical/High = 10 penalty), others 100 -> the weighted
+    # sum is exactly 96.5. Half-up -> 97 (what a hand-audit gets); banker's round
+    # would give 96. ADR-0008's "hand-auditable" promise requires half-up.
+    findings = [_f(Pillar.RELIABILITY, Severity.CRITICAL, Confidence.HIGH)]
+    scores = compute_scores(findings, semantic_node_count=1)
+    assert scores.pillars[Pillar.RELIABILITY] == 90
+    assert scores.readiness == 97
+
+
 def test_pillar_floors_at_zero() -> None:
     # Four High Blockers in one pillar over-penalize; the score floors at 0.
     fs = [_f(Pillar.SECURITY, Severity.BLOCKER, Confidence.HIGH) for _ in range(4)]

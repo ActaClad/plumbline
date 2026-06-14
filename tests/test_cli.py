@@ -23,6 +23,51 @@ def test_scan_clean_repo_exits_zero(tmp_path: Path) -> None:
     assert "gate passed" in result.output
 
 
+def test_scan_prints_readiness_score(tmp_path: Path) -> None:
+    _write(
+        tmp_path,
+        "agent.py",
+        "from openai import OpenAI\n"
+        "c = OpenAI()\n"
+        "c.chat.completions.create(model='m', timeout=None, max_tokens=10)\n",
+    )
+    result = CliRunner().invoke(main, ["scan", str(tmp_path)])
+    assert "Readiness Score:" in result.output
+    assert "Reliability" in result.output
+
+
+def test_scan_writes_html_report(tmp_path: Path) -> None:
+    _write(tmp_path, "a.py", "x = 1\n")
+    out = tmp_path / "report.html"
+    result = CliRunner().invoke(main, ["scan", str(tmp_path), "--html", str(out)])
+    assert result.exit_code == 0
+    assert out.exists()
+    text = out.read_text()
+    assert "<html" in text and "Plumbline" in text
+    assert "http://" not in text and "https://" not in text  # offline
+
+
+def test_score_does_not_drive_the_gate(tmp_path: Path) -> None:
+    # CLAUDE.md §1.6: the gate is the CI mechanism, the score is a dashboard.
+    # An SSRF (Critical/Medium) + project-scope advisories are all non-gating, so
+    # the gate PASSES (exit 0) even though the Readiness Score is well under 100.
+    _write(
+        tmp_path,
+        "agent.py",
+        "import requests\n"
+        "from openai import OpenAI\n"
+        "c = OpenAI()\n"
+        "def f(q):\n"
+        "    r = c.chat.completions.create(model='m', timeout=5, max_tokens=10)\n"
+        "    return requests.get(r.choices[0].message.content, timeout=5)\n",
+    )
+    result = CliRunner().invoke(main, ["scan", str(tmp_path)])
+    assert result.exit_code == 0  # gate passed
+    assert "gate passed" in result.output
+    assert "PLB-SEC-007" in result.output  # the Medium finding fired
+    assert "Readiness Score: 100" not in result.output  # but the score reflects it
+
+
 def test_rules_command_lists_discovered_rules(tmp_path: Path) -> None:
     result = CliRunner().invoke(main, ["rules"])
     assert result.exit_code == 0
