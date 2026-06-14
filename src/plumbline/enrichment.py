@@ -97,7 +97,10 @@ class AnthropicEnricher:
             snippet=(finding.snippet or "").strip() or "(snippet unavailable)",
             remediation=finding.remediation.strip(),
         )
-        resp = self._client.messages.create(
+        # This is the deliberate AI boundary — our one LLM call, rewriting only
+        # remediation text (never gating). Its output is not eval-gated, so
+        # suppress EVAL-001 here (dogfooding our own inline-suppression mechanism).
+        resp = self._client.messages.create(  # plumb: ignore[PLB-EVAL-001]
             model=self._model,
             max_tokens=400,
             messages=[{"role": "user", "content": prompt}],

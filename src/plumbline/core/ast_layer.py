@@ -245,6 +245,9 @@ def _all_args(args: ast.arguments) -> list[ast.arg]:
 # Inline suppressions (ADR-0006 D6)
 # --------------------------------------------------------------------------- #
 
+# Anchored at the comment start (matched with .match, not .search): a suppression
+# directive must BE the comment — `# plumb: ignore[ID]` — not appear inside prose
+# that merely mentions the syntax (e.g. a doc comment "bare `# plumb: ignore`").
 _IGNORE_RE = re.compile(r"#\s*plumb:\s*ignore(?:\[(?P<ids>[^\]]*)\])?", re.IGNORECASE)
 
 
@@ -261,7 +264,7 @@ def scan_suppressions(source: str) -> Suppressions:
         return Suppressions(by_line={}, invalid_lines=())
 
     for lineno, text in comments:
-        match = _IGNORE_RE.search(text)
+        match = _IGNORE_RE.match(text)  # anchored — the directive must start the comment
         if match is None:
             continue
         ids_raw = match.group("ids")

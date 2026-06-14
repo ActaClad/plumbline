@@ -34,3 +34,5 @@ jobs:
         # risk is the term leaking into an identifier or user-facing string.
         run: |
           ! grep -rniE "trust[ _-]?score" src
+      - name: Dogfood (Plumbline scans its own source with no analyzer errors)
+        run: plumb scan src --strict-analyzer-errors

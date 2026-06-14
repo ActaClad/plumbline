@@ -118,6 +118,18 @@ def test_non_suppression_comment_ignored() -> None:
     assert s.by_line == {} and s.invalid_lines == ()
 
 
+def test_prose_comment_mentioning_directive_is_not_a_suppression() -> None:
+    # A comment that DOCUMENTS the syntax must not be parsed as a directive
+    # (the directive must start the comment, matched with .match). Plumbline's own
+    # source has such comments — found by dogfooding `plumb scan src`.
+    s = scan_suppressions("invalid: tuple  # bare `# plumb: ignore` with no rule id\n")
+    assert s.invalid_lines == ()
+    assert s.by_line == {}
+    # but a real trailing directive still works
+    s2 = scan_suppressions("x = f()  # plumb: ignore[PLB-RES-001]\n")
+    assert s2.by_line == {1: frozenset({"PLB-RES-001"})}
+
+
 def test_tokenizer_error_is_swallowed() -> None:
     # Unterminated string would raise TokenError; scan must degrade, not crash.
     s = scan_suppressions('x = "unterminated\n')
