@@ -65,7 +65,7 @@ RULE = Rule(
     category="SEC",
     pillar=Pillar.SECURITY,
     severity=Severity.BLOCKER,
-    confidence=Confidence.MEDIUM,  # -> High via the /benchmark commit
+    confidence=Confidence.HIGH,  # measured 100% precision in /benchmark
     why_it_matters=(
         "Executing model output or untrusted input as code is in-process remote code execution."
     ),
