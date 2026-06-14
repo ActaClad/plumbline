@@ -22,6 +22,7 @@ from .baseline import load_baseline_fingerprints
 from .config import Config, GateVerdict, evaluate_gate
 from .core.ast_layer import ParseError, parse
 from .core.derive import derive_semantics
+from .core.evidence import collect_evidence
 from .core.taint import TaintView, analyze_taint
 from .model import AnalyzerError, Finding, FindingDraft, assign_fingerprints, finding_sort_key
 from .rules.base import AnalysisContext, FileAnalysis, ProjectContext, Rule, RuleScope
@@ -154,8 +155,9 @@ def scan(root: Path, config: Config, rules: Sequence[Rule]) -> ScanResult:
             ctx = AnalysisContext(analysis, rule, config)
             drafts.extend(_run(rule, ctx, analysis.file, errors))
 
+    evidence = collect_evidence(root)
     for rule in project_rules:
-        pctx = ProjectContext(analyses, rule, config)
+        pctx = ProjectContext(analyses, rule, config, evidence)
         drafts.extend(_run(rule, pctx, "<project>", errors))
 
     findings = _dedupe(assign_fingerprints(drafts))
