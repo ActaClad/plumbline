@@ -22,6 +22,7 @@ from typing import Final, final
 from ..adapters.base import SemanticIndex
 from ..config import Config
 from ..core.ast_layer import SourceTree
+from ..core.evidence import EMPTY_EVIDENCE, ProjectEvidence
 from ..core.taint import TaintView
 from ..model import (
     Confidence,
@@ -117,13 +118,21 @@ class ProjectContext:
     """Passed to a PROJECT rule's `detect`, once per run after all files are
     analyzed (ADR-0010 D1). Findings still anchor to a real (file, node)."""
 
-    __slots__ = ("_by_file", "config", "files", "rule")
+    __slots__ = ("_by_file", "config", "evidence", "files", "rule")
 
-    def __init__(self, files: Sequence[FileAnalysis], rule: Rule, config: Config) -> None:
+    def __init__(
+        self,
+        files: Sequence[FileAnalysis],
+        rule: Rule,
+        config: Config,
+        evidence: ProjectEvidence = EMPTY_EVIDENCE,
+    ) -> None:
         self.files = tuple(files)
         self._by_file = {f.file: f for f in files}
         self.rule = rule
         self.config = config
+        #: Non-Python project facts (CI files, repo paths) — ADR-0013.
+        self.evidence = evidence
 
     def finding(
         self,
@@ -207,6 +216,9 @@ class Rule:
     detect: Callable[..., list[FindingDraft]]
     standards: tuple[str, ...] = ()
     scope: RuleScope = RuleScope.FILE
+    #: Marks a sanctioned pattern/grep rule (CLAUDE.md §1.2 exception, ADR-0013
+    #: D2) — used only where dataflow does not apply (e.g. scanning CI text).
+    grep_rule: bool = False
 
 
 # --------------------------------------------------------------------------- #

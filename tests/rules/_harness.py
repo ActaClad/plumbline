@@ -14,6 +14,7 @@ from plumbline.adapters.base import SemanticIndex, collect_semantics
 from plumbline.config import Config
 from plumbline.core.ast_layer import parse
 from plumbline.core.derive import derive_semantics
+from plumbline.core.evidence import collect_evidence
 from plumbline.core.taint import analyze_taint
 from plumbline.model import Finding, assign_fingerprints
 from plumbline.rules.base import (
@@ -50,7 +51,7 @@ def run_project_rule(rule: Rule, root: Path) -> list[Finding]:
         _file_analysis(p.relative_to(root).as_posix(), p.read_text(encoding="utf-8"))
         for p in sorted(root.rglob("*.py"))
     ]
-    ctx = ProjectContext(analyses, rule, Config())
+    ctx = ProjectContext(analyses, rule, Config(), collect_evidence(root))
     return assign_fingerprints(list(rule.detect(ctx)))
 
 

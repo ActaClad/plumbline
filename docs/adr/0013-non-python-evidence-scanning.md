@@ -1,14 +1,15 @@
 # ADR-0013 — Non-Python project evidence (for EVAL-003 / CI-gating rules)
 
-- **Status:** Proposed — awaiting maintainer approval at the M5 review pause
+- **Status:** Accepted (approved at the M5 review pause, 2026-06-14)
 - **Date:** 2026-06-14
 - **Deciders:** ActaClad founding team
 - **Supersedes:** none
 
-> This ADR is **Proposed, not Accepted.** The M5 plan requires EVAL-003's
-> detector design to be "written and approved as part of this milestone"
-> (implementation-plan §M5). No code implements this ADR yet; it is the artifact
-> to be approved or rejected before EVAL-003 is built.
+> Approved by the maintainer at the M5 review: the non-Python evidence channel
+> and the sanctioned grep rule are accepted into v1. Implemented by
+> `core/evidence.py` (`ProjectEvidence`/`collect_evidence`), the
+> `ProjectContext.evidence` accessor, the `Rule.grep_rule` marker, and
+> `PLB-EVAL-003`. ADRs are immutable once Accepted — supersede to revise.
 
 ---
 
