@@ -74,6 +74,30 @@ milestones in `specs/architecture.md`) — it's the catch-net.
   maintained deprecated-model list) but needs a packaged, versioned data file.
   Add with the data file + its refresh process.
 
+## Deferred from M6 (security pillar) — needs a sharper signal
+
+Shipped: SEC-002/003/004/005/006 (High), SEC-007 + GOV-001/002 (Medium); SARIF
+codeFlows (ADR-0014). Deferred:
+
+- **PLB-SEC-001 (untrusted input reaches a tool-enabled prompt)** — as stated
+  this describes *most* user-facing agents (putting user input in the prompt is
+  the point; `tools=` set is normal), so it flags the architecture, not a defect.
+  The real defect needs a *mediation* signal we don't have statically: untrusted
+  content reaching a tool-capable model with **no delimiting/role-separation**
+  between source and tool. Same call as TOOL-002/004 — defer until that signal
+  exists. (Highest-FP rule in the set; must not ship as a gating Blocker.)
+- **SEC taint recall is intra-procedural by design (ADR-0003).** The SEC rules
+  miss cross-function source→sink flows; the benchmark recall column will read
+  low and that is correct (precision over recall, CLAUDE.md §1.4). Do NOT loosen
+  taint to chase it. Cross-procedural flow is its own backlogged milestone.
+- **Benchmark against incumbent scanners' public test sets** (the M6 DoD's
+  aspirational line) — licensing-gated. We ship our own safe-form FP-stress
+  corpus; comparing against third-party suites (e.g. the security
+  scanners' fixtures) where licensing allows is a follow-on.
+- **Richer secret detection (SEC-004)** — entropy scoring and more provider
+  patterns (Stripe, Twilio, JWT, PEM blocks) would raise recall; the v1 set is
+  the common high-signal shapes. Additive.
+
 ## Deferred from M5 (harness pillar) — approval gate or heuristic
 
 Shipped: EVAL-001, OBS-001, **EVAL-003** (all Major/Medium, project-scope; see
