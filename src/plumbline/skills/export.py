@@ -57,8 +57,21 @@ def write_skill_pack(
 # --------------------------------------------------------------------------- #
 
 
+_FRONTMATTER = (
+    "---\n"
+    "name: plumbline-rules\n"
+    "description: >-\n"
+    "  Reliability, architecture, harness, and security rules for LLM/agent code.\n"
+    "  Apply these while writing code to generate production-safe agentic systems\n"
+    "  by default — bounded loops, timeouts/retries, validated tool I/O, guarded\n"
+    "  output parsing, and safe handling of model output.\n"
+    "---\n"
+)
+
+
 def _render_index(rules: Sequence[Rule]) -> str:
     lines = [
+        _FRONTMATTER,
         "# Plumbline rule pack — write reliable agentic code by default",
         "",
         _POSITIONING,
@@ -126,9 +139,14 @@ def _render_manifest(rules: Sequence[Rule], version: str) -> str:
 
 
 def _fixture_example(fixtures_root: Path, rule_id: str, kind: str) -> str | None:
-    """The first `kind` (bad/good) fixture for a rule — a file fixture's
-    `kind_*.py`, or a representative `.py` from a `kind_*/` project-fixture
-    directory. None if no fixtures are present (e.g. installed without them)."""
+    """The first `kind` (bad/good) fixture for a rule.
+
+    File-scope rules use a single `kind_*.py`. Project-scope rules use a
+    `kind_*/` mini-repo whose WHOLE POINT is the multi-file structure (e.g. the
+    `tests/` eval suite that distinguishes good from bad) — so those are rendered
+    as every file under a `# <path>` header, never flattened to one file (which
+    would make the "good" example look identical to the "bad" one). None if no
+    fixtures are present (e.g. installed without them)."""
     rule_dir = fixtures_root / rule_id
     if not rule_dir.is_dir():
         return None
@@ -138,5 +156,9 @@ def _fixture_example(fixtures_root: Path, rule_id: str, kind: str) -> str | None
     for sub in sorted(p for p in rule_dir.glob(f"{kind}_*") if p.is_dir()):
         pys = [p for p in sorted(sub.rglob("*.py")) if p.name != "__init__.py"]
         if pys:
-            return pys[0].read_text(encoding="utf-8")
+            blocks = [
+                f"# {py.relative_to(sub).as_posix()}\n{py.read_text(encoding='utf-8').rstrip()}"
+                for py in pys
+            ]
+            return "\n\n".join(blocks)
     return None
