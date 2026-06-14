@@ -68,6 +68,36 @@ def test_score_does_not_drive_the_gate(tmp_path: Path) -> None:
     assert "Readiness Score: 100" not in result.output  # but the score reflects it
 
 
+def test_ai_enrichment_does_not_change_exit_code(tmp_path: Path, monkeypatch) -> None:
+    # §1.1 firewall at the CLI: AI rewrites remediation but the gate/exit are
+    # decided on the deterministic result. RES-001 (Blocker) still fails the gate.
+    from plumbline import cli
+
+    class _Fake:
+        def enrich(self, finding):  # noqa: ANN001, ANN201
+            return "AI-TAILORED fix"
+
+    monkeypatch.setattr(cli, "build_enricher", lambda config: (_Fake(), None))
+    _write(
+        tmp_path,
+        "agent.py",
+        "from openai import OpenAI\nc = OpenAI()\n"
+        "c.chat.completions.create(model='m', timeout=None, max_tokens=10)\n",
+    )
+    result = CliRunner().invoke(main, ["scan", str(tmp_path)])
+    assert result.exit_code == 1  # gate still fails — enrichment cannot change it
+    assert "(AI-assisted)" in result.output
+
+
+def test_ai_enabled_without_key_emits_notice(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    _write(tmp_path, "a.py", "x = 1\n")
+    _write(tmp_path, ".plumbline.toml", "[ai]\nenrich_remediation = true\n")
+    result = CliRunner().invoke(main, ["scan", str(tmp_path)])
+    assert result.exit_code == 0  # detection/exit unchanged
+    assert "static remediation" in result.output  # but the user is told
+
+
 def test_rules_command_lists_discovered_rules(tmp_path: Path) -> None:
     result = CliRunner().invoke(main, ["rules"])
     assert result.exit_code == 0

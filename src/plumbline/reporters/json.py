@@ -75,6 +75,7 @@ def _finding(f: Finding) -> dict[str, Any]:
         "snippet": f.snippet,
         "standards": list(f.standards),
         "remediation": f.remediation,
+        "remediation_is_ai": f.remediation_is_ai,
         "fingerprint": f.fingerprint,
         "code_flow": [
             {"file": s.file, "line": s.line, "column": s.column, "message": s.message}
