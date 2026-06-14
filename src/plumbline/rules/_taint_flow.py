@@ -13,6 +13,25 @@ import ast
 from ..core.taint import TaintLabel, TaintView
 from ..model import CodeFlowStep
 
+#: Labels that denote attacker-controllable / untrusted content reaching a sink.
+#: (PII is sensitive, not untrusted — handled separately by GOV rules.)
+UNTRUSTED: tuple[TaintLabel, ...] = (
+    TaintLabel.LLM_OUTPUT,
+    TaintLabel.USER_INPUT,
+    TaintLabel.TOOL_RESULT,
+    TaintLabel.RETRIEVED_CONTENT,
+    TaintLabel.EXTERNAL_HTTP,
+)
+
+
+def first_label(
+    taint: TaintView, node: ast.AST, labels: tuple[TaintLabel, ...]
+) -> TaintLabel | None:
+    """The first of `labels` (in priority order) that taints `node`, else None.
+    Lets a sink rule fire on any untrusted source while naming a concrete one."""
+    present = taint.labels(node)
+    return next((label for label in labels if label in present), None)
+
 
 def witness_flow(
     taint: TaintView,
