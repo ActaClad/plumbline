@@ -14,7 +14,8 @@ RULES = discover_rules()
 _DISABLED = (
     "from openai import OpenAI\n"
     "c = OpenAI()\n"
-    "r = c.chat.completions.create(model='m', timeout=None){suffix}\n"
+    # max_tokens set so only RES-001 fires (isolates the suppression assertions).
+    "r = c.chat.completions.create(model='m', timeout=None, max_tokens=256){suffix}\n"
 )
 
 

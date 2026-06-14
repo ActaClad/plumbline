@@ -1,0 +1,1 @@
+"""Output validation rules (OUT)."""
