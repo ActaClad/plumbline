@@ -6,6 +6,8 @@ No test touches the network: a FakeEnricher stands in for the LLM.
 from __future__ import annotations
 
 import dataclasses
+import subprocess
+import sys
 from pathlib import Path
 
 from plumbline.config import AIConfig, Config
@@ -39,6 +41,22 @@ def _project(tmp_path: Path) -> Path:
     )
     (tmp_path / "_h.py").write_text("import deepeval\nimport opentelemetry\n")
     return tmp_path
+
+
+def test_detection_path_never_imports_the_ai_layer() -> None:
+    # ADR-0015 D1 as a CI-enforced invariant, not a manual grep: importing the
+    # engine (the detection entry point) must NOT transitively load the
+    # enrichment layer or the LLM SDK. A fresh interpreter is required — this
+    # test process already imported enrichment above.
+    code = (
+        "import plumbline.engine, sys; "
+        "assert 'plumbline.enrichment' not in sys.modules, 'engine pulled in enrichment'; "
+        "assert 'anthropic' not in sys.modules, 'engine pulled in anthropic'; "
+        "print('ai-free')"
+    )
+    proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+    assert "ai-free" in proc.stdout
 
 
 def test_enrichment_cannot_alter_detection(tmp_path: Path) -> None:
