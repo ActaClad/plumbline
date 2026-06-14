@@ -93,6 +93,27 @@ wiring (ADR-0015). Additive follow-ons:
   report and SARIF could surface it too (SARIF deliberately keeps the static rule
   remediation as the machine contract).
 
+## Real-repo validation findings (benchmark/real-repos.md)
+
+Fixed this pass: SEC-005 non-DB `.execute()` (now requires a SQL keyword in the
+query arg). Backlogged FP classes found on real OSS code:
+
+- **TOOL-001 misses common crewAI schema mechanisms (FP class, 86× on crewAI).**
+  Tools declaring `args_schema = create_model(...)` passed to `super().__init__`,
+  or a typed `_run(self, x: T)` signature, are flagged as "untyped". Fix on the
+  general principle: a tool with a typed `_run`/`_arun` signature OR any
+  `args_schema` reference (not just a class-body assignment) HAS an input
+  contract. Don't chase crewAI-specific shapes.
+- **SEC-004 fires on test-fixture fake secrets (FP class, 26× on crewAI).**
+  `access_token = "test_token"`, `jwt_token = "aaaaa.bbbbbb.cccccc"` (one already
+  `# noqa: S105`). Needs: a `test`/`fake`/`dummy`/`example` substring check
+  anywhere (not exact-match), low-entropy/repeated-char rejection, and optionally
+  test-path awareness. Judgment-laden tuning, not a one-liner.
+- **Unsupported-stack recall gap.** babyagi → 0 semantic nodes because it uses
+  **LiteLLM**, not a supported adapter. `instructor`, raw `requests`/`httpx` to an
+  LLM endpoint, and other wrappers are equally invisible. A LiteLLM adapter (it
+  has a stable `completion(...)` surface) would cover a large slice of real apps.
+
 ## Known detection edges (disclosed from the hardening pass)
 
 - **External real-repo validation is still undone.** Every measured "100%

@@ -27,13 +27,39 @@ Good:
 """
 
 
+# `.execute()` is not only a DB cursor (e.g. crewAI's function executor, thread
+# pools). Requiring a SQL keyword in the query arg's literal/f-string parts is a
+# far better signal than receiver-name matching: it fires on a real interpolated
+# query and stays silent on `executor.execute(name)` (real-repo FP, babyagi).
+_SQL_KEYWORDS: tuple[str, ...] = (
+    "select ",
+    "insert ",
+    "update ",
+    "delete ",
+    " from ",
+    " where ",
+    " join ",
+    " values",
+    " into ",
+    "drop ",
+    "union ",
+)
+
+
+def _looks_like_sql(query: ast.expr) -> bool:
+    text = " ".join(
+        n.value for n in ast.walk(query) if isinstance(n, ast.Constant) and isinstance(n.value, str)
+    ).lower()
+    return any(kw in text for kw in _SQL_KEYWORDS)
+
+
 def detect(ctx: AnalysisContext) -> list[FindingDraft]:
     findings: list[FindingDraft] = []
     for node in ast.walk(ctx.tree.tree):
         if not isinstance(node, ast.Call):
             continue
         query = sql_query_sink(node)
-        if query is None:
+        if query is None or not _looks_like_sql(query):
             continue
         label = first_label(ctx.taint, query, UNTRUSTED)
         if label is None:
