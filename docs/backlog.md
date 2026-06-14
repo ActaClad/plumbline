@@ -94,6 +94,14 @@ codeFlows (ADR-0014). Deferred:
   aspirational line) — licensing-gated. We ship our own safe-form FP-stress
   corpus; comparing against third-party suites (e.g. the security
   scanners' fixtures) where licensing allows is a follow-on.
+- **SEC-005 `.execute` receiver is not type-resolved.** SEC-005 (Blocker/High)
+  fires on `<x>.execute(tainted_query)`; the receiver `<x>` isn't typed, so a
+  tainted arg0 to a *non-DB* `.execute()` (some driver/ORM method taking a
+  command string) would be a false positive. Frequency is low in practice
+  (redis `.execute()` takes no args; SQLAlchemy `.execute(text(...))` is SQL;
+  `concurrent.futures` uses `submit`), so not narrowed in v1 — but it is a
+  gating Blocker, so the residual is disclosed here, not assumed away. Fix needs
+  receiver typing / a DB-cursor signal.
 - **Richer secret detection (SEC-004)** — entropy scoring and more provider
   patterns (Stripe, Twilio, JWT, PEM blocks) would raise recall; the v1 set is
   the common high-signal shapes. Additive.

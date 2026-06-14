@@ -98,3 +98,18 @@ def test_taint_finding_emits_codeflows(tmp_path: Path) -> None:
     steps = out["codeFlows"][0]["threadFlows"][0]["locations"]
     assert len(steps) >= 2  # at least source + sink
     assert steps[-1]["location"]["message"]["text"] == "parsed by json.loads()"
+
+
+def test_codeflow_sarif_is_byte_deterministic(tmp_path: Path) -> None:
+    # The codeFlows array is an ordered list (not key-sorted by json.dumps), so
+    # its determinism is a distinct invariant from the witness-free path
+    # (ADR-0002 D3). Render a code_flow-bearing SARIF twice; assert byte-equal.
+    (tmp_path / "a.py").write_text(
+        "from openai import OpenAI\n"
+        "c = OpenAI()\n"
+        "import json\n"
+        "r = c.chat.completions.create(model='m', timeout=5, max_tokens=10)\n"
+        "data = json.loads(r.choices[0].message.content)\n"
+    )
+    result = scan(tmp_path, Config(), RULES)
+    assert render_sarif(result, RULES) == render_sarif(result, RULES)  # type: ignore[arg-type]
