@@ -140,6 +140,18 @@ ABSENT: Final[Resolved] = _Absent()
 UNKNOWN: Final[Resolved] = _Unknown()
 
 
+@final
+@dataclass(frozen=True, slots=True)
+class CodeFlowStep:
+    """One step in a taint witness path (ADR-0014). Source-first, sink-last.
+    Carried on a Finding for SARIF `codeFlows`; never part of the fingerprint."""
+
+    file: str
+    line: int
+    column: int | None
+    message: str
+
+
 @dataclass(frozen=True, eq=False, slots=True)
 class SemanticNode:
     """A normalized framework-semantics annotation on an AST node (ADR-0004 D2).
@@ -181,6 +193,7 @@ class Finding:
     standards: tuple[str, ...]
     remediation: str
     fingerprint: str
+    code_flow: tuple[CodeFlowStep, ...] = ()  # taint witness (ADR-0014); fingerprint-excluded
 
 
 @final
@@ -211,6 +224,7 @@ class FindingDraft:
     standards: tuple[str, ...]
     remediation: str
     anchor: str
+    code_flow: tuple[CodeFlowStep, ...] = ()  # taint witness (ADR-0014)
 
 
 @final
@@ -283,6 +297,7 @@ def assign_fingerprints(drafts: Sequence[FindingDraft]) -> list[Finding]:
                     standards=d.standards,
                     remediation=d.remediation,
                     fingerprint=compute_fingerprint(rule_id, file, anchor, ordinal),
+                    code_flow=d.code_flow,  # carried through; NOT in the fingerprint (ADR-0014 D2)
                 )
             )
     return out
