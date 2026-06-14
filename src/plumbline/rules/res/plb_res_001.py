@@ -7,9 +7,8 @@ genuinely unbounded case: a bare call relies on the SDK's finite default timeout
 — flagging idiomatic, default-bounded code is exactly the noise that gets an
 analyzer uninstalled (CLAUDE.md §1.4, detailed-design §9.4).
 
-Ships at Medium confidence until a precision number lands in /benchmark
-(CLAUDE.md §1.3); the signal itself is deterministic (an explicit `timeout=None`),
-so promotion to High is expected in M3.
+High confidence: measured 100% precision (4 TP / 0 FP across ~12 idiomatic
+patterns) in /benchmark — see benchmark/precision.md (CLAUDE.md §1.3).
 """
 
 from __future__ import annotations
@@ -51,7 +50,7 @@ RULE = Rule(
     category="RES",
     pillar=Pillar.RELIABILITY,
     severity=Severity.BLOCKER,
-    confidence=Confidence.MEDIUM,  # -> High in M3 once /benchmark measures precision
+    confidence=Confidence.HIGH,  # 100% precision in /benchmark (precision.md)
     why_it_matters=(
         "A model/tool call with no timeout can hang indefinitely and exhaust the "
         "worker pool, taking the service down."
