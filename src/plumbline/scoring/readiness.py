@@ -21,11 +21,19 @@ from typing import final
 from ..model import Finding, Pillar
 from .pillars import pillar_scores
 
-PILLAR_WEIGHTS: Mapping[Pillar, float] = {
-    Pillar.RELIABILITY: 0.35,
-    Pillar.ARCHITECTURE: 0.25,
-    Pillar.HARNESS: 0.20,
-    Pillar.SECURITY: 0.20,
+# Weights are 0.35 / 0.25 / 0.20 / 0.20 (ADR-0008 D2), expressed here in integer
+# hundredths — the Readiness sum is computed in integer
+# hundredths and rounded half-up `(sum + 50)//100`, NOT via float `round()`.
+# Two reasons: float `round` is banker's (half-to-even), so a Readiness landing on
+# an exact .5 (e.g. Reliability 90 / others 100 -> 96.5) would round to 96 while a
+# human hand-recomputing gets 97 — breaking ADR-0008's "hand-auditable" promise;
+# and float noise (0.35 is inexact) would otherwise decide near-.5 cases by
+# representation error. This reproduces the D4 vector exactly (7530 -> 75).
+_WEIGHT_HUNDREDTHS: Mapping[Pillar, int] = {
+    Pillar.RELIABILITY: 35,
+    Pillar.ARCHITECTURE: 25,
+    Pillar.HARNESS: 20,
+    Pillar.SECURITY: 20,
 }
 SCORING_MODEL = "adr-0008"
 
@@ -48,5 +56,6 @@ def compute_scores(findings: Iterable[Finding], semantic_node_count: int) -> Sco
     if semantic_node_count == 0:
         return Scores(applicable=False, pillars={}, readiness=None)
     pillars = pillar_scores(findings)
-    readiness = round(sum(PILLAR_WEIGHTS[p] * pillars[p] for p in Pillar))
+    hundredths = sum(_WEIGHT_HUNDREDTHS[p] * pillars[p] for p in Pillar)
+    readiness = (hundredths + 50) // 100  # integer half-up (see _WEIGHT_HUNDREDTHS)
     return Scores(applicable=True, pillars=pillars, readiness=readiness)
