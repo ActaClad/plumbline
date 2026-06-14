@@ -86,6 +86,9 @@ wiring (ADR-0015). Additive follow-ons:
 - **Batch / cached enrichment.** One API call per finding is simple but chatty;
   batch by rule, or cache by fingerprint so re-scans don't re-enrich unchanged
   findings.
+- **`max_tokens=400` can truncate a long remediation mid-sentence.** Harmless
+  (the text is advisory, never gating, and the static fallback is always present
+  on error), but disclosed: raise the cap or stream if longer fixes are wanted.
 - **HTML/SARIF AI labelling.** The CLI and JSON mark `(AI-assisted)`; the HTML
   report and SARIF could surface it too (SARIF deliberately keeps the static rule
   remediation as the machine contract).
