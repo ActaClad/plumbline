@@ -94,6 +94,19 @@ no precision regression. Shipped: AGT-001, AGT-002, TOOL-001 (all High, measured
   `@tool` decorator by its local name; `from crewai.tools import tool as t` then
   `@t` is missed. resolve_qualified-based decorator resolution would make it
   alias-proof (as it already is for constructors). Low priority (rare).
+- **Blocking-worker `while True` loops are a residual AGT-001/002 false-positive
+  class.** The derivation pass excludes interactive REPLs (loop body contains
+  `input()`, ADR-0012 D2) so a human-gated `while True` no longer fires. But a
+  *blocking-queue/socket worker* — `while True: msg = q.get(); llm.create(msg)`
+  with no break — is still tagged AGENT_LOOP and fires AGT-001 (no cap) and
+  AGT-002 (no goal exit), even though it is a legitimate daemon bounded by the
+  external queue, not the model. A `.get()`/`.recv()` name match is too broad to
+  exclude safely (`dict.get`). The precise discriminator is *model-output
+  feedback*: a true runaway agent loop re-feeds the model's output into the next
+  iteration's prompt; a worker does not. Implementing that needs the taint
+  engine to track list-append mutation (it currently does not — `.append` is not
+  a return-propagator), or a dedicated loop-carried-feedback pass. Until then,
+  this class is disclosed, not silently dropped (CLAUDE.md §1.4).
 - **Mixed-/inline-client `.invoke()` linking.** LangChain `LLM_CALL` is tagged
   only when the receiver links to a model construction by single assignment;
   LCEL pipes (`chain = prompt | model`) and inline `ChatOpenAI().invoke()` are

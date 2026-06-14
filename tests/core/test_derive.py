@@ -50,6 +50,12 @@ def test_llm_call_in_nested_def_does_not_tag_the_loop() -> None:
     assert _loops(src) == []
 
 
+def test_interactive_input_loop_is_not_tagged() -> None:
+    # A human-gated REPL (input() each turn) is not an autonomous agent loop.
+    src = "while True:\n    msg = input()\n" + _CALL
+    assert _loops(src) == []
+
+
 # --- the four worked cases from ADR-0012 D3 -----------------------------------
 
 
