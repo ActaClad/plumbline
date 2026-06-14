@@ -74,6 +74,28 @@ milestones in `specs/architecture.md`) — it's the catch-net.
   maintained deprecated-model list) but needs a packaged, versioned data file.
   Add with the data file + its refresh process.
 
+## Deferred from M5 (harness pillar) — approval gate or heuristic
+
+Shipped: EVAL-001, OBS-001 (both Major/Medium, project-scope absence rules; see
+`docs/specs/harness-rules.md`). Deferred:
+
+- **PLB-EVAL-003 (prompt/model changes not gated by eval in CI)** — needs the
+  non-Python CI-evidence substrate of **ADR-0013, which is Proposed, not
+  Accepted**. Per the M5 plan its detector design must be approved before it is
+  built; the spec + ADR are written and awaiting the maintainer's decision at
+  the M5 review. It also heavily overlaps EVAL-001 (ADR-0013 D3) — the open
+  question is whether the marginal "you wrote evals but don't run them" signal
+  justifies a whole non-Python channel + a sanctioned grep rule. If rejected,
+  drop EVAL-003 from v1.
+- **PLB-EVAL-002 (no golden dataset / ground-truth fixtures)** — distinguishing
+  "asserts against reference outputs" from "asserts it ran" is genuinely noisy
+  statically (assertions take countless shapes; golden data may be inline, in
+  fixtures, or external). High false-positive surface; defer until a precise
+  signal exists.
+- **PLB-OBS-002 (no run/session/user IDs on calls)** — correlation IDs are
+  usually injected via middleware/context/callbacks, not call kwargs, so this
+  shares OBS-001's env/middleware blind spot with less payoff. Defer.
+
 ## Deferred from M4 (adapters + AGT/TOOL) — substrate or heuristic
 
 The M4 task list named AGT-001/002/003/004/005/006 and TOOL-001…004; the M4
