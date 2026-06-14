@@ -220,6 +220,11 @@ Shipped: `plumb export-skills` (claude-skill format) — SKILL.md + per-rule pag
 - Additional render targets beyond `claude-skill`: `cursor-rules` and a
   single-file `agents-md` (the `--format` flag is already in place).
 - Auto-publish the skill-pack as a versioned release asset in CI.
+- **Validate the `claude-skill` pack against a live skill loader.** SKILL.md now
+  carries `name`/`description` frontmatter, but the format hasn't been loaded by
+  an actual Claude/Agent skill runtime end-to-end — confirm the frontmatter
+  fields and directory layout a real loader expects, or rename the format to
+  `markdown` if it's a portable doc rather than a drop-in skill.
 - **Fixtures must be on disk for the bad/good examples.** The exporter reads
   `fixtures/<rule_id>/` at export time, so a bare `pip install` (which doesn't
   ship test fixtures) produces rule pages *without* the embedded examples (the

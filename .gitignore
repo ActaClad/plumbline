@@ -15,3 +15,6 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+
+# Generated skill pack (default --out dir for `plumb export-skills`)
+skill-pack/

@@ -58,6 +58,23 @@ def test_write_skill_pack_creates_files(tmp_path: Path) -> None:
     assert len(written) == len(RULES) + 2  # per-rule + SKILL.md + manifest.json
 
 
+def test_skill_md_has_loader_frontmatter() -> None:
+    skill = build_skill_pack(RULES, FIXTURES, "1.2.3")["SKILL.md"]
+    assert skill.startswith("---\n")
+    assert "name: plumbline-rules" in skill
+    assert "description:" in skill
+
+
+def test_project_rule_example_shows_the_distinguishing_signal() -> None:
+    # EVAL-001's good fixture is a mini-repo; the multi-file render must surface
+    # the tests/ eval suite (the thing that makes it good), not flatten to the
+    # same agent.py as the bad example.
+    page = build_skill_pack(RULES, FIXTURES, "1.2.3")["rules/PLB-EVAL-001.md"]
+    prefer = page.split("## Prefer", 1)[1].split("## How to do it right", 1)[0]
+    assert "# tests/test_agent.py" in prefer  # the multi-file structure is shown
+    assert "import" in prefer and "agent" in prefer  # the test imports the agent
+
+
 def test_no_llm_no_network_marker() -> None:
     # A smoke check that the exporter is pure metadata serialization: building the
     # pack twice from the same inputs is identical (covered above) and it needs
