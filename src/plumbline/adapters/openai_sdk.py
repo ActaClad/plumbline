@@ -37,12 +37,14 @@ _PROVIDER_DEFAULTS: dict[str, dict[str, object]] = {
     "anthropic": {"timeout": 600.0, "max_retries": 2},
 }
 
-# Trailing attribute paths that denote a model call / embedding call.
-_LLM_CALL_TAILS: tuple[tuple[str, ...], ...] = (
+# Trailing attribute paths that denote a model call. The OpenAI-unique shapes are
+# safe to tag project-wide (ADR-0016 D2); `messages.create` is ALSO Twilio's SMS
+# API, so it is only tagged when openai/anthropic is imported in the same file.
+_UNAMBIGUOUS_CALL_TAILS: tuple[tuple[str, ...], ...] = (
     ("chat", "completions", "create"),
     ("responses", "create"),
-    ("messages", "create"),
 )
+_AMBIGUOUS_CALL_TAILS: tuple[tuple[str, ...], ...] = (("messages", "create"),)
 _EMBED_TAIL: tuple[str, ...] = ("embeddings", "create")
 
 _CALL_LEVEL_PARAMS = ("model", "temperature", "max_tokens", "tools", "stream")
@@ -53,8 +55,12 @@ class OpenAISDKAdapter:
     name = "openai_sdk"
     priority = 10
     trigger_imports = frozenset({"openai", "anthropic"})
+    project_triggered = True  # catch centralized clients used cross-module (ADR-0016)
 
     def annotate(self, ctx: SourceTree) -> Iterable[SemanticNode]:
+        # `messages.create` is ambiguous with Twilio, so it counts as a model call
+        # only when the SDK is imported in THIS file (ADR-0016 D2).
+        sdk_in_file = bool(ctx.imported_roots & self.trigger_imports)
         out: list[SemanticNode] = []
         for node in ast.walk(ctx.tree):
             if not isinstance(node, ast.Call):
@@ -64,7 +70,9 @@ class OpenAISDKAdapter:
                 out.append(self._client_create(ctx, node, _CLIENT_CTORS[qualified]))
                 continue
             tail = _attr_tail(node.func)
-            if _matches(tail, _LLM_CALL_TAILS):
+            if _matches(tail, _UNAMBIGUOUS_CALL_TAILS) or (
+                sdk_in_file and _matches(tail, _AMBIGUOUS_CALL_TAILS)
+            ):
                 out.append(self._llm_call(ctx, node))
             elif tail[-len(_EMBED_TAIL) :] == list(_EMBED_TAIL):
                 out.append(self._embedding_call(ctx, node))

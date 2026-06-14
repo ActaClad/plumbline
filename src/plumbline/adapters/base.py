@@ -28,6 +28,12 @@ class Adapter(Protocol):
     name: str
     priority: int
     trigger_imports: frozenset[str]
+    #: If True, the adapter runs on a file when its trigger imports appear
+    #: ANYWHERE in the project, not just that file (ADR-0016) — for catching
+    #: cross-module clients. Only opt in when the adapter is precise enough to
+    #: run project-wide (the openai_sdk adapter; not the name-matching framework
+    #: adapters).
+    project_triggered: bool
 
     def annotate(self, ctx: FileContext) -> Iterable[SemanticNode]: ...
 
@@ -38,12 +44,22 @@ def _node_pos(n: SemanticNode) -> tuple[int, int, str]:
     return (line, col, n.tag.value)
 
 
-def collect_semantics(ctx: FileContext, adapters: Sequence[Adapter]) -> list[SemanticNode]:
-    """Run every adapter whose trigger imports appear in the file, resolve
+def collect_semantics(
+    ctx: FileContext,
+    adapters: Sequence[Adapter],
+    project_roots: frozenset[str] = frozenset(),
+) -> list[SemanticNode]:
+    """Run every adapter whose trigger imports appear in the file (or, for a
+    project-triggered adapter, anywhere in `project_roots` — ADR-0016), resolve
     duplicate (tag, node) annotations by adapter priority (higher wins), and
     return the result sorted by (line, column, tag) for determinism.
     """
-    gated = [a for a in adapters if ctx.imported_roots & a.trigger_imports]
+    gated = [
+        a
+        for a in adapters
+        if (ctx.imported_roots | (project_roots if a.project_triggered else frozenset()))
+        & a.trigger_imports
+    ]
     # Higher priority first so it wins the (tag, node) dedupe below.
     gated.sort(key=lambda a: (-a.priority, a.name))
 

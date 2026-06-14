@@ -20,7 +20,7 @@ from .adapters import ADAPTERS
 from .adapters.base import SemanticIndex, collect_semantics
 from .baseline import load_baseline_fingerprints
 from .config import Config, GateVerdict, evaluate_gate
-from .core.ast_layer import ParseError, parse
+from .core.ast_layer import ParseError, SourceTree, parse
 from .core.derive import derive_semantics
 from .core.evidence import collect_evidence
 from .core.taint import TaintView, analyze_taint
@@ -110,19 +110,24 @@ def _excluded(rel: str, patterns: Sequence[str]) -> bool:
     )
 
 
-def _analyze_file(root: Path, rel: str, errors: list[AnalyzerError]) -> FileAnalysis | None:
+def _parse_file(root: Path, rel: str, errors: list[AnalyzerError]) -> tuple[str, SourceTree] | None:
     try:
         source = (root / rel).read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         errors.append(AnalyzerError(file=rel, stage="read", message=str(exc)))
         return None
     try:
-        tree = parse(rel, source)
+        return rel, parse(rel, source)
     except ParseError as exc:
         errors.append(AnalyzerError(file=rel, stage="parse", message=str(exc)))
         return None
+
+
+def _semantics_for(
+    rel: str, tree: SourceTree, project_roots: frozenset[str], errors: list[AnalyzerError]
+) -> FileAnalysis:
     try:
-        collected = collect_semantics(tree, ADAPTERS)
+        collected = collect_semantics(tree, ADAPTERS, project_roots)
         collected.extend(derive_semantics(tree, collected))
         semantics = SemanticIndex(collected)
     except Exception as exc:  # noqa: BLE001 — adapter/derivation crash is contained
@@ -140,11 +145,14 @@ def scan(root: Path, config: Config, rules: Sequence[Rule]) -> ScanResult:
     errors: list[AnalyzerError] = []
     files = discover_files(root, config)
 
-    analyses: list[FileAnalysis] = []
-    for rel in files:
-        analysis = _analyze_file(root, rel, errors)
-        if analysis is not None:
-            analyses.append(analysis)
+    # Two-pass (ADR-0016): parse all files and union their import roots, so a
+    # project-triggered adapter can see a centralized client imported elsewhere,
+    # THEN annotate + taint each file.
+    parsed = [p for rel in files if (p := _parse_file(root, rel, errors)) is not None]
+    project_roots: frozenset[str] = frozenset()
+    for _, tree in parsed:
+        project_roots |= tree.imported_roots
+    analyses = [_semantics_for(rel, tree, project_roots, errors) for rel, tree in parsed]
 
     file_rules = [r for r in rules if r.scope is RuleScope.FILE]
     project_rules = [r for r in rules if r.scope is RuleScope.PROJECT]

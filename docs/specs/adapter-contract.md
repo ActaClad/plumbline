@@ -87,8 +87,12 @@ class Adapter(Protocol):
 - `FileContext` gives the adapter the wrapped AST (ADR-0009), the scope/parent
   tables, the import map, and the shared value resolver — adapters never
   re-parse and never do I/O.
-- The engine runs an adapter on a file only if any `trigger_imports` entry
-  appears in the file's imports (module or `from` form, including aliased).
+- The engine runs an adapter on a file if any `trigger_imports` entry appears in
+  the file's imports (module or `from` form, including aliased). **Amended by
+  ADR-0016:** an adapter with `project_triggered = True` (only `openai_sdk`) also
+  runs when its trigger appears *anywhere in the project*, so a centralized
+  client imported cross-module is still analyzed. That adapter self-scopes its
+  ambiguous tails (`messages.create`, shared with Twilio) to in-file SDK imports.
 - Output is collected, then sorted by `(line, column, tag)`; duplicate
   `(tag, node)` annotations keep the highest-priority adapter's version.
   Priorities: framework adapters (langchain 20, crewai 20) > raw SDK
