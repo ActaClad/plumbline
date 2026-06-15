@@ -182,6 +182,9 @@ runtime one.
 
 ## Contributing
 
+New to the project? [**ONBOARDING.md**](ONBOARDING.md) takes you from clone to
+"I've run it myself" in ~30 minutes.
+
 Plumbline is built to be extended. One rule = one detector module + a
 vulnerable fixture + a clean fixture. See [CONTRIBUTING.md](CONTRIBUTING.md) and
 [`docs/rule-authoring.md`](docs/rule-authoring.md). The full rule taxonomy is
