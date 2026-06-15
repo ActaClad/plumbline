@@ -189,4 +189,4 @@ published as a roadmap — pick an unclaimed rule and open a PR.
 
 ## License
 
-Apache-2.0 © ActaClad Technologies. *The craft of intelligence.*
+Apache-2.0 © ActaClad Innovations. *The craft of intelligence.*
