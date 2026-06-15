@@ -20,15 +20,26 @@ The load-bearing ones:
 
 ## Dev setup
 
+One command — `make dev` creates `.venv` and installs everything:
+
 ```bash
 git clone https://github.com/actaclad/plumbline
 cd plumbline
+make dev        # create .venv + install with dev/ai extras
+make check      # everything CI runs: lint, format, types, tests
+```
+
+Prefer it by hand? The equivalent is:
+
+```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pytest          # all tests green before you start
 ruff check .    # lint clean
 mypy src        # types clean
 ```
+
+Run `make` (or `make help`) to see all targets.
 
 ## Adding a rule (the common case)
 
