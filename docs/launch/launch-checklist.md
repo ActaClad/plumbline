@@ -66,12 +66,16 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       in minutes.
 
 **Distribution artifacts (ship WITH launch)**
-- [ ] **GitHub Action** (`actaclad/plumbline-action`) — 5-line `uses:` that scans +
-      uploads SARIF to the Security tab. Highest-leverage artifact.
-- [ ] **`pre-commit` hook** — publish `.pre-commit-hooks.yaml`.
-- [ ] **Automated PyPI publish on tag** — GitHub Actions trusted publishing (OIDC,
-      no API tokens).
-- [ ] **Docs page: "SARIF → GitHub code scanning"** — concrete demoable hook.
+- [x] **GitHub Action** — 5-line `uses:` that scans + uploads SARIF to the Security
+      tab. Highest-leverage artifact. (Composite `action.yml` at repo root →
+      `uses: actaclad/plumbline@v1`; chose in-repo over a separate
+      `actaclad/plumbline-action` so the version pin matches the package.)
+- [x] **`pre-commit` hook** — publish `.pre-commit-hooks.yaml`. (`id: plumbline`.)
+- [x] **Automated PyPI publish on tag** — GitHub Actions trusted publishing (OIDC,
+      no API tokens). (`.github/workflows/publish.yml`, on Release published.
+      **TODO (you): configure the PyPI trusted publisher + `pypi` GH environment.**)
+- [x] **Docs page: "SARIF → GitHub code scanning"** — concrete demoable hook.
+      (`docs/sarif-code-scanning.md`; linked from README.)
 
 **Supply-chain credibility**
 - [ ] Dependabot enabled; deps pinned.

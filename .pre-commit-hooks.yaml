@@ -1,0 +1,17 @@
+# Plumbline pre-commit hook. Consumers add this to their .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/actaclad/plumbline
+#       rev: v0.0.1            # pin to a released tag
+#       hooks:
+#         - id: plumbline
+#
+# pre-commit installs Plumbline from this repo and runs the Quality Gate on the
+# Python files being committed (a non-zero exit blocks the commit).
+- id: plumbline
+  name: plumbline
+  description: Reliability & architecture analyzer for LLM/agentic code
+  entry: plumb scan
+  language: python
+  types: [python]
+  require_serial: true
