@@ -1,0 +1,14 @@
+# Code ownership for review routing. GitHub requests review from these owners
+# automatically. Update to org teams (e.g. @actaclad/maintainers) once the repo
+# lives in the actaclad org.
+
+# Default owner for everything in the repo.
+*                       @actaclad
+
+# Project constitution and decisions — maintainer review required.
+/CLAUDE.md              @actaclad
+/docs/adr/              @actaclad
+
+# Public contracts: the Finding schema and rule-plugin API. Changes need an ADR.
+/src/plumbline/rules/base.py    @actaclad
+/src/plumbline/core/            @actaclad

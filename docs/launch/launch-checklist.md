@@ -43,16 +43,17 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 ## P1 — Launch-ready repo hygiene & distribution artifacts
 
 **Community-health files**
-- [ ] `CODE_OF_CONDUCT.md` (Contributor Covenant).
-- [ ] `.github/ISSUE_TEMPLATE/bug_report.md`.
-- [ ] `.github/ISSUE_TEMPLATE/false_positive_report.md` — **your most important
+- [x] `CODE_OF_CONDUCT.md` (Contributor Covenant). (v2.1; contact conduct@actaclad.com.)
+- [x] `.github/ISSUE_TEMPLATE/bug_report.md`.
+- [x] `.github/ISSUE_TEMPLATE/false_positive_report.md` — **your most important
       signal**; capture command, snippet, expected vs actual, version.
-- [ ] `.github/ISSUE_TEMPLATE/rule_request.md`.
-- [ ] `.github/PULL_REQUEST_TEMPLATE.md` — checklist: detector + bad fixture + good
-      fixture + test; ADR if a decision is made.
-- [ ] `CODEOWNERS`, `.github/FUNDING.yml`.
+- [x] `.github/ISSUE_TEMPLATE/rule_request.md`.
+- [x] `.github/PULL_REQUEST_TEMPLATE.md` — checklist: detector + bad fixture + good
+      fixture + test; ADR if a decision is made. (+ DCO sign-off, config.yml routing.)
+- [x] `CODEOWNERS`, `.github/FUNDING.yml`. (Owner `@actaclad`; FUNDING entries
+      commented until accounts exist.)
 - [ ] Issue **labels**: `good first issue`, `help wanted`, `false-positive`,
-      `new-rule`, `precision`, `adapter`, `docs`.
+      `new-rule`, `precision`, `adapter`, `docs`. **(you, post-transfer: `gh label create`.)**
 
 **Repo polish**
 - [ ] **Social preview image** (Settings → Social preview).
