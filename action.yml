@@ -1,0 +1,114 @@
+# Plumbline GitHub Action — scan a repo and upload findings to the Security tab.
+#
+# Minimal usage (in a consumer repo's .github/workflows/plumbline.yml):
+#
+#   permissions:
+#     contents: read
+#     security-events: write   # required to upload SARIF to code scanning
+#   jobs:
+#     plumbline:
+#       runs-on: ubuntu-latest
+#       steps:
+#         - uses: actions/checkout@v4
+#         - uses: actaclad/plumbline@v1
+#
+# By default this scans the whole checkout, uploads SARIF to GitHub code
+# scanning, and fails the job if the Quality Gate fails.
+name: Plumbline
+description: Reliability & architecture analyzer for LLM and agentic code. Scans and uploads SARIF.
+author: ActaClad
+
+branding:
+  icon: check-circle
+  color: blue
+
+inputs:
+  paths:
+    description: Space-separated paths to scan.
+    required: false
+    default: "."
+  version:
+    description: Plumbline version to install (e.g. "0.0.1"). Empty installs the latest release.
+    required: false
+    default: ""
+  sarif-file:
+    description: Path to write the SARIF report.
+    required: false
+    default: plumbline.sarif
+  upload-sarif:
+    description: Upload the SARIF to GitHub code scanning (requires security-events:write).
+    required: false
+    default: "true"
+  fail-on-findings:
+    description: Fail the job when the Quality Gate fails (Blocker or High-confidence Critical).
+    required: false
+    default: "true"
+  strict-analyzer-errors:
+    description: Also fail if any file/rule raised an analyzer error.
+    required: false
+    default: "false"
+  python-version:
+    description: Python version used to run Plumbline.
+    required: false
+    default: "3.12"
+  args:
+    description: Extra arguments appended to `plumb scan`.
+    required: false
+    default: ""
+
+outputs:
+  sarif-file:
+    description: Path to the generated SARIF report.
+    value: ${{ inputs.sarif-file }}
+  exit-code:
+    description: Exit code from `plumb scan` (0 = gate passed).
+    value: ${{ steps.scan.outputs.exit-code }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Plumbline
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        if [ -n "${{ inputs.version }}" ]; then
+          pip install "actaclad-plumbline==${{ inputs.version }}"
+        else
+          pip install actaclad-plumbline
+        fi
+
+    - name: Run Plumbline
+      id: scan
+      shell: bash
+      run: |
+        set +e
+        extra=""
+        if [ "${{ inputs.strict-analyzer-errors }}" = "true" ]; then
+          extra="--strict-analyzer-errors"
+        fi
+        plumb scan ${{ inputs.paths }} --sarif "${{ inputs.sarif-file }}" $extra ${{ inputs.args }}
+        code=$?
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        echo "Plumbline exited with code $code."
+
+    - name: Upload SARIF to code scanning
+      if: ${{ inputs.upload-sarif == 'true' && hashFiles(inputs.sarif-file) != '' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.sarif-file }}
+
+    - name: Enforce the Quality Gate
+      if: ${{ inputs.fail-on-findings == 'true' }}
+      shell: bash
+      run: |
+        code="${{ steps.scan.outputs.exit-code }}"
+        if [ "$code" != "0" ]; then
+          echo "::error::Plumbline Quality Gate failed (exit $code). See the Security tab for findings."
+          exit "$code"
+        fi
+        echo "Plumbline Quality Gate passed."

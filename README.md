@@ -94,6 +94,9 @@ plumb rules
 ```
 
 Wiring it into CI takes one job — see [`docs/ci-integration.md`](docs/ci-integration.md).
+On GitHub, the [Plumbline Action](action.yml) is five lines and uploads findings
+straight to the Security tab ([SARIF → code scanning](docs/sarif-code-scanning.md));
+there's also a [`pre-commit`](https://pre-commit.com) hook (`id: plumbline`).
 
 Supported today: Python, with adapters for the raw OpenAI/Anthropic SDKs,
 LangChain/LangGraph, and CrewAI. (More frameworks and languages on the roadmap —
