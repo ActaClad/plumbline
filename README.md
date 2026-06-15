@@ -49,6 +49,12 @@ Detection is **fully deterministic**: same code, same findings, every run.
 Safe to gate a build on. (An optional AI layer enriches *fix suggestions* only —
 never the detection itself.)
 
+**No network. No telemetry.** The detection path never makes a network call and
+collects no usage data — your source code never leaves your machine. The only
+time Plumbline talks to the network is the *optional* AI fix-suggestion layer,
+and only when you explicitly enable it. Your security team can verify this:
+analysis runs fully offline.
+
 ## What it checks
 
 Four pillars, in priority order:
@@ -148,6 +154,28 @@ observability, evaluation, security, and audit-ready governance. Plumbline's
 reliability findings are the static precursors of the signals AgentGuard
 observes at runtime. Use Plumbline free, forever; reach for AgentGuard when you
 need the runtime and governance story.
+
+### What's free forever vs. what AgentGuard adds
+
+We want this boundary to be unambiguous, so here it is in plain terms:
+
+**Plumbline — free forever, Apache-2.0, no paywalled internals:**
+
+- the full detection engine (AST + taint/dataflow);
+- **every rule** across all four pillars, and the complete rule catalog;
+- all reporters (CLI, SARIF, JSON, HTML), the Quality Gate, baselines, and the
+  skill-pack export;
+- the GitHub Action, pre-commit hook, and CI integrations.
+
+Plumbline is not crippleware. There is no "pro" rule pack, no rules held back, no
+feature gated behind a license key. New rules ship to the open-source project.
+
+**AgentGuard — ActaClad's commercial product — is a different thing, not a
+locked tier of this one:** it is the **runtime** trust platform (live
+observability, runtime evaluation, security enforcement, and audit-ready
+governance for agents in production). Plumbline checks your code at design time
+and *feeds* AgentGuard; it never withholds design-time capability to sell the
+runtime one.
 
 ## Contributing
 
