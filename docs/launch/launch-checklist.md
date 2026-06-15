@@ -62,8 +62,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       `crewai`).
 - [ ] Enable **Discussions** (Q&A, Show-and-tell, Ideas).
 - [ ] First **GitHub Release** + tag from `CHANGELOG.md`.
-- [ ] **One-command dev setup** (dev container or `make dev`): clone → green tests
-      in minutes.
+- [x] **One-command dev setup** (dev container or `make dev`): clone → green tests
+      in minutes. (`Makefile`: `make dev` + `make check`; documented in CONTRIBUTING.)
 
 **Distribution artifacts (ship WITH launch)**
 - [x] **GitHub Action** — 5-line `uses:` that scans + uploads SARIF to the Security
@@ -78,8 +78,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       (`docs/sarif-code-scanning.md`; linked from README.)
 
 **Supply-chain credibility**
-- [ ] Dependabot enabled; deps pinned.
-- [ ] Signed releases / OIDC publish; (later) SBOM + OpenSSF Best Practices badge.
+- [x] Dependabot enabled; deps pinned. (`.github/dependabot.yml`: pip +
+      github-actions, weekly, grouped. Runtime deps are intentionally minimal
+      lower-bounds — correct for a distributed library; Dependabot watches the
+      rest. Actions pinned to major tags and Dependabot-tracked.)
+- [~] Signed releases / OIDC publish; (later) SBOM + OpenSSF Best Practices badge.
+      (OIDC publish done in `publish.yml`; SBOM + OpenSSF badge are later items.)
 
 ---
 

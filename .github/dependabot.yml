@@ -1,0 +1,27 @@
+# Keep dependencies and GitHub Actions current. Grouped + weekly to keep PR
+# noise low; security updates always come through regardless of schedule.
+version: 2
+updates:
+  # Python dependencies (the [dev] and [ai] extras; runtime deps are minimal).
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      python-deps:
+        patterns: ["*"]
+    commit-message:
+      prefix: "deps"
+
+  # GitHub Actions used by our workflows (CI, DCO, publish, the action itself).
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
