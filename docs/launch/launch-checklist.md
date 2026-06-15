@@ -24,14 +24,19 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       GitHub **org** `actaclad`, domain, X handle, Discord vanity, npm (future).
 - [ ] **Move the repo into the `actaclad` GitHub org** (not a personal account) —
       legitimacy + continuity.
-- [ ] **Decide & document the contributor agreement** — recommend **DCO**
+- [x] **Decide & document the contributor agreement** — recommend **DCO**
       (`Signed-off-by`); add a one-paragraph `CONTRIBUTING` note + a DCO check.
-- [ ] **Publish the open-core boundary** — one short section (README + site):
+      (DCO chosen; CONTRIBUTING "Sign your commits" section + `.github/workflows/dco.yml`.)
+- [x] **Publish the open-core boundary** — one short section (README + site):
       forever-free = engine + all rules + catalog; AgentGuard = runtime/governance.
-- [ ] **`SECURITY.md` + enable GitHub private vulnerability reporting** — a
-      security-adjacent tool must have a disclosure path.
-- [ ] **Confirm no telemetry / no network in the detection path** — and say so
-      explicitly in the README (trust signal). (Invariant already enforced.)
+      (README "What's free forever vs. what AgentGuard adds"; mirror on site at launch.)
+- [~] **`SECURITY.md` + enable GitHub private vulnerability reporting** — a
+      security-adjacent tool must have a disclosure path. (`SECURITY.md` added;
+      **TODO (you): enable private vulnerability reporting in repo Settings → Security.**)
+- [x] **Confirm no telemetry / no network in the detection path** — and say so
+      explicitly in the README (trust signal). (Verified: no network/telemetry
+      imports in `src/`; only `enrichment.py` uses `anthropic` for opt-in fix text.
+      README "No network. No telemetry." paragraph added.)
 
 ---
 

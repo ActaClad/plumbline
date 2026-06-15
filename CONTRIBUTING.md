@@ -82,6 +82,29 @@ Adapters normalize a framework's API (LangChain, CrewAI, raw SDK, ...) into the
 common semantic model the rules consume. See `docs/specs/adapter-contract.md`.
 Adding an adapter widens coverage for many rules at once — high-value work.
 
+## Sign your commits (DCO)
+
+Plumbline uses the [**Developer Certificate of Origin**](https://developercertificate.org/)
+(DCO) — a lightweight, sign-off-based alternative to a CLA. By signing off you
+certify that you wrote the contribution (or have the right to submit it under the
+project's Apache-2.0 license). There is no separate form to sign.
+
+Add a `Signed-off-by` line to **every commit** by committing with `-s`:
+
+```bash
+git commit -s -m "PLB-RES-007: detect missing retry on tool call"
+```
+
+That appends a trailer using your `git config user.name` / `user.email`:
+
+```
+Signed-off-by: Jane Developer <jane@example.com>
+```
+
+A DCO check runs on every pull request; commits missing the sign-off will fail
+it. To fix an existing branch, run `git rebase --signoff main` (or amend the last
+commit with `git commit --amend -s --no-edit`) and force-push.
+
 ## Pull request checklist
 
 - [ ] `pytest`, `ruff check .`, `mypy src` all clean
@@ -90,6 +113,7 @@ Adding an adapter widens coverage for many rules at once — high-value work.
 - [ ] Confidence level justified (precision number if High)
 - [ ] ADR added if a non-trivial design decision was made
 - [ ] Docs updated (`rule-catalog.md`, and `standards-map.md` if mapped)
+- [ ] All commits signed off (`git commit -s`) — DCO
 - [ ] Commit message references the rule ID and any ADR
 
 ## What we will push back on
