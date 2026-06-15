@@ -1,0 +1,10 @@
+# Steer reporters to the right place. Keep blank issues off so reports use a
+# template (especially the false-positive one — our key signal).
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & ideas (Discussions)
+    url: https://github.com/actaclad/plumbline/discussions
+    about: Usage questions, "show and tell", and open-ended ideas go in Discussions.
+  - name: Security vulnerability (private)
+    url: https://github.com/actaclad/plumbline/security/advisories/new
+    about: Report security issues privately. Please do NOT open a public issue. See SECURITY.md.
