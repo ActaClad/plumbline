@@ -282,6 +282,10 @@ def _name_in(node: ast.expr, names: tuple[str, ...]) -> bool:
 
 
 def _all_params_annotated(fn: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    # Every NAMED param annotated. A tool with no named params — no-arg, or a
+    # generic `*args/**kwargs` pass-through — has no typable contract and is not a
+    # TOOL-001 defect (`all([])` is True). FP class found on gpt-researcher's
+    # `custom_tool(*args, **kwargs)`.
     params = [*fn.args.posonlyargs, *fn.args.args, *fn.args.kwonlyargs]
     real = [a for a in params if a.arg not in ("self", "cls")]
-    return bool(real) and all(a.annotation is not None for a in real)
+    return all(a.annotation is not None for a in real)
