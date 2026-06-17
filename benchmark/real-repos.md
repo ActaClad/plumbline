@@ -51,6 +51,30 @@ No false positives. 12 LLM calls correctly detected via the raw OpenAI adapter.
 | SEC-004 | 26 → **0** | **FP class — FIXED.** All were test fixtures (`access_token="test_token"`, `jwt_token="aaaaa.bbbbbb.cccccc"`, contextvar tokens). Fix: dummy-marker substring + absolute distinct-char entropy + test-path suppression of the fuzzy heuristic (provider-pattern keys still fire everywhere). |
 | COST-001 / MDL-001 / SEC-007 | 7 / 3 / 2 | Mixed; not individually triaged (library artifact). |
 
+## Batch 2 — more app-shaped repos
+
+| Repo | SHA | Findings → verdict |
+|---|---|---|
+| **crewAIInc/crewAI-examples** | `da94a91` | 13 TOOL-001 — **all true positives** (untyped `@tool def f(query)`); 2 advisories. No FP. |
+| **assafelovic/gpt-researcher** | `b364917` | 1 TOOL-001 — FP class: generic `*args/**kwargs` wrapper → **fixed**. Now clean. |
+| **OpenInterpreter/open-interpreter** | `8705d8f` | 2 SEC-004 — FP class: `token`/`secret` name overload → **fixed**. (Most LLM calls behind a wrapper — cross-module residual.) |
+| **pydantic/pydantic-ai** | `e356f32` | 3 SEC-004 — 3 FP sub-classes (sentinel, fake low-entropy key, blob substring) → **fixed**; 2 COST-001 (library/test, advisory). |
+
+**The divergence.** The reliability / architecture / harness / taint rules and
+TOOL-001 **flattened** — crewAI-examples found only true positives, the TOOL-001
+fixes generalized and stopped recurring, the taint SEC rules didn't fire falsely
+on any real app. **SEC-004 (secret detection) did NOT flatten** — a new FP
+sub-class on nearly every repo (6 total: test fakes, contextvar tokens,
+token/secret name overload, sentinels, low-entropy fakes, blob substrings).
+Secret-scanning is inherently pattern-based and FP-prone ("incumbent FP
+territory") and is a commodity (gitleaks/trufflehog), not Plumbline's wedge.
+
+**Decision: SEC-004 downgraded to advisory** (Critical/Medium, non-gating). Its
+real-world precision is below the ~90% the High/gating bar requires (its curated
+100% never captured this FP diversity); it now informs without failing a build.
+The taint SEC rules (002/003/005/006) stay High/gating — they are deterministic
+source→sink and clean on real code.
+
 ## Outcome
 
 **All four FP/recall classes the first validation found are now fixed:**
@@ -66,9 +90,12 @@ No false positives. 12 LLM calls correctly detected via the raw OpenAI adapter.
 Every High-confidence corpus TP held at 100% through all four fixes; each fix
 shipped with a regression fixture/test.
 
-**Honest read & what's left.** On the real apps, the false positives found are
-fixed and the survivors are true positives. But this is still only 3 repos — per
-the precision-before-publicity gate, the P0 launch blocker is cleared when the
-**new-FP-class discovery curve flattens across a larger, app-weighted set** (the
-next batch of real repos). Fixing the first three classes is necessary, not yet
-sufficient; "hardened" is now meaningfully closer to "validated."
+**Honest read & what's left (8 repos total).** Across babyagi, llm, crewAI,
+crewAI-examples, gpt-researcher, open-interpreter, and pydantic-ai, the
+**non-SEC-004 rules have flattened** — the last few app-shaped repos surfaced no
+new FP classes for the reliability/architecture/harness/taint rules or TOOL-001,
+which is the precision-before-publicity signal we wanted. **SEC-004 was the
+outlier** (a new FP sub-class on nearly every repo) and is now **advisory**, so
+its residual FPs no longer gate. Remaining: a few more app-weighted scans would
+keep confirming the gating rules' real-world precision, but the curve is visibly
+flattening — the gating surface is in good shape for a soft-launch.

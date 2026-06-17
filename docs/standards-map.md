@@ -41,7 +41,7 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 | PLB-SEC-001 | Security | Blocker | — | OWASP-LLM01, OWASP-LLM02 | deferred (flags architecture; needs a mediation signal) |
 | PLB-SEC-002 | Security | Blocker | High | CWE-95, OWASP-LLM01 | 100% (1 TP / 0 FP) |
 | PLB-SEC-003 | Security | Blocker | High | CWE-78, OWASP-LLM01 | 100% (1 TP / 0 FP) |
-| PLB-SEC-004 | Security | Blocker | High | CWE-798 | 100% (1 TP / 0 FP) |
+| PLB-SEC-004 | Security | Critical | Medium | CWE-798 | advisory — real-world FP-prone (6 FP classes in real-repo validation); non-gating |
 | PLB-SEC-005 | Security | Blocker | High | CWE-89 | 100% (1 TP / 0 FP) |
 | PLB-SEC-006 | Security | Critical | High | OWASP-LLM02, CWE-79 | 100% (1 TP / 0 FP) |
 | PLB-SEC-007 | Security | Critical | Medium | CWE-918 | n/a (advisory; allow-lists invisible) |

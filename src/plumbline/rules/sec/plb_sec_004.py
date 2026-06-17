@@ -179,8 +179,14 @@ RULE = Rule(
     title="Hardcoded API key or secret",
     category="SEC",
     pillar=Pillar.SECURITY,
-    severity=Severity.BLOCKER,
-    confidence=Confidence.HIGH,  # measured 100% precision in /benchmark
+    # Critical blast radius, but ADVISORY (Medium) — not build-gating. Secret
+    # detection is inherently pattern-based and FP-prone (real-repo validation
+    # surfaced a new FP sub-class on nearly every repo); its real-world precision
+    # is below the ~90% the High/gating bar requires (CLAUDE.md §1.3/§1.4), and
+    # secret-scanning is a commodity (gitleaks/trufflehog), not Plumbline's
+    # reliability/architecture wedge. So it informs, never fails a build.
+    severity=Severity.CRITICAL,
+    confidence=Confidence.MEDIUM,
     why_it_matters=(
         "A committed API key or secret is an immediate credential leak to anyone with repo access."
     ),
