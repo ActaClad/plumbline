@@ -11,10 +11,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ## P0 — Blockers (do NOT publicize until every box is checked)
 
-- [ ] **Real-repo precision pass.** Scan 10–15 real OSS agentic repos; triage every
+- [~] **Real-repo precision pass.** Scan 10–15 real OSS agentic repos; triage every
       finding; fix or backlog each FP **class**. Precision before publicity — this
-      is the single most important item. (Started: babyagi/llm/crewAI; SEC-005
-      fixed; TOOL-001 + SEC-004 + LiteLLM recall queued.)
+      is the single most important item. (Done so far: babyagi/llm/crewAI triaged;
+      **all 4 found classes fixed** — SEC-005 non-DB `.execute`, TOOL-001 crewAI
+      schema mechanisms 86→1, SEC-004 test fakes 26→0, LiteLLM recall 0→16. NEXT:
+      scan ~6–10 more *app-weighted* repos until the new-FP-class curve flattens;
+      see `benchmark/real-repos.md`.)
 - [ ] **Fresh-machine install works.** `pip install` from the built wheel on a
       clean env → `plumb scan` gives useful output. (Verified once; re-verify at
       release.)
