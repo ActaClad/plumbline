@@ -43,11 +43,13 @@ def _result(findings: list[Finding], semantic_nodes: int = 5, passed: bool = Fal
 
 def test_html_is_self_contained_offline() -> None:
     html = render_html(_result([_finding()]))
-    # No network resources: no external scripts/styles/links, no CDN.
-    assert "<script" not in html
+    # Inline CSS + inline JS are allowed (the sort/filter UI); EXTERNAL resources
+    # are not — no `src=`, no CDN, no remote URLs.
     assert "src=" not in html
     assert "http://" not in html and "https://" not in html
-    assert "<style>" in html  # CSS is inline
+    assert "cdn" not in html.lower()
+    assert "<style>" in html  # CSS inline
+    assert "<script>" in html  # JS inline (sort/filter), not external
 
 
 def test_html_shows_readiness_and_pillars() -> None:
@@ -68,15 +70,48 @@ def test_html_na_when_no_agentic_code() -> None:
 
 
 def test_html_escapes_dynamic_text() -> None:
-    # The report must not be its own XSS sink: a message with markup is escaped.
+    # The report must not be its own XSS sink: a message with markup is escaped,
+    # in both the cell and its data-attribute sort/search keys.
     html = render_html(_result([_finding(message="<script>alert(1)</script>")]))
     assert "<script>alert(1)</script>" not in html
     assert "&lt;script&gt;" in html
 
 
+def test_html_table_is_sortable_and_filterable() -> None:
+    html = render_html(_result([_finding()]))
+    assert "id=findings" in html  # the table the script targets
+    assert "class=sortable" in html  # clickable column headers (all four)
+    assert html.count("class=sortable") == 4  # Severity, Rule, Location, What & why
+    assert "id=q" in html  # free-text filter input
+    assert "sevchip" in html  # severity filter chip(s)
+    assert "data-text=" in html and "data-sev=" in html  # per-row filter keys
+
+
+def test_html_severity_sorts_by_rank_not_alphabetically() -> None:
+    # A Major finding must sort below a Blocker even though "Major" > "Blocker"
+    # alphabetically — the severity cell carries its numeric rank as the sort key.
+    html = render_html(_result([_finding()]))
+    assert f'data-sort="{Severity.BLOCKER.value}"' in html  # e.g. data-sort="50"
+    assert Severity.BLOCKER.value > Severity.MAJOR.value  # rank order, not text
+
+
+def test_html_no_toolbar_or_script_when_empty() -> None:
+    # Nothing to sort/filter on a clean scan — no toolbar, no script noise.
+    html = render_html(_result([], semantic_nodes=5, passed=True))
+    assert "id=q" not in html and "<script>" not in html
+
+
 def test_gate_verdict_rendered() -> None:
     assert "Quality Gate failed" in render_html(_result([_finding()], passed=False))
     assert "Quality Gate passed" in render_html(_result([], passed=True))
+
+
+def test_gate_shows_blocking_count_not_redundant_reason_list() -> None:
+    # The gate banner used to list every reason, duplicating the findings table.
+    # Now it shows just the blocking count and points to the table below.
+    html = render_html(_result([_finding()], passed=False))
+    assert "1 blocking finding" in html
+    assert "<ul class=why>" not in html  # the duplicated reason list is gone
 
 
 def test_summary_strip_counts_findings_by_severity() -> None:
