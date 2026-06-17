@@ -25,3 +25,11 @@ def test_secret_named_heuristic_is_test_path_aware(tmp_path) -> None:
     assert [
         f for f in run_file_rule(RULE, tmp_path / "app.py") if f.rule_id == RULE.id
     ]  # src fires
+
+
+def test_provider_pattern_not_matched_inside_a_long_blob(tmp_path) -> None:
+    # A provider pattern matching a coincidental substring of a multi-KB blob (a
+    # base64 signature) is not a leak — real keys are short (pydantic-ai FP).
+    blob = "ghp_" + "a1B2c3D4" * 60  # > 200 chars, contains a GitHub-PAT-shaped run
+    (tmp_path / "app.py").write_text(f"signature = {blob!r}\n")
+    assert run_file_rule(RULE, tmp_path / "app.py") == []
