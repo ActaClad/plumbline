@@ -34,4 +34,70 @@ th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);
 .loc { color:var(--muted); font-family:ui-monospace,monospace; font-size:12px; }
 .msg { color:var(--fg); } .why { color:var(--muted); font-size:13px; }
 .empty { color:var(--muted); padding:24px; text-align:center; }
-</style></head><body><div class=wrap><h1>Plumbline</h1><p class=sub>Reliability &amp; architecture analysis for agentic systems · by ActaClad</p><div class=hero><div><div class=score>93<small>/100</small></div><div class=why>Readiness Score</div></div><div class=pillars><div class=pillar><span>Reliability</span><span class=bar><i style='width:80%;background:var(--ok)'></i></span><span>80</span><span class='count has'>2 issues</span></div><div class=pillar><span>Architecture &amp; Agentic Maturity</span><span class=bar><i style='width:100%;background:var(--ok)'></i></span><span>100</span><span class='count'>no issues</span></div><div class=pillar><span>Harness Engineering</span><span class=bar><i style='width:99%;background:var(--ok)'></i></span><span>99</span><span class='count has'>1 issue</span></div><div class=pillar><span>Security</span><span class=bar><i style='width:100%;background:var(--ok)'></i></span><span>100</span><span class='count'>no issues</span></div></div></div><div class='gate fail'>✗ Quality Gate failed — 2 blocking findings (Blockers and High-confidence Criticals), listed below</div><div class=summary><span class=total>3 findings</span><span class=pill>2 Critical</span><span class=pill>1 Major</span></div><table><thead><tr><th>Severity</th><th>Rule</th><th>Location</th><th>What &amp; why</th></tr></thead><tbody><tr><td><span class='tag major'>Major</span><div class=why>Medium</div></td><td><strong>PLB-OBS-001</strong> · NIST-AI-RMF:MEASURE</td><td class=loc>llm/default_plugins/openai_models.py:961:26</td><td><div class=msg>This project ships LLM/agent code with no in-code tracing or instrumentation; production failures will be undiagnosable. (If you enable tracing via env vars / auto-instrumentation, ignore this.) Note: harness rules reason about the whole repo — scan the project root (including tests/ and CI), not just src/.</div><div class=why>An LLM/agent app with no tracing is unobservable in production — failures can&#x27;t be traced.</div></td></tr><tr><td><span class='tag critical'>Critical</span><div class=why>High</div></td><td><strong>PLB-OUT-001</strong></td><td class=loc>llm/default_plugins/openai_models.py:1027:35</td><td><div class=msg>LLM output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request.</div><div class=why>`json.loads` on raw LLM output with no guard crashes on the first malformed generation.</div></td></tr><tr><td><span class='tag critical'>Critical</span><div class=why>High</div></td><td><strong>PLB-OUT-001</strong></td><td class=loc>llm/default_plugins/openai_models.py:1143:35</td><td><div class=msg>LLM output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request.</div><div class=why>`json.loads` on raw LLM output with no guard crashes on the first malformed generation.</div></td></tr></tbody></table></div></body></html>
+.toolbar { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center;
+  margin-bottom:10px; }
+.toolbar input { flex:1 1 220px; min-width:180px; background:var(--card);
+  border:1px solid var(--line); border-radius:8px; color:var(--fg);
+  padding:7px 10px; font-size:13px; }
+.sevfilter { display:flex; gap:6px; flex-wrap:wrap; }
+.sevchip { cursor:pointer; border:1px solid var(--line); background:var(--line);
+  color:var(--fg); border-radius:10px; padding:2px 10px; font-size:12px;
+  font-weight:600; } .sevchip.off { opacity:.4; }
+#visct { color:var(--muted); font-size:12px; margin-left:auto; }
+th.sortable { cursor:pointer; user-select:none; } th.sortable:hover { color:var(--fg); }
+.arrow { font-size:10px; color:var(--fg); }
+</style></head><body><div class=wrap><h1>Plumbline</h1><p class=sub>Reliability &amp; architecture analysis for agentic systems · by ActaClad</p><div class=hero><div><div class=score>93<small>/100</small></div><div class=why>Readiness Score</div></div><div class=pillars><div class=pillar><span>Reliability</span><span class=bar><i style='width:80%;background:var(--ok)'></i></span><span>80</span><span class='count has'>2 issues</span></div><div class=pillar><span>Architecture &amp; Agentic Maturity</span><span class=bar><i style='width:100%;background:var(--ok)'></i></span><span>100</span><span class='count'>no issues</span></div><div class=pillar><span>Harness Engineering</span><span class=bar><i style='width:99%;background:var(--ok)'></i></span><span>99</span><span class='count has'>1 issue</span></div><div class=pillar><span>Security</span><span class=bar><i style='width:100%;background:var(--ok)'></i></span><span>100</span><span class='count'>no issues</span></div></div></div><div class='gate fail'>✗ Quality Gate failed — 2 blocking findings (Blockers and High-confidence Criticals), listed below</div><div class=summary><span class=total>3 findings</span><span class=pill>2 Critical</span><span class=pill>1 Major</span></div><div class=toolbar><input id=q type=search placeholder="Filter findings…" aria-label="Filter findings"><span class=sevfilter><button class=sevchip data-sev="Critical">Critical</button><button class=sevchip data-sev="Major">Major</button></span><span id=visct class=why></span></div><table id=findings><thead><tr><th class=sortable>Severity<span class=arrow></span></th><th class=sortable>Rule<span class=arrow></span></th><th class=sortable>Location<span class=arrow></span></th><th class=sortable>What &amp; why<span class=arrow></span></th></tr></thead><tbody><tr data-sev="Major" data-text="plb-obs-001 llm/default_plugins/openai_models.py:961:26 this project ships llm/agent code with no in-code tracing or instrumentation; production failures will be undiagnosable. (if you enable tracing via env vars / auto-instrumentation, ignore this.) note: harness rules reason about the whole repo — scan the project root (including tests/ and ci), not just src/. an llm/agent app with no tracing is unobservable in production — failures can&#x27;t be traced. nist-ai-rmf:measure"><td data-sort="30"><span class="tag major">Major</span><div class=why>Medium</div></td><td data-sort="plb-obs-001"><strong>PLB-OBS-001</strong> · NIST-AI-RMF:MEASURE</td><td class=loc data-sort="llm/default_plugins/openai_models.py:00000961">llm/default_plugins/openai_models.py:961:26</td><td data-sort="this project ships llm/agent code with no in-code tracing or instrumentation; production failures will be undiagnosable. (if you enable tracing via env vars / auto-instrumentation, ignore this.) note: harness rules reason about the whole repo — scan the project root (including tests/ and ci), not just src/."><div class=msg>This project ships LLM/agent code with no in-code tracing or instrumentation; production failures will be undiagnosable. (If you enable tracing via env vars / auto-instrumentation, ignore this.) Note: harness rules reason about the whole repo — scan the project root (including tests/ and CI), not just src/.</div><div class=why>An LLM/agent app with no tracing is unobservable in production — failures can&#x27;t be traced.</div></td></tr><tr data-sev="Critical" data-text="plb-out-001 llm/default_plugins/openai_models.py:1027:35 llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request. `json.loads` on raw llm output with no guard crashes on the first malformed generation."><td data-sort="40"><span class="tag critical">Critical</span><div class=why>High</div></td><td data-sort="plb-out-001"><strong>PLB-OUT-001</strong></td><td class=loc data-sort="llm/default_plugins/openai_models.py:00001027">llm/default_plugins/openai_models.py:1027:35</td><td data-sort="llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request."><div class=msg>LLM output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request.</div><div class=why>`json.loads` on raw LLM output with no guard crashes on the first malformed generation.</div></td></tr><tr data-sev="Critical" data-text="plb-out-001 llm/default_plugins/openai_models.py:1143:35 llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request. `json.loads` on raw llm output with no guard crashes on the first malformed generation."><td data-sort="40"><span class="tag critical">Critical</span><div class=why>High</div></td><td data-sort="plb-out-001"><strong>PLB-OUT-001</strong></td><td class=loc data-sort="llm/default_plugins/openai_models.py:00001143">llm/default_plugins/openai_models.py:1143:35</td><td data-sort="llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request."><div class=msg>LLM output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request.</div><div class=why>`json.loads` on raw LLM output with no guard crashes on the first malformed generation.</div></td></tr></tbody></table></div><script>
+(function () {
+  var tbl = document.getElementById('findings');
+  if (!tbl) return;
+  var body = tbl.tBodies[0];
+  var rows = Array.prototype.slice.call(body.rows);
+  var q = document.getElementById('q');
+  var ct = document.getElementById('visct');
+  var off = {};
+
+  function apply() {
+    var term = (q && q.value || '').toLowerCase();
+    var vis = 0;
+    rows.forEach(function (r) {
+      var show = (!term || r.dataset.text.indexOf(term) >= 0) && !off[r.dataset.sev];
+      r.style.display = show ? '' : 'none';
+      if (show) vis++;
+    });
+    if (ct) ct.textContent = vis + ' of ' + rows.length + ' shown';
+  }
+
+  if (q) q.addEventListener('input', apply);
+  Array.prototype.forEach.call(document.querySelectorAll('.sevchip'), function (c) {
+    c.addEventListener('click', function () {
+      var s = c.dataset.sev;
+      off[s] = !off[s];
+      c.classList.toggle('off', off[s]);
+      apply();
+    });
+  });
+
+  var dir = {};
+  var ths = tbl.tHead.rows[0].cells;
+  Array.prototype.forEach.call(ths, function (th, i) {
+    th.addEventListener('click', function () {
+      var d = dir[i] = (dir[i] === 1) ? -1 : 1;
+      var numeric = rows.every(function (r) {
+        var v = r.cells[i].dataset.sort;
+        return v !== undefined && v !== '' && !isNaN(v);
+      });
+      rows.slice().sort(function (a, b) {
+        var av = a.cells[i].dataset.sort || '', bv = b.cells[i].dataset.sort || '';
+        var c = numeric ? (parseFloat(av) - parseFloat(bv)) : av.localeCompare(bv);
+        return d * c;
+      }).forEach(function (r) { body.appendChild(r); });
+      Array.prototype.forEach.call(ths, function (h) {
+        var a = h.querySelector('.arrow'); if (a) a.textContent = '';
+      });
+      var arr = th.querySelector('.arrow'); if (arr) arr.textContent = d > 0 ? ' ▲' : ' ▼';
+    });
+  });
+
+  apply();
+})();
+</script></body></html>
