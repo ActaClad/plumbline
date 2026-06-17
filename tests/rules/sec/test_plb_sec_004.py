@@ -16,9 +16,9 @@ def test_metadata() -> None:
 
 
 def test_secret_named_heuristic_is_test_path_aware(tmp_path) -> None:
-    # A `*_token = "<label>"` that isn't an obvious fake (a contextvar token — the
-    # real-repo FP class on crewAI) fires in src but is suppressed in a test file.
-    src = 'def t():\n    session_token = "context-var-token"\n'
+    # A secret-named var with a realistic value fires in src but is suppressed in
+    # a test file (test fixtures are dominated by fakes — crewAI's test suite).
+    src = 'def t():\n    api_key = "ab12cd34ef56gh78"\n'
     (tmp_path / "test_ctx.py").write_text(src)
     (tmp_path / "app.py").write_text(src)
     assert run_file_rule(RULE, tmp_path / "test_ctx.py") == []  # suppressed in tests

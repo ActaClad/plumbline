@@ -34,15 +34,18 @@ Good:
     OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 """
 
-# Target names (case-insensitive, suffix-matched) that denote a secret.
+# Target names (case-insensitive, suffix-matched) that denote a secret. Bare
+# `token` and `secret` are deliberately EXCLUDED — they are wildly overloaded
+# (contextvar tokens, sentinel/label strings, CSRF/pagination tokens: real-repo
+# FPs `bearer_token="bearerToken"`, `STDERR_NULL_TOKEN`, contextvar tokens). Only
+# the specific compound names are high-signal; a real key in a `token` var is
+# still caught by the provider-pattern path below regardless of its name.
 _SECRET_NAMES: frozenset[str] = frozenset(
     {
         "api_key",
         "apikey",
-        "secret",
         "secret_key",
         "client_secret",
-        "token",
         "access_token",
         "auth_token",
         "password",
