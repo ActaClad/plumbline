@@ -13,6 +13,7 @@ crewai adapters from the function signature or an `args_schema=` declaration).
 from __future__ import annotations
 
 from ...model import Confidence, FindingDraft, Known, Pillar, SemanticTag, Severity
+from .._harness_evidence import is_test_file
 from ..base import AnalysisContext, Rule
 
 REMEDIATION = """\
@@ -35,6 +36,11 @@ Good:
 
 def detect(ctx: AnalysisContext) -> list[FindingDraft]:
     findings: list[FindingDraft] = []
+    # Tools defined in test files are scaffolding, not the shipped agent surface,
+    # and are routinely minimal/untyped on purpose — flagging them is noise
+    # (real-repo FPs: crewAI's test suite). Concrete production tools still fire.
+    if is_test_file(ctx.file):
+        return findings
     for sn in ctx.semantics.by_tag(SemanticTag.TOOL_DEF):
         has_schema = sn.attrs.get("has_schema")
         if isinstance(has_schema, Known) and has_schema.value is False:
