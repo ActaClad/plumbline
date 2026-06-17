@@ -92,13 +92,22 @@ class CrewAIAdapter:
         return None
 
     def _tool_from_class(self, cls: ast.ClassDef) -> SemanticNode | None:
-        # A `class X(BaseTool): args_schema = ...` custom tool.
+        # A `class X(BaseTool)` custom tool. Only a class that actually defines a
+        # `_run`/`_arun` method is a CONCRETE, runnable tool — an abstract base
+        # (e.g. `SerpApiBaseTool`, no `_run`) leaves the contract to its subclass,
+        # so flagging it is a false positive (found on crewai_tools). A concrete
+        # tool declares its input contract if it references `args_schema` anywhere
+        # (a class attr, or passed to super().__init__) OR has a typed `_run`.
         if not any(isinstance(b, ast.Name) and b.id == "BaseTool" for b in cls.bases):
             return None
-        has_schema = any(
-            isinstance(s, ast.AnnAssign | ast.Assign) and "args_schema" in _assigned_names(s)
+        runs = [
+            s
             for s in cls.body
-        )
+            if isinstance(s, ast.FunctionDef | ast.AsyncFunctionDef) and s.name in ("_run", "_arun")
+        ]
+        if not runs:
+            return None  # abstract base — the concrete subclass carries the contract
+        has_schema = _references_args_schema(cls) or any(_all_params_annotated(r) for r in runs)
         return SemanticNode(
             SemanticTag.TOOL_DEF,
             cls,
@@ -121,12 +130,20 @@ def _resolve_cap(ctx: SourceTree, scope: Scope, call: ast.Call) -> tuple[Resolve
     return at_call, "explicit"
 
 
-def _assigned_names(stmt: ast.stmt) -> set[str]:
-    if isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name):
-        return {stmt.target.id}
-    if isinstance(stmt, ast.Assign):
-        return {t.id for t in stmt.targets if isinstance(t, ast.Name)}
-    return set()
+def _references_args_schema(cls: ast.ClassDef) -> bool:
+    """True if `args_schema` appears as a name, attribute, or keyword argument
+    anywhere in the class — covers a class attr, `self.args_schema = …`, and
+    `super().__init__(args_schema=…)`. Deliberately permissive (a tool that
+    mentions args_schema has a schema). A `"args_schema"` STRING dict-key is an
+    ast.Constant and is correctly NOT matched."""
+    for n in ast.walk(cls):
+        if isinstance(n, ast.keyword) and n.arg == "args_schema":
+            return True
+        if isinstance(n, ast.Attribute) and n.attr == "args_schema":
+            return True
+        if isinstance(n, ast.Name) and n.id == "args_schema":
+            return True
+    return False
 
 
 def _all_params_annotated(fn: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
