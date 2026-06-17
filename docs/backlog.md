@@ -104,9 +104,15 @@ babyagi 0→16). Still open:
 - **Remaining unsupported stacks.** `instructor`, raw `requests`/`httpx` to an LLM
   endpoint, and other wrappers are still invisible. Add adapters as they show up
   in real-repo scans.
-- **More app-weighted real-repo scans** — the P0 launch gate clears when the
-  new-FP-class discovery curve flattens across a larger set (not just babyagi /
-  llm / crewAI). Each new app may surface a fresh class to triage + fix.
+- **More app-weighted real-repo scans** — 8 repos triaged so far; the non-SEC-004
+  rules have flattened (no new FP classes on the last several apps). A few more
+  scans would keep confirming, but the gating surface is soft-launch-ready.
+- **SEC-004 downgraded to advisory (Critical/Medium, non-gating).** Secret
+  detection surfaced a new FP sub-class on nearly every repo (6 total) — its
+  real-world precision is below the High/gating bar, and it's a commodity vs the
+  reliability wedge. It informs without failing builds. To make it gating again
+  would need a substantially more robust detector (entropy model, verified-key
+  checks) — likely not worth it vs delegating to gitleaks/trufflehog.
 - **TOOL-001 cross-module / external-factory `args_schema`** — `ZapierActionTool`
   builds its schema in a module-level factory (outside the class), so it reads as
   untyped (1 residual on crewAI). Low priority.
