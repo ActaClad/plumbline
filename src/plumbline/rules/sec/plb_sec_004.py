@@ -82,8 +82,18 @@ _DUMMY_SUBSTRINGS: tuple[str, ...] = (
     "your_",
     "xxxx",
     "foobar",
+    "not-set",
+    "not_set",
+    "notset",
+    "unset",
+    "no-key",
+    "nokey",
 )
 _MIN_SECRET_LEN = 8
+# Real provider keys are short (sk-…, AKIA…, ghp_… are all < ~100 chars). A
+# provider pattern matching a SUBSTRING of a multi-KB blob (a base64 signature,
+# an embedding) is a coincidence, not a leak — found on pydantic-ai's test data.
+_MAX_KEY_LEN = 200
 # A real secret is high-entropy. Reject low-diversity fakes by ABSOLUTE distinct
 # alphanumeric count — never a ratio: a 64-char hex key has a low distinct/len
 # ratio but ~16 distinct chars, so a ratio test would false-NEGATIVE real keys.
@@ -118,11 +128,14 @@ def detect(ctx: AnalysisContext) -> list[FindingDraft]:
             ):
                 findings.append(_finding(ctx, node, "a secret-named variable"))
                 continue
-        # 2. a provider key pattern anywhere
+        # 2. a provider key pattern as the value (not a coincidental substring of
+        # a long blob, and high-entropy — a fake `AKIA6666…` is low-diversity)
         if (
             isinstance(node, ast.Constant)
             and isinstance(node.value, str)
+            and len(node.value) <= _MAX_KEY_LEN
             and not _is_placeholder(node.value)
+            and _distinct_alnum(node.value) >= _MIN_DISTINCT_ALNUM
             and _matches_provider(node.value)
         ):
             findings.append(_finding(ctx, node, "a provider key pattern"))
