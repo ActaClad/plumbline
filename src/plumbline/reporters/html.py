@@ -1,10 +1,18 @@
 """HTML report reporter (architecture.md §6, M7).
 
-A single self-contained file: inline CSS, no CDN, no JavaScript — it renders
-offline. Shows the Readiness Score, the pillar breakdown, the gate verdict, and a
-findings table. Deterministic and byte-reproducible (no timestamps, findings
-sorted, ADR-0002 D3). All dynamic text is HTML-escaped — the report must never be
-its own XSS sink (cf. SEC-006).
+A single self-contained file: inline CSS and inline vanilla JS, **no CDN, no
+external resources** — it renders fully offline. Shows the Readiness Score, the
+pillar breakdown, the gate verdict, and a findings table that the reader can
+**sort** (click any column header — Severity sorts by severity rank, not
+alphabetically) and **filter** (free-text search + severity chips), all
+client-side.
+
+Deterministic and byte-reproducible (no timestamps; findings rendered in
+`finding_sort_key` order; the JS only re-orders the live DOM on interaction, never
+the emitted bytes — ADR-0002 D3). All dynamic text is HTML-escaped, including
+data-attribute values — the report must never be its own XSS sink (cf. SEC-006);
+the script only reads `textContent`/`dataset` and toggles `display`, never
+injects markup.
 """
 
 from __future__ import annotations
@@ -70,6 +78,18 @@ th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);
 .loc { color:var(--muted); font-family:ui-monospace,monospace; font-size:12px; }
 .msg { color:var(--fg); } .why { color:var(--muted); font-size:13px; }
 .empty { color:var(--muted); padding:24px; text-align:center; }
+.toolbar { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center;
+  margin-bottom:10px; }
+.toolbar input { flex:1 1 220px; min-width:180px; background:var(--card);
+  border:1px solid var(--line); border-radius:8px; color:var(--fg);
+  padding:7px 10px; font-size:13px; }
+.sevfilter { display:flex; gap:6px; flex-wrap:wrap; }
+.sevchip { cursor:pointer; border:1px solid var(--line); background:var(--line);
+  color:var(--fg); border-radius:10px; padding:2px 10px; font-size:12px;
+  font-weight:600; } .sevchip.off { opacity:.4; }
+#visct { color:var(--muted); font-size:12px; margin-left:auto; }
+th.sortable { cursor:pointer; user-select:none; } th.sortable:hover { color:var(--fg); }
+.arrow { font-size:10px; color:var(--fg); }
 """
 
 
@@ -88,8 +108,11 @@ def render_html(result: ScanResult) -> str:
         _hero(scores, pillar_counts),
         _gate(result),
         _summary(result.findings),
+        _toolbar(result.findings),
         _findings_table(result.findings),
-        "</div></body></html>",
+        "</div>",
+        _SCRIPT if result.findings else "",
+        "</body></html>",
     ]
     return "".join(parts) + "\n"
 
@@ -167,30 +190,124 @@ def _score_color(value: int) -> str:
 def _gate(result: ScanResult) -> str:
     if result.gate.passed:
         return "<div class='gate pass'>✓ Quality Gate passed</div>"
-    reasons = "".join(f"<li>{html.escape(r)}</li>" for r in result.gate.reasons)
-    return f"<div class='gate fail'>✗ Quality Gate failed</div><ul class=why>{reasons}</ul>"
+    # The verdict is the product (CLAUDE.md §1.6); the per-finding reasons used to
+    # duplicate the table below, so we show only the blocking count and point down.
+    n = len(result.gate.reasons)
+    noun = "finding" if n == 1 else "findings"
+    return (
+        f"<div class='gate fail'>✗ Quality Gate failed — {n} blocking {noun} "
+        "(Blockers and High-confidence Criticals), listed below</div>"
+    )
+
+
+_HEADERS: tuple[str, ...] = ("Severity", "Rule", "Location", "What &amp; why")
+
+
+def _toolbar(findings: Iterable[Finding]) -> str:
+    findings = list(findings)
+    if not findings:
+        return ""
+    present = [s for s in _SEV_ORDER if any(f.severity is s for f in findings)]
+    chips = "".join(
+        f'<button class=sevchip data-sev="{html.escape(s.label)}">{html.escape(s.label)}</button>'
+        for s in present
+    )
+    return (
+        "<div class=toolbar>"
+        '<input id=q type=search placeholder="Filter findings…" aria-label="Filter findings">'
+        f"<span class=sevfilter>{chips}</span>"
+        "<span id=visct class=why></span>"
+        "</div>"
+    )
 
 
 def _findings_table(findings: Iterable[Finding]) -> str:
     rows = sorted(findings, key=finding_sort_key)
     if not rows:
         return "<table><tr><td class=empty>No findings.</td></tr></table>"
+    head = "".join(f"<th class=sortable>{h}<span class=arrow></span></th>" for h in _HEADERS)
     body = "".join(_row(f) for f in rows)
-    return (
-        "<table><thead><tr><th>Severity</th><th>Rule</th><th>Location</th>"
-        f"<th>What &amp; why</th></tr></thead><tbody>{body}</tbody></table>"
-    )
+    return f"<table id=findings><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
 
 
 def _row(f: Finding) -> str:
     sev = _SEV_CLASS.get(f.severity, "info")
     col = f":{f.column + 1}" if f.column is not None else ""
+    loc = f"{f.file}:{f.line}{col}"
     std = f" · {html.escape(', '.join(f.standards))}" if f.standards else ""
+    # Per-row searchable text + per-cell sort keys. Severity sorts by its numeric
+    # rank (Blocker=50 … Info=10); location pads the line so it orders numerically
+    # within a file. All attribute values are escaped (SEC-006 — no self-XSS).
+    searchable = " ".join([f.rule_id, loc, f.message, f.why_it_matters, *f.standards]).lower()
+    loc_key = f"{f.file}:{f.line:08d}".lower()
     return (
-        f"<tr><td><span class='tag {sev}'>{f.severity.label}</span>"
+        f'<tr data-sev="{html.escape(f.severity.label)}" data-text="{html.escape(searchable)}">'
+        f'<td data-sort="{f.severity.value}"><span class="tag {sev}">{f.severity.label}</span>'
         f"<div class=why>{f.confidence.label}</div></td>"
-        f"<td><strong>{html.escape(f.rule_id)}</strong>{std}</td>"
-        f"<td class=loc>{html.escape(f.file)}:{f.line}{col}</td>"
-        f"<td><div class=msg>{html.escape(f.message)}</div>"
+        f'<td data-sort="{html.escape(f.rule_id.lower())}">'
+        f"<strong>{html.escape(f.rule_id)}</strong>{std}</td>"
+        f'<td class=loc data-sort="{html.escape(loc_key)}">{html.escape(loc)}</td>'
+        f'<td data-sort="{html.escape(f.message.lower())}">'
+        f"<div class=msg>{html.escape(f.message)}</div>"
         f"<div class=why>{html.escape(f.why_it_matters)}</div></td></tr>"
     )
+
+
+# Inline, dependency-free. Reads dataset/textContent and toggles display + reorders
+# rows; never injects markup (the cells are already escaped server-side).
+_SCRIPT = """\
+<script>
+(function () {
+  var tbl = document.getElementById('findings');
+  if (!tbl) return;
+  var body = tbl.tBodies[0];
+  var rows = Array.prototype.slice.call(body.rows);
+  var q = document.getElementById('q');
+  var ct = document.getElementById('visct');
+  var off = {};
+
+  function apply() {
+    var term = (q && q.value || '').toLowerCase();
+    var vis = 0;
+    rows.forEach(function (r) {
+      var show = (!term || r.dataset.text.indexOf(term) >= 0) && !off[r.dataset.sev];
+      r.style.display = show ? '' : 'none';
+      if (show) vis++;
+    });
+    if (ct) ct.textContent = vis + ' of ' + rows.length + ' shown';
+  }
+
+  if (q) q.addEventListener('input', apply);
+  Array.prototype.forEach.call(document.querySelectorAll('.sevchip'), function (c) {
+    c.addEventListener('click', function () {
+      var s = c.dataset.sev;
+      off[s] = !off[s];
+      c.classList.toggle('off', off[s]);
+      apply();
+    });
+  });
+
+  var dir = {};
+  var ths = tbl.tHead.rows[0].cells;
+  Array.prototype.forEach.call(ths, function (th, i) {
+    th.addEventListener('click', function () {
+      var d = dir[i] = (dir[i] === 1) ? -1 : 1;
+      var numeric = rows.every(function (r) {
+        var v = r.cells[i].dataset.sort;
+        return v !== undefined && v !== '' && !isNaN(v);
+      });
+      rows.slice().sort(function (a, b) {
+        var av = a.cells[i].dataset.sort || '', bv = b.cells[i].dataset.sort || '';
+        var c = numeric ? (parseFloat(av) - parseFloat(bv)) : av.localeCompare(bv);
+        return d * c;
+      }).forEach(function (r) { body.appendChild(r); });
+      Array.prototype.forEach.call(ths, function (h) {
+        var a = h.querySelector('.arrow'); if (a) a.textContent = '';
+      });
+      var arr = th.querySelector('.arrow'); if (arr) arr.textContent = d > 0 ? ' ▲' : ' ▼';
+    });
+  });
+
+  apply();
+})();
+</script>"""
