@@ -20,6 +20,7 @@ import ast
 import re
 
 from ...model import Confidence, FindingDraft, Pillar, Severity
+from .._harness_evidence import is_test_file
 from ..base import AnalysisContext, Rule
 
 REMEDIATION = """\
@@ -57,20 +58,54 @@ _PROVIDER_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"),  # Slack
     re.compile(r"AIza[0-9A-Za-z_\-]{35}"),  # Google API key
 )
-# Obvious non-secrets — never flag these.
+# Obvious non-secrets — never flag these. Anchored shapes…
 _PLACEHOLDER = re.compile(
     r"^\s*$|^(x+|\.+|-+|none|null|todo|changeme|change-me|example|placeholder|dummy|fake|test|"
     r"your[-_ ].*|<.*>|\$\{.*\}|\{\{.*\}\})\s*$",
     re.IGNORECASE,
 )
+# …plus a dummy/test marker ANYWHERE in the value (substring). Real-repo FPs were
+# test fixtures: `access_token = "test_token"`, etc. (found scanning crewAI).
+_DUMMY_SUBSTRINGS: tuple[str, ...] = (
+    "test",
+    "fake",
+    "dummy",
+    "example",
+    "sample",
+    "placeholder",
+    "changeme",
+    "redacted",
+    "your-",
+    "your_",
+    "xxxx",
+    "foobar",
+)
 _MIN_SECRET_LEN = 8
+# A real secret is high-entropy. Reject low-diversity fakes by ABSOLUTE distinct
+# alphanumeric count — never a ratio: a 64-char hex key has a low distinct/len
+# ratio but ~16 distinct chars, so a ratio test would false-NEGATIVE real keys.
+_MIN_DISTINCT_ALNUM = 5
+
+
+def _is_placeholder(value: str) -> bool:
+    low = value.strip().lower()
+    return bool(_PLACEHOLDER.match(value)) or any(s in low for s in _DUMMY_SUBSTRINGS)
+
+
+def _distinct_alnum(value: str) -> int:
+    return len({c for c in value.lower() if c.isalnum()})
 
 
 def detect(ctx: AnalysisContext) -> list[FindingDraft]:
     findings: list[FindingDraft] = []
+    # The secret-NAMED-variable heuristic is fuzzy (a `*_token` may be a contextvar
+    # token, a CSRF token, …). Test files are dominated by such fixtures, so the
+    # heuristic is suppressed there (real-repo FPs: crewAI's contextvar tests). A
+    # real provider-pattern key is still flagged everywhere, including in tests.
+    in_test = is_test_file(ctx.file)
     for node in ast.walk(ctx.tree.tree):
-        # 1. literal assigned to a secret-named target
-        if isinstance(node, ast.Assign | ast.AnnAssign):
+        # 1. literal assigned to a secret-named target (skipped in test files)
+        if not in_test and isinstance(node, ast.Assign | ast.AnnAssign):
             value = node.value
             if (
                 isinstance(value, ast.Constant)
@@ -84,7 +119,7 @@ def detect(ctx: AnalysisContext) -> list[FindingDraft]:
         if (
             isinstance(node, ast.Constant)
             and isinstance(node.value, str)
-            and not _PLACEHOLDER.match(node.value)
+            and not _is_placeholder(node.value)
             and _matches_provider(node.value)
         ):
             findings.append(_finding(ctx, node, "a provider key pattern"))
@@ -112,7 +147,11 @@ def _is_secret_name(name: str) -> bool:
 
 
 def _looks_secret(value: str) -> bool:
-    return len(value) >= _MIN_SECRET_LEN and not _PLACEHOLDER.match(value)
+    return (
+        len(value) >= _MIN_SECRET_LEN
+        and not _is_placeholder(value)
+        and _distinct_alnum(value) >= _MIN_DISTINCT_ALNUM
+    )
 
 
 def _matches_provider(value: str) -> bool:
