@@ -212,6 +212,26 @@ exact value (the numbers above are the current defaults, stated for the reader).
 | `Task(...)` | — | not tagged in v1 (no rule consumes it yet) |
 | `@tool` decorator; `BaseTool` subclass | `TOOL_DEF` | `has_schema` from `args_schema` / typed `_run` signature |
 
+## 9a. The `litellm` adapter (LiteLLM)
+
+**Version assumption:** LiteLLM ≥ 1.0. Priority **15**, per-file
+(`project_triggered=False` — `completion` is too generic to widen project-wide;
+`resolve_qualified` keeps it safe per-file). `trigger_imports = {"litellm"}`.
+Added after real-repo validation found LiteLLM-driven apps (e.g. babyagi)
+invisible.
+
+| Pattern (incl. aliased / from-import) | Emits |
+|---|---|
+| `litellm.completion(...)`, `acompletion`, `text_completion`, `atext_completion` | `LLM_CALL` |
+| `litellm.embedding(...)`, `aembedding` | `EMBEDDING_CALL` |
+
+Resolves `model`/`timeout`/`max_tokens`/`tools` at the call, and `num_retries` →
+the normalized `max_retries` key. **No framework defaults are claimed** (ADR-0004
+D3 precedent): a bare call → ABSENT (RES-001/002 silent on defaults), an explicit
+`timeout=None` / `num_retries=0` → fires. Known residual: a centralized LiteLLM
+wrapper imported cross-module is not linked (intra-file, like the framework
+adapters).
+
 ## 10. Derived semantics (`core/derive.py`, ADR-0012 D1)
 
 After every adapter has run, the engine runs one deterministic derivation pass
