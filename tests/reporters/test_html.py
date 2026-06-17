@@ -77,3 +77,22 @@ def test_html_escapes_dynamic_text() -> None:
 def test_gate_verdict_rendered() -> None:
     assert "Quality Gate failed" in render_html(_result([_finding()], passed=False))
     assert "Quality Gate passed" in render_html(_result([], passed=True))
+
+
+def test_summary_strip_counts_findings_by_severity() -> None:
+    html = render_html(_result([_finding(), _finding()]))
+    assert "2 findings" in html
+    assert "2 Blocker" in html  # both fixtures are Blocker severity
+
+
+def test_pillar_bars_show_issue_counts() -> None:
+    html = render_html(_result([_finding()]))  # one Security finding
+    assert "1 issue" in html  # the Security pillar reports its count
+    assert "no issues" in html  # pillars with nothing fired say so (not just "100")
+
+
+def test_branding_attributes_actaclad() -> None:
+    # Product name stays "Plumbline"; ActaClad is the attribution.
+    html = render_html(_result([_finding()]))
+    assert "Plumbline" in html
+    assert "by ActaClad" in html

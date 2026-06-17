@@ -10,11 +10,20 @@ its own XSS sink (cf. SEC-006).
 from __future__ import annotations
 
 import html
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 from ..engine import ScanResult
 from ..model import Finding, Pillar, Severity, finding_sort_key
 from ..scoring import Scores, compute_scores
+
+# Severities shown in the summary strip, worst-first.
+_SEV_ORDER: tuple[Severity, ...] = (
+    Severity.BLOCKER,
+    Severity.CRITICAL,
+    Severity.MAJOR,
+    Severity.MINOR,
+    Severity.INFO,
+)
 
 _SEV_CLASS: dict[Severity, str] = {
     Severity.BLOCKER: "blocker",
@@ -36,9 +45,16 @@ h1 { font-size:20px; margin:0 0 4px; } .sub { color:var(--muted); margin:0 0 24p
 .score { font-size:52px; font-weight:700; line-height:1; }
 .score small { font-size:18px; color:var(--muted); font-weight:400; }
 .pillars { flex:1; display:grid; gap:10px; }
-.pillar { display:grid; grid-template-columns:160px 1fr 40px; gap:10px; align-items:center; }
+.pillar { display:grid; grid-template-columns:170px 1fr 40px 84px; gap:10px; align-items:center; }
+.pillar .count { color:var(--muted); font-size:12px; text-align:right; }
+.pillar .count.has { color:var(--fg); }
 .bar { height:8px; background:var(--line); border-radius:4px; overflow:hidden; }
 .bar > i { display:block; height:100%; }
+.summary { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+  margin-bottom:16px; color:var(--muted); font-size:13px; }
+.summary .total { color:var(--fg); font-size:15px; font-weight:700; }
+.summary .pill { display:inline-block; padding:1px 8px; border-radius:10px;
+  background:var(--line); }
 .gate { padding:12px 16px; border-radius:8px; margin-bottom:20px; font-weight:600; }
 .gate.pass { background:rgba(63,185,80,.15); color:var(--ok); }
 .gate.fail { background:rgba(248,81,73,.15); color:var(--bad); }
@@ -59,6 +75,7 @@ th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);
 
 def render_html(result: ScanResult) -> str:
     scores = compute_scores(result.findings, result.semantic_node_count)
+    pillar_counts = _count_by_pillar(result.findings)
     parts = [
         "<!doctype html><html lang=en><head><meta charset=utf-8>",
         "<meta name=viewport content='width=device-width,initial-scale=1'>",
@@ -66,13 +83,29 @@ def render_html(result: ScanResult) -> str:
         _STYLE,
         "</style></head><body><div class=wrap>",
         "<h1>Plumbline</h1>",
-        "<p class=sub>Reliability &amp; architecture analysis for agentic systems</p>",
-        _hero(scores),
+        "<p class=sub>Reliability &amp; architecture analysis for agentic systems · "
+        "by ActaClad</p>",
+        _hero(scores, pillar_counts),
         _gate(result),
+        _summary(result.findings),
         _findings_table(result.findings),
         "</div></body></html>",
     ]
     return "".join(parts) + "\n"
+
+
+def _count_by_pillar(findings: Iterable[Finding]) -> dict[Pillar, int]:
+    counts: dict[Pillar, int] = dict.fromkeys(Pillar, 0)
+    for f in findings:
+        counts[f.pillar] += 1
+    return counts
+
+
+def _count_by_severity(findings: Iterable[Finding]) -> dict[Severity, int]:
+    counts: dict[Severity, int] = dict.fromkeys(Severity, 0)
+    for f in findings:
+        counts[f.severity] += 1
+    return counts
 
 
 def write_html(result: ScanResult, path: str) -> None:
@@ -80,14 +113,14 @@ def write_html(result: ScanResult, path: str) -> None:
         fh.write(render_html(result))
 
 
-def _hero(scores: Scores) -> str:
+def _hero(scores: Scores, counts: Mapping[Pillar, int]) -> str:
     if not scores.applicable:
         return (
             "<div class=hero><div class=score>N/A</div>"
             "<div class=pillars><div class=why>No LLM/agent code detected — scoring "
             "does not apply (ADR-0008 D3).</div></div></div>"
         )
-    bars = "".join(_pillar_bar(p, scores.pillars[p]) for p in Pillar)
+    bars = "".join(_pillar_bar(p, scores.pillars[p], counts.get(p, 0)) for p in Pillar)
     return (
         f"<div class=hero><div><div class=score>{scores.readiness}<small>/100</small></div>"
         "<div class=why>Readiness Score</div></div>"
@@ -95,14 +128,32 @@ def _hero(scores: Scores) -> str:
     )
 
 
-def _pillar_bar(pillar: Pillar, value: int) -> str:
+def _pillar_bar(pillar: Pillar, value: int, count: int) -> str:
     color = _score_color(value)
     label = html.escape(pillar.display)
+    issues = "no issues" if count == 0 else f"{count} issue{'' if count == 1 else 's'}"
+    cls = "count" if count == 0 else "count has"
     return (
         f"<div class=pillar><span>{label}</span>"
         f"<span class=bar><i style='width:{value}%;background:{color}'></i></span>"
-        f"<span>{value}</span></div>"
+        f"<span>{value}</span>"
+        f"<span class='{cls}'>{issues}</span></div>"
     )
+
+
+def _summary(findings: Iterable[Finding]) -> str:
+    findings = list(findings)
+    total = len(findings)
+    if total == 0:
+        return ""
+    sev_counts = _count_by_severity(findings)
+    noun = "finding" if total == 1 else "findings"
+    pills = "".join(
+        f"<span class=pill>{sev_counts[s]} {html.escape(s.label)}</span>"
+        for s in _SEV_ORDER
+        if sev_counts[s]
+    )
+    return f"<div class=summary><span class=total>{total} {noun}</span>{pills}</div>"
 
 
 def _score_color(value: int) -> str:

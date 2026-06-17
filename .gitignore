@@ -12,6 +12,9 @@ build/
 htmlcov/
 *.sarif
 .plumbline-baseline.json
+# Generated scan reports (`plumb scan --html/--json`); commit deliberately if needed.
+sample-report.html
+out.json
 .DS_Store
 .idea/
 .vscode/
