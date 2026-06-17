@@ -147,6 +147,11 @@ def _references_args_schema(cls: ast.ClassDef) -> bool:
 
 
 def _all_params_annotated(fn: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    # A tool is "typed enough" if every NAMED param is annotated. A tool with no
+    # named params — a no-arg tool, or a generic `*args/**kwargs` pass-through
+    # (e.g. a tool-factory wrapper) — has no typable input contract and is not a
+    # TOOL-001 defect (`all([])` is vacuously True). Real-repo FP class found on
+    # gpt-researcher (`custom_tool(*args, **kwargs)`) and crewAI's ZapierActionTool.
     params = [*fn.args.posonlyargs, *fn.args.args, *fn.args.kwonlyargs]
     real = [a for a in params if a.arg not in ("self", "cls")]
-    return bool(real) and all(a.annotation is not None for a in real)
+    return all(a.annotation is not None for a in real)
