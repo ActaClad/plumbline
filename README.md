@@ -66,6 +66,12 @@ Four pillars, in priority order:
 | **Harness Engineering** | no evaluation suite, no golden datasets / ground-truth checks, model/prompt changes not gated by evals, no tracing or correlation IDs |
 | **Security & Governance** | untrusted input into tool-enabled prompts, LLM output into eval/exec/shell/SQL, hardcoded secrets, unsanitized output rendering, PII into prompts |
 
+**25 rules implemented today** (12 High-confidence/gating, 13 advisory),
+weighted to the differentiated wedge — Reliability and Architecture lead, ahead
+of Security. They are the validated core of a **54-rule taxonomy**; the rest is
+published as a contributor roadmap. A rule ships gating only with a measured
+precision number — advisory until then.
+
 Full catalog: [`docs/specs/rule-catalog.md`](docs/specs/rule-catalog.md).
 Every rule maps to OWASP LLM Top 10, OWASP Agentic Top 10, NIST AI RMF, or CWE
 where applicable.
