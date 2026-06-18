@@ -16,9 +16,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       (**8 repos triaged** — babyagi, llm, crewAI, crewAI-examples, gpt-researcher,
       open-interpreter, pydantic-ai. The gating rules' FP-class curve has
       **flattened**; LiteLLM adapter added (recall). SEC-004 surfaced a new FP
-      class on nearly every repo → **downgraded to advisory/non-gating**. Mostly
-      there for a soft-launch; a few more scans would keep confirming. See
-      `benchmark/real-repos.md`.)
+      class on nearly every repo → **downgraded to advisory/non-gating**.
+      **Batch 3** validated the +5 wedge rules: OUT-002 (1 FP class on llm →
+      fixed) and TOOL-003 (2 true positives on crewAI-examples) are real-repo
+      exercised; MDL-003/MDL-002/PRM-003 are fixture-validated only (no repo yet
+      exercises them) and stay advisory. Mostly there for a soft-launch; a few
+      more scans would keep confirming. See `benchmark/real-repos.md`.)
 - [ ] **Fresh-machine install works.** `pip install` from the built wheel on a
       clean env → `plumb scan` gives useful output. (Verified once; re-verify at
       release.)
