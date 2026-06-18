@@ -55,6 +55,35 @@ milestones in `specs/architecture.md`) — it's the catch-net.
   not gate idiomatic code; complements RES-001's High/Blocker explicit-disable
   case. (Requested 2026-06-13.)
 
+## Disclosed residuals from the +5 wedge rules (2026-06)
+
+Five reliability/architecture rules added to deepen the differentiated wedge
+(TOOL-003, MDL-003, OUT-002, MDL-002, PRM-003 — all Medium/advisory). Recall
+gaps deliberately left for precision (CLAUDE.md §1.4), surfaced here not assumed
+away:
+
+- **MDL-002 deprecated-model list refresh.** `data/deprecated_models.py` is a
+  manual snapshot (ADR-0017). Needs a periodic-refresh process; option to
+  generate it from providers' published deprecation pages in a *build* step
+  (never at scan time — no-network determinism). Staleness is safe-direction
+  only (a missed deprecation is a recall gap, never a false positive).
+- **MDL-002 LangChain double-report.** A deprecated id pinned on a
+  `ChatOpenAI(model=...)` construction (LLM_CLIENT_CREATE) is also merged onto
+  the linked `.invoke()` (LLM_CALL), so it can report twice (two source lines).
+  Benign for an advisory rule; tighten with a "model set here vs merged"
+  provenance flag if it proves noisy.
+- **MDL-003 LangChain `.bind_tools()` recall.** MDL-003 fires where `tools=` and
+  `temperature=` sit on one `create()` call (raw SDK). LangChain binds tools
+  separately (`llm.bind_tools(...)`), so a high-temperature LangChain agent path
+  is not caught. Needs linking the bound-tools handle to the temperature on the
+  model construction.
+- **OUT-002 `match` statement recall.** OUT-002 covers `if`/`while` equality
+  branching on model output; a `match response:` with literal `case` patterns is
+  the same defect but not yet covered. Add a match-subject taint check.
+- **TOOL-003 constructor-style tools.** Only `@tool`-decorated functions are
+  inspected (their body is in scope). `StructuredTool.from_function(fn)` points
+  at a function defined elsewhere; chasing it needs cross-symbol resolution.
+
 ## Deferred from M3 (reliability core) — need substrate or are heuristic
 
 - **PLB-RES-003 (retry without backoff)** and **PLB-RES-006 (no 429 handling)**:

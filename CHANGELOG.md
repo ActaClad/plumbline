@@ -8,8 +8,12 @@ versioning once it reaches 1.0.
 
 The first end-to-end implementation: a deterministic reliability/architecture
 analyzer for LLM & agentic Python, built substrate-first across M0–M8 plus a
-hardening pass. **20 rules across all four pillars** (13 High-confidence, each
-with a measured precision in `/benchmark`).
+hardening pass. **25 rules across all four pillars** (12 High-confidence/gating,
+13 Medium/advisory). The implemented set leads with the differentiated wedge —
+Reliability 9 + Architecture 5 — ahead of Security 8; the full 54-rule taxonomy
+in the catalog is the published contributor roadmap. High-confidence rules carry
+a measured precision in `/benchmark`; advisory rules graduate to High only after
+a real-repo precision pass.
 
 ### Engine & substrate
 - Deterministic AST + taint/dataflow core (stdlib `ast`); no network, clock, or
@@ -23,15 +27,19 @@ with a measured precision in `/benchmark`).
 
 ### Rules (pillars: Reliability → Architecture → Harness → Security)
 - **Reliability:** RES-001/002/005 (timeout, retries, swallowed errors),
-  OUT-001 (unguarded JSON parse), COST-001 (no max_tokens), MDL-001 (scattered
-  model literals).
+  OUT-001 (unguarded JSON parse) High; OUT-002 (output as control flow),
+  MDL-002 (deprecated/sunset model id, ADR-0017), MDL-003 (high temperature on a
+  tool-calling path) advisory; COST-001 (no max_tokens) High; MDL-001 (scattered
+  model literals) advisory.
 - **Architecture:** AGT-001/002 (agent-loop cap / termination, one detector
-  across three frameworks), TOOL-001 (untyped tool).
+  across three frameworks), TOOL-001 (untyped tool) High; TOOL-003 (tool with no
+  error handling) and PRM-003 (no system prompt — opens the PRM category) advisory.
 - **Harness:** EVAL-001/003 (no eval suite / no CI eval gate), OBS-001 (no
   tracing) — the "flying blind" rules.
-- **Security:** SEC-002/003/004/005/006 (eval/exec, shell, secret, SQLi, XSS)
-  High; SEC-007 (SSRF) + GOV-001/002 (PII, logging) advisory; taint findings
-  carry source→sink SARIF codeFlows.
+- **Security:** SEC-002/003/005/006 (eval/exec, shell, SQLi, XSS) High; SEC-004
+  (hardcoded secret) downgraded to advisory after real-repo validation; SEC-007
+  (SSRF) + GOV-001/002 (PII, logging) advisory; taint findings carry source→sink
+  SARIF codeFlows.
 
 ### Reporters, gate, scoring
 - Quality Gate (CI mechanism) + the Readiness Score (0–100 dashboard, ADR-0008,

@@ -28,16 +28,20 @@ are "help wanted"). Keep it in sync whenever a rule's `standards` field changes.
 | PLB-AGT-002 | Architecture | Critical | High | — | 100% (1 TP / 0 FP) |
 | PLB-AGT-004 | Architecture | Critical | High | — | TBD |
 | PLB-MDL-001 | Reliability | Major | Medium | — | n/a (advisory) |
-| PLB-MDL-002 | Reliability | Critical | High | — | TBD |
+| PLB-MDL-002 | Reliability | Critical | Medium | — | advisory — deterministic (exact-id match, ADR-0017); ships Medium until a real-repo precision pass (CLAUDE.md §1.3) |
+| PLB-MDL-003 | Reliability | Major | Medium | — | n/a (advisory) |
 | PLB-OUT-001 | Reliability | Critical | High | — | 100% (1 TP / 0 FP) |
+| PLB-OUT-002 | Reliability | Major | Medium | — | n/a (advisory) |
 | PLB-OUT-003 | Reliability | Major | High | — | TBD |
 | PLB-TOOL-001 | Architecture | Major | High | — | 100% (2 TP / 0 FP) |
 | PLB-TOOL-002 | Architecture | Critical | High | CWE-20 | TBD |
+| PLB-TOOL-003 | Architecture | Major | Medium | — | n/a (advisory) |
 | PLB-EVAL-001 | Harness | Major | Medium | NIST-AI-RMF:MEASURE | n/a (advisory, project-scope) |
 | PLB-EVAL-003 | Harness | Major | Medium | NIST-AI-RMF:MEASURE | n/a (advisory, project-scope; grep rule) |
 | PLB-OBS-001 | Harness | Major | Medium | NIST-AI-RMF:MEASURE | n/a (advisory, project-scope) |
 | PLB-COST-001 | Reliability | Major | High | — | 100% (2 TP / 0 FP) |
 | PLB-PRM-001 | Architecture | Critical | High | OWASP-LLM01 | TBD |
+| PLB-PRM-003 | Architecture | Minor | Medium | — | n/a (advisory) |
 | PLB-SEC-001 | Security | Blocker | — | OWASP-LLM01, OWASP-LLM02 | deferred (flags architecture; needs a mediation signal) |
 | PLB-SEC-002 | Security | Blocker | High | CWE-95, OWASP-LLM01 | 100% (1 TP / 0 FP) |
 | PLB-SEC-003 | Security | Blocker | High | CWE-78, OWASP-LLM01 | 100% (1 TP / 0 FP) |

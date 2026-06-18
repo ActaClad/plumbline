@@ -60,6 +60,23 @@ No false positives. 12 LLM calls correctly detected via the raw OpenAI adapter.
 | **OpenInterpreter/open-interpreter** | `8705d8f` | 2 SEC-004 — FP class: `token`/`secret` name overload → **fixed**. (Most LLM calls behind a wrapper — cross-module residual.) |
 | **pydantic/pydantic-ai** | `e356f32` | 3 SEC-004 — 3 FP sub-classes (sentinel, fake low-entropy key, blob substring) → **fixed**; 2 COST-001 (library/test, advisory). |
 
+## Batch 3 — the +5 wedge rules (TOOL-003, MDL-003, OUT-002, MDL-002, PRM-003)
+
+Validated the five new reliability/architecture rules on `simonw/llm @ 0d593ea`
+(the sample-report repo) at the moment they landed:
+
+| Rule | Count → after fix | Class verdict |
+|---|---|---|
+| OUT-002 | 9 → **0** | **FP class — FIXED.** All nine were `if item.type == "function_call":` etc. in the OpenAI response handler — `item` is tainted only because it is iterated from the response, and `.type` is an API-guaranteed *discriminator field*, not generated text. Branching on it is correct schema dispatch, not the brittle content-equality OUT-002 targets. Fix: exclude tainted operands that are structured response-envelope fields (`.type`/`.role`/`.finish_reason`/…); shipped with a regression fixture (`good_structured_dispatch.py`). |
+| TOOL-003 / MDL-003 / MDL-002 / PRM-003 | 0 | No findings — no FP, no spurious fire. |
+
+**Outcome.** After the OUT-002 fix, the current 25-rule analyzer reports the
+**same 3 findings (2× OUT-001, 1× OBS-001) and the same Readiness Score 93/100**
+on `llm` as the committed sample report — i.e. the five new rules add *zero* new
+findings on a real, well-engineered repo. The sample report stays accurate. The
+OUT-002 envelope-field FP was caught and fixed **before** the rules were
+published (precision before publicity).
+
 **The divergence.** The reliability / architecture / harness / taint rules and
 TOOL-001 **flattened** — crewAI-examples found only true positives, the TOOL-001
 fixes generalized and stopped recurring, the taint SEC rules didn't fire falsely
