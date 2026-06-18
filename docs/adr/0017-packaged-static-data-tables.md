@@ -55,9 +55,11 @@ confer High confidence.
 - **Easier:** adding/curating deprecations is a one-line dict edit with a clear
   diff; the detector logic stays tiny and stable; the list is unit-testable and
   reviewable independently of the rule.
-- **Constrained:** the list can only ever go stale in the *safe* direction — a
-  missed deprecation is a recall gap, never a false positive on a live model — so
-  staleness never produces noise (the cardinal sin, CLAUDE.md §1.4).
+- **Constrained:** *provided every entry is a genuinely-retired id*, the list can
+  only go stale in the *safe* direction — a missed deprecation is a recall gap,
+  never a false positive. The bar for adding an id is therefore "provably
+  retired/sunset," never "looks old": a wrongly-listed *live* model would be a
+  flat false positive on working code (the cardinal sin, CLAUDE.md §1.4).
 - **Follow-up:** a periodic-refresh process for the table (backlog). Any future
   data-driven rule follows this same pattern: a literal module under
   `plumbline/data/`, exact-match consumption, no runtime I/O.

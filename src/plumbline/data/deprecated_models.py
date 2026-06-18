@@ -7,9 +7,11 @@ live models like `gpt-4o`). Each value is a short human note: when it was
 retired/deprecated and what to migrate to.
 
 Last reviewed: 2026-06. Keeping this current is a maintenance task, not an
-automated one — the refresh process is tracked in `docs/backlog.md`. Because the
-list can only go stale in the *safe* direction (a missed deprecation is a recall
-gap, never a false positive on a live model), staleness never produces noise.
+automated one — the refresh process is tracked in `docs/backlog.md`. As long as
+every entry is a genuinely-retired id, the list can only go stale in the *safe*
+direction (a missed deprecation is a recall gap, never a false positive) — so the
+bar for *adding* an id is "provably retired/sunset," never "looks old": a
+wrongly-listed live model would be a flat false positive on working code.
 
 Sources: OpenAI and Anthropic public model-deprecation pages. Only identifiers
 that are unambiguously retired or on a published sunset path are included.

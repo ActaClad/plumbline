@@ -62,20 +62,33 @@ No false positives. 12 LLM calls correctly detected via the raw OpenAI adapter.
 
 ## Batch 3 — the +5 wedge rules (TOOL-003, MDL-003, OUT-002, MDL-002, PRM-003)
 
-Validated the five new reliability/architecture rules on `simonw/llm @ 0d593ea`
-(the sample-report repo) at the moment they landed:
+The five new rules were validated against two already-pinned real repos chosen to
+*exercise* them. Crucially, "fired zero" is only a precision result for a rule the
+repo actually **engages** — a rule that fires zero because the repo contains none
+of its target pattern is *not exercised*, not "clean" (the single-number false-
+precision trap this file exists to avoid). Split accordingly:
 
-| Rule | Count → after fix | Class verdict |
-|---|---|---|
-| OUT-002 | 9 → **0** | **FP class — FIXED.** All nine were `if item.type == "function_call":` etc. in the OpenAI response handler — `item` is tainted only because it is iterated from the response, and `.type` is an API-guaranteed *discriminator field*, not generated text. Branching on it is correct schema dispatch, not the brittle content-equality OUT-002 targets. Fix: exclude tainted operands that are structured response-envelope fields (`.type`/`.role`/`.finish_reason`/…); shipped with a regression fixture (`good_structured_dispatch.py`). |
-| TOOL-003 / MDL-003 / MDL-002 / PRM-003 | 0 | No findings — no FP, no spurious fire. |
+**Genuinely exercised:**
 
-**Outcome.** After the OUT-002 fix, the current 25-rule analyzer reports the
-**same 3 findings (2× OUT-001, 1× OBS-001) and the same Readiness Score 93/100**
-on `llm` as the committed sample report — i.e. the five new rules add *zero* new
-findings on a real, well-engineered repo. The sample report stays accurate. The
-OUT-002 envelope-field FP was caught and fixed **before** the rules were
-published (precision before publicity).
+| Rule | Repo | Count → after fix | Verdict |
+|---|---|---|---|
+| OUT-002 | `simonw/llm @ 0d593ea` | 9 → **0** | **FP class — FIXED.** All nine were `if item.type == "function_call":` etc. in the OpenAI response handler — `item` is tainted only because it is iterated from the response, and `.type` is an API-guaranteed *discriminator field*, not generated text. Branching on it is correct schema dispatch, not the brittle content-equality OUT-002 targets. Fix: exclude tainted operands that are structured response-envelope fields (`.type`/`.role`/`.finish_reason`/…); regression fixture `good_structured_dispatch.py`. |
+| TOOL-003 | `crewAIInc/crewAI-examples @ da94a91` | **2 TP** | **True positives, no FP.** Both are the `@tool scrape_and_summarize_website` browserless scraper (`trip_planner`, `instagram_post`) doing `requests.request("POST", …)` with no try/except — a failed/slow scrape raises straight out of the tool and aborts the crew run. Exactly the defect. |
+
+**Not exercised (fixture-validated only — neither repo contains the pattern):**
+
+- **MDL-003** — no call sets `temperature=` and `tools=` together.
+- **MDL-002** — both repos use current model ids.
+- **PRM-003** — no raw-SDK call with an inline `messages=[…]` list and no system
+  role (llm uses the `responses` API / variable-built messages). Treat PRM-003 as
+  **fixture-validated only** until a repo that engages it is triaged; acceptable
+  for a Minor advisory rule, but not claimed as real-repo-validated.
+
+**Outcome.** Where exercised, the new rules behaved correctly: TOOL-003 found
+real defects with no FP; OUT-002's one envelope-field FP class was caught and
+fixed **before** publication (precision before publicity). After the OUT-002 fix
+the analyzer reports the **same 3 findings / Readiness 93** on `llm` as the
+committed sample report, so that artifact stays accurate.
 
 **The divergence.** The reliability / architecture / harness / taint rules and
 TOOL-001 **flattened** — crewAI-examples found only true positives, the TOOL-001
