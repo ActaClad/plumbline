@@ -30,6 +30,13 @@ def test_membership_validation_is_not_flagged() -> None:
     assert run_file_rule(RULE, d / "good_membership_validation.py") == []
 
 
+def test_structured_envelope_dispatch_is_not_flagged() -> None:
+    # `if item.type == "function_call":` is schema dispatch on a discriminator
+    # field, not content-branching — the real-repo FP class (simonw/llm).
+    d = fixture_dir(RULE)
+    assert run_file_rule(RULE, d / "good_structured_dispatch.py") == []
+
+
 def test_finding_carries_taint_witness() -> None:
     d = fixture_dir(RULE)
     fired = [f for f in run_file_rule(RULE, d / "bad_equality_branch.py") if f.rule_id == RULE.id]
