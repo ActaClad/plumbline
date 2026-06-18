@@ -90,7 +90,7 @@ class AnthropicEnricher:
         self._model = model
 
     def enrich(self, finding: Finding) -> str | None:
-        prompt = _PROMPT.format(
+        prompt = _USER_TEMPLATE.format(
             rule=finding.rule_id,
             title=finding.title,
             message=finding.message,
@@ -98,11 +98,14 @@ class AnthropicEnricher:
             remediation=finding.remediation.strip(),
         )
         # This is the deliberate AI boundary — our one LLM call, rewriting only
-        # remediation text (never gating). Its output is not eval-gated, so
-        # suppress EVAL-001 here (dogfooding our own inline-suppression mechanism).
+        # remediation text (never gating). The role/instruction lives in a system
+        # prompt (we follow our own PRM-003 advice); the finding is the user turn.
+        # Its output is not eval-gated, so suppress EVAL-001 here (dogfooding our
+        # own inline-suppression mechanism).
         resp = self._client.messages.create(  # plumb: ignore[PLB-EVAL-001]
             model=self._model,
             max_tokens=400,
+            system=_SYSTEM,
             messages=[{"role": "user", "content": prompt}],
         )
         parts = [block.text for block in resp.content if getattr(block, "type", "") == "text"]
@@ -110,11 +113,13 @@ class AnthropicEnricher:
         return text or None
 
 
-_PROMPT = """\
+_SYSTEM = """\
 You are helping a developer fix a static-analysis finding. Rewrite the generic
-remediation below as concrete, specific guidance for THIS code. Keep it short
-(a few lines), actionable, and do not restate the problem. Output only the fix.
+remediation as concrete, specific guidance for THIS code. Keep it short (a few
+lines), actionable, and do not restate the problem. Output only the fix.\
+"""
 
+_USER_TEMPLATE = """\
 Rule: {rule} — {title}
 Finding: {message}
 Code:
