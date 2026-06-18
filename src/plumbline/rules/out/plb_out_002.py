@@ -15,6 +15,11 @@ This is a taint rule over the existing LLM_OUTPUT label. Precision discipline
   None:`) — those are OUT-003 handling, and flagging them would punish exactly
   the behavior we want. It also excludes comparisons to variables (which may be
   validated values).
+- The tainted operand must NOT be a structured response-envelope field
+  (`item.type`, `.finish_reason`, `.role`, …). A value tainted LLM_OUTPUT is
+  often the whole response object; comparing its discriminator field to a
+  literal is correct schema dispatch, not content-branching. (Real-repo FP class
+  — 9x on simonw/llm's response handler.)
 """
 
 from __future__ import annotations
@@ -45,6 +50,26 @@ Good:
 """
 
 _MATCH_OPS = (ast.Eq, ast.NotEq)
+
+# Structured response-envelope fields. A value tainted LLM_OUTPUT is often the
+# whole response object; comparing one of THESE attributes to a literal
+# (`if item.type == "function_call"`) is correct schema dispatch on an
+# API-guaranteed discriminator, NOT brittle branching on generated text. Found
+# 9x on simonw/llm's response handler — the real-repo FP class for this rule.
+_METADATA_ATTRS = frozenset(
+    {
+        "type",
+        "role",
+        "finish_reason",
+        "stop_reason",
+        "status",
+        "object",
+        "index",
+        "id",
+        "name",
+        "model",
+    }
+)
 
 
 def detect(ctx: AnalysisContext) -> list[FindingDraft]:
@@ -93,9 +118,17 @@ def _branching_compares(ctx: AnalysisContext, test: ast.expr) -> list[ast.Compar
 
 def _tainted_operand(ctx: AnalysisContext, cmp: ast.Compare) -> ast.expr | None:
     for operand in (cmp.left, *cmp.comparators):
-        if not _is_nonempty_str(operand) and ctx.taint.is_tainted(operand, TaintLabel.LLM_OUTPUT):
+        if _is_nonempty_str(operand) or _is_metadata_field(operand):
+            continue  # the literal side, or a structured discriminator — not the defect
+        if ctx.taint.is_tainted(operand, TaintLabel.LLM_OUTPUT):
             return operand
     return None
+
+
+def _is_metadata_field(node: ast.expr) -> bool:
+    """`x.type`, `item.finish_reason`, … — a structured response-envelope field,
+    not generated content. Branching on it is schema dispatch, not the defect."""
+    return isinstance(node, ast.Attribute) and node.attr in _METADATA_ATTRS
 
 
 def _is_nonempty_str(node: ast.expr) -> bool:
