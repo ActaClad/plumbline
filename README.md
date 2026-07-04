@@ -111,6 +111,14 @@ Supported today: Python, with adapters for the raw OpenAI/Anthropic SDKs,
 LangChain/LangGraph, and CrewAI. (More frameworks and languages on the roadmap —
 [contributions welcome](CONTRIBUTING.md).)
 
+> **Runs on Python 3.11+, scans code of any Python version.** Plumbline *parses*
+> your source — it never imports or runs it — so your application's own Python
+> version is irrelevant. If your app targets an older Python (3.8–3.10), just run
+> the scan in a 3.11+ step (the GitHub Action brings its own Python, so CI is
+> zero-friction). Run Plumbline on a Python at least as new as the newest syntax
+> in your codebase; a file it can't parse is reported as an analyzer error and
+> skipped, never crashing the run.
+
 ## Output
 
 Each finding tells you:

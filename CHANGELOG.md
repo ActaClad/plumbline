@@ -4,16 +4,20 @@ All notable changes to Plumbline are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/); this project uses semantic
 versioning once it reaches 1.0.
 
-## [Unreleased] — v0.1 development
+## [Unreleased]
 
-The first end-to-end implementation: a deterministic reliability/architecture
-analyzer for LLM & agentic Python, built substrate-first across M0–M8 plus a
-hardening pass. **25 rules across all four pillars** (12 High-confidence/gating,
-13 Medium/advisory). The implemented set leads with the differentiated wedge —
-Reliability 9 + Architecture 5 — ahead of Security 8; the full 54-rule taxonomy
-in the catalog is the published contributor roadmap. High-confidence rules carry
-a measured precision in `/benchmark`; advisory rules graduate to High only after
-a real-repo precision pass.
+_Nothing yet._
+
+## [0.0.1] — 2026-07-04
+
+Initial public release: a deterministic reliability/architecture analyzer for
+LLM & agentic Python, built substrate-first across M0–M8 plus a launch-hardening
+pass. **32 rules across all four pillars** (12 High-confidence/gating,
+20 Medium/advisory), weighted to the differentiated wedge — Reliability and
+Architecture lead, ahead of Security; the full 60-rule taxonomy in the catalog is
+the published contributor roadmap. High-confidence rules carry a measured
+precision in `/benchmark`; advisory rules graduate to High only after a real-repo
+precision pass.
 
 ### Engine & substrate
 - Deterministic AST + taint/dataflow core (stdlib `ast`); no network, clock, or
@@ -40,18 +44,37 @@ a real-repo precision pass.
   (hardcoded secret) downgraded to advisory after real-repo validation; SEC-007
   (SSRF) + GOV-001/002 (PII, logging) advisory; taint findings carry source→sink
   SARIF codeFlows.
+- **Reasoning-model configuration (ADR-0018):** MDL-006 (removed sampling param
+  — `temperature`/`top_p`/`top_k` — on a reasoning model), MDL-007 (Anthropic
+  extended-thinking budget out of range), MDL-008 (OpenAI reasoning model uses
+  `max_tokens` instead of `max_completion_tokens`) — each a guaranteed HTTP 400,
+  keyed on curated static model tables.
+- **RES-010** (streamed response not used as a context manager → leaked HTTP
+  connection). **MCP category** (new): MCP-001 (remote MCP server with no auth),
+  MCP-003 (over-broad/wildcard OAuth scopes). **AGT-008** (AutoGen team with no
+  turn cap or termination condition).
 
 ### Reporters, gate, scoring
 - Quality Gate (CI mechanism) + the Readiness Score (0–100 dashboard, ADR-0008,
   never the gate). N/A when no agentic code.
 - CLI, SARIF 2.1.0 (schema-validated, codeFlows), JSON, and a self-contained
-  offline HTML report. Baselines + inline suppressions.
+  offline HTML report — branded (plumb-line mark, scan-metadata strip, expandable
+  remediation, light/dark toggle, print/PDF stylesheet). `plumb scan --open`
+  writes and opens a shareable report. Baselines + inline suppressions.
 
 ### Distribution & remediation
 - `plumb export-skills` — the rule set as a generation-time prevention pack
   (prevention, never the gate; ADR-0011).
 - Optional AI remediation enrichment behind a tested determinism firewall — the
   LLM rewrites only remediation text, never detection (ADR-0015).
+
+### Fixes (launch hardening)
+- EVAL-003 recognizes `rye test` (no longer false-flags Rye-based CI).
+- Makefile is Windows-portable (OS-detected venv layout; portable `help`/`clean`).
+- Config file reads use explicit `encoding="utf-8"` (no `UnicodeDecodeError` on
+  non-UTF-8 default locales).
+- COST-001 recognizes `max_completion_tokens` / `max_output_tokens` as output
+  caps — no longer false-positives on correctly-bounded reasoning-model calls.
 
 ### Hardening
 - Dogfood self-scan in CI; robustness battery (gnarly + malformed Python);
