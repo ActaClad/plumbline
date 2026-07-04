@@ -44,6 +44,12 @@ def main() -> None:
     "--html", "html_path", type=click.Path(path_type=Path), help="Write an HTML report here."
 )
 @click.option(
+    "--open",
+    "open_report",
+    is_flag=True,
+    help="Write the HTML report (default: plumbline-report.html) and open it in a browser.",
+)
+@click.option(
     "--strict-analyzer-errors",
     is_flag=True,
     help="Fail the gate (exit 1) if any file/rule raised an analyzer error.",
@@ -54,6 +60,7 @@ def scan_command(
     sarif_path: Path | None,
     json_path: Path | None,
     html_path: Path | None,
+    open_report: bool,
     strict_analyzer_errors: bool,
 ) -> None:
     """Scan PATHS (default: current directory) for reliability/architecture defects."""
@@ -66,8 +73,21 @@ def scan_command(
     failed = not result.gate.passed or (strict_analyzer_errors and result.analyzer_errors)
     result = _maybe_enrich(result, config)
 
+    # `--open` implies an HTML report; default its path if none was given.
+    if open_report and html_path is None:
+        html_path = Path("plumbline-report.html")
+
     cli_reporter.render(_out, _err, result)
     _write_outputs(result, rules, config, sarif_path, json_path, html_path)
+    if open_report and html_path is not None:
+        import webbrowser
+
+        webbrowser.open(html_path.resolve().as_uri())
+    elif html_path is None and sarif_path is None and json_path is None and _err.is_terminal:
+        # Discoverability: the shareable HTML report is one flag away, but a
+        # first-time user never learns it exists. A single dim hint, TTY-only so
+        # it never pollutes CI logs or piped output.
+        _err.print("[dim]Tip: add --html report.html (or --open) for a shareable report.[/dim]")
     raise SystemExit(1 if failed else 0)
 
 

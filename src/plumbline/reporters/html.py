@@ -1,24 +1,27 @@
 """HTML report reporter (architecture.md §6, M7).
 
 A single self-contained file: inline CSS and inline vanilla JS, **no CDN, no
-external resources** — it renders fully offline. Shows the Readiness Score, the
-pillar breakdown, the gate verdict, and a findings table that the reader can
-**sort** (click any column header — Severity sorts by severity rank, not
-alphabetically) and **filter** (free-text search + severity chips), all
-client-side.
+external resources** — it renders fully offline. Shows a branded header, a
+scan-metadata strip, the Readiness Score, the pillar breakdown, the gate verdict,
+and a findings table that the reader can **sort** (click any column header —
+Severity sorts by severity rank, not alphabetically), **filter** (free-text
+search + severity chips), and expand per finding to read the **remediation**
+("how to fix") — all client-side. A light/dark **theme toggle** and a print
+stylesheet make it presentable on screen and as an exported PDF.
 
 Deterministic and byte-reproducible (no timestamps; findings rendered in
-`finding_sort_key` order; the JS only re-orders the live DOM on interaction, never
-the emitted bytes — ADR-0002 D3). All dynamic text is HTML-escaped, including
-data-attribute values — the report must never be its own XSS sink (cf. SEC-006);
-the script only reads `textContent`/`dataset` and toggles `display`, never
-injects markup.
+`finding_sort_key` order; the JS only re-orders/reveals live DOM on interaction,
+never the emitted bytes — ADR-0002 D3). All dynamic text is HTML-escaped,
+including data-attribute values — the report must never be its own XSS sink
+(cf. SEC-006); the script only reads `textContent`/`dataset` and toggles
+attributes, never injects markup.
 """
 
 from __future__ import annotations
 
 import html
 from collections.abc import Iterable, Mapping
+from importlib.metadata import PackageNotFoundError, version
 
 from ..engine import ScanResult
 from ..model import Finding, Pillar, Severity, finding_sort_key
@@ -41,13 +44,36 @@ _SEV_CLASS: dict[Severity, str] = {
     Severity.INFO: "info",
 }
 
+# Inline plumb-line mark (a beam, a string, and a plumb bob). Monochrome via
+# currentColor so it inherits the accent — no external image, offline-safe.
+_LOGO = (
+    "<svg class=logo viewBox='0 0 24 24' width=26 height=26 fill=none "
+    "stroke=currentColor stroke-width=1.7 stroke-linecap=round stroke-linejoin=round "
+    "aria-hidden=true><path d='M4 5h16'/><path d='M12 5v10'/><path d='M12 15l3.2 4.5H8.8Z'/></svg>"
+)
+
 _STYLE = """\
 :root { --bg:#0f1419; --card:#1a2029; --fg:#e6e6e6; --muted:#8a94a6; --line:#2a3340;
-  --ok:#3fb950; --warn:#d29922; --bad:#f85149; }
+  --accent:#4c9aff; --ok:#3fb950; --warn:#d29922; --bad:#f85149;
+  --okbg:rgba(63,185,80,.15); --warnbg:rgba(210,153,34,.15); --badbg:rgba(248,81,73,.15);
+  --chip:#2a3340; }
+:root[data-theme=light] { --bg:#f6f8fa; --card:#ffffff; --fg:#1f2328; --muted:#59636e;
+  --line:#d1d9e0; --accent:#0969da; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e;
+  --okbg:rgba(26,127,55,.10); --warnbg:rgba(154,103,0,.12); --badbg:rgba(207,34,46,.10);
+  --chip:#eaeef2; }
 * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--fg);
   font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; }
 .wrap { max-width:960px; margin:0 auto; padding:32px 20px; }
-h1 { font-size:20px; margin:0 0 4px; } .sub { color:var(--muted); margin:0 0 24px; }
+.brand { display:flex; align-items:center; gap:10px; margin:0 0 2px; }
+.brand .logo { color:var(--accent); flex:none; }
+h1 { font-size:20px; margin:0; letter-spacing:.2px; } .brand .sp { flex:1; }
+.themebtn { cursor:pointer; border:1px solid var(--line); background:var(--card);
+  color:var(--muted); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:600; }
+.themebtn:hover { color:var(--fg); }
+.sub { color:var(--muted); margin:0 0 14px; }
+.meta { display:flex; flex-wrap:wrap; gap:6px 18px; color:var(--muted); font-size:12px;
+  padding:0 0 18px; border-bottom:1px solid var(--line); margin-bottom:20px; }
+.meta b { color:var(--fg); font-weight:600; }
 .hero { display:flex; gap:28px; align-items:center; background:var(--card);
   border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:20px; }
 .score { font-size:52px; font-weight:700; line-height:1; }
@@ -62,21 +88,28 @@ h1 { font-size:20px; margin:0 0 4px; } .sub { color:var(--muted); margin:0 0 24p
   margin-bottom:16px; color:var(--muted); font-size:13px; }
 .summary .total { color:var(--fg); font-size:15px; font-weight:700; }
 .summary .pill { display:inline-block; padding:1px 8px; border-radius:10px;
-  background:var(--line); }
+  background:var(--chip); }
 .gate { padding:12px 16px; border-radius:8px; margin-bottom:20px; font-weight:600; }
-.gate.pass { background:rgba(63,185,80,.15); color:var(--ok); }
-.gate.fail { background:rgba(248,81,73,.15); color:var(--bad); }
+.gate.pass { background:var(--okbg); color:var(--ok); }
+.gate.fail { background:var(--badbg); color:var(--bad); }
 table { width:100%; border-collapse:collapse; background:var(--card);
   border:1px solid var(--line); border-radius:12px; overflow:hidden; }
 th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);
   vertical-align:top; } th { color:var(--muted); font-weight:600; font-size:12px;
   text-transform:uppercase; } tr:last-child td { border-bottom:none; }
 .tag { display:inline-block; padding:1px 8px; border-radius:10px; font-size:12px;
-  font-weight:600; } .blocker,.critical { background:rgba(248,81,73,.15); color:var(--bad); }
-.major { background:rgba(210,153,34,.15); color:var(--warn); }
-.minor,.info { background:rgba(138,148,166,.15); color:var(--muted); }
+  font-weight:600; } .blocker,.critical { background:var(--badbg); color:var(--bad); }
+.major { background:var(--warnbg); color:var(--warn); }
+.minor,.info { background:var(--chip); color:var(--muted); }
 .loc { color:var(--muted); font-family:ui-monospace,monospace; font-size:12px; }
 .msg { color:var(--fg); } .why { color:var(--muted); font-size:13px; }
+.fix { margin-top:8px; } .fix > summary { cursor:pointer; color:var(--accent);
+  font-size:12px; font-weight:600; list-style:none; }
+.fix > summary::-webkit-details-marker { display:none; }
+.fix > summary::before { content:'▸ '; } .fix[open] > summary::before { content:'▾ '; }
+.fix pre { white-space:pre-wrap; word-break:break-word; margin:8px 0 2px;
+  padding:10px 12px; background:var(--bg); border:1px solid var(--line);
+  border-radius:8px; font:12px/1.5 ui-monospace,monospace; color:var(--fg); }
 .empty { color:var(--muted); padding:24px; text-align:center; }
 .toolbar { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center;
   margin-bottom:10px; }
@@ -84,13 +117,30 @@ th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);
   border:1px solid var(--line); border-radius:8px; color:var(--fg);
   padding:7px 10px; font-size:13px; }
 .sevfilter { display:flex; gap:6px; flex-wrap:wrap; }
-.sevchip { cursor:pointer; border:1px solid var(--line); background:var(--line);
+.sevchip { cursor:pointer; border:1px solid var(--line); background:var(--chip);
   color:var(--fg); border-radius:10px; padding:2px 10px; font-size:12px;
   font-weight:600; } .sevchip.off { opacity:.4; }
 #visct { color:var(--muted); font-size:12px; margin-left:auto; }
 th.sortable { cursor:pointer; user-select:none; } th.sortable:hover { color:var(--fg); }
 .arrow { font-size:10px; color:var(--fg); }
+.footer { margin-top:28px; padding-top:16px; border-top:1px solid var(--line);
+  color:var(--muted); font-size:12px; line-height:1.6; }
+.footer b { color:var(--fg); font-weight:600; }
+@media print {
+  :root { --bg:#fff; --card:#fff; --fg:#111; --muted:#555; --line:#ccc; }
+  body { background:#fff; } .themebtn, .toolbar { display:none; }
+  .hero, table { break-inside:avoid; } tr { break-inside:avoid; }
+  .fix pre { display:block !important; } .fix[open] > summary::before,
+  .fix > summary::before { content:''; } .fix > summary { color:var(--muted); }
+}
 """
+
+
+def _report_version() -> str:
+    try:
+        return version("actaclad-plumbline")
+    except PackageNotFoundError:  # not installed as a dist (e.g. source checkout)
+        return ""
 
 
 def render_html(result: ScanResult) -> str:
@@ -102,15 +152,19 @@ def render_html(result: ScanResult) -> str:
         "<title>Plumbline report</title><style>",
         _STYLE,
         "</style></head><body><div class=wrap>",
-        "<h1>Plumbline</h1>",
+        f"<div class=brand>{_LOGO}<h1>Plumbline</h1><span class=sp></span>"
+        "<button class=themebtn id=theme type=button>Light</button></div>",
         "<p class=sub>Reliability &amp; architecture analysis for agentic systems · "
         "by ActaClad</p>",
+        _meta(result),
         _hero(scores, pillar_counts),
         _gate(result),
         _summary(result.findings),
         _toolbar(result.findings),
         _findings_table(result.findings),
+        _footer(),
         "</div>",
+        _THEME_SCRIPT,
         _SCRIPT if result.findings else "",
         "</body></html>",
     ]
@@ -134,6 +188,19 @@ def _count_by_severity(findings: Iterable[Finding]) -> dict[Severity, int]:
 def write_html(result: ScanResult, path: str) -> None:
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(render_html(result))
+
+
+def _meta(result: ScanResult) -> str:
+    total = len(result.findings)
+    files = f"<b>{result.files_scanned}</b> file{'' if result.files_scanned == 1 else 's'}"
+    rules = f"<b>{result.rules_loaded}</b> rule{'' if result.rules_loaded == 1 else 's'} run"
+    finds = f"<b>{total}</b> finding{'' if total == 1 else 's'}"
+    ver = _report_version()
+    version_span = f"<span>Plumbline v{html.escape(ver)}</span>" if ver else ""
+    return (
+        f"<div class=meta><span>{files} scanned</span><span>{rules}</span>"
+        f"<span>{finds}</span>{version_span}</div>"
+    )
 
 
 def _hero(scores: Scores, counts: Mapping[Pillar, int]) -> str:
@@ -200,6 +267,19 @@ def _gate(result: ScanResult) -> str:
     )
 
 
+def _footer() -> str:
+    # Attribution + standards only — no hyperlink (the report is strictly offline;
+    # an external URL would break the no-network guarantee the tests enforce) and
+    # no commercial/upsell line: the OSS artifact carries the project's identity,
+    # not a sales pitch.
+    return (
+        "<div class=footer><b>Plumbline</b> — the open-source reliability &amp; "
+        "architecture analyzer for LLM &amp; agentic systems, by <b>ActaClad</b>. "
+        "Detection is deterministic and fully offline. Findings map to OWASP LLM &amp; "
+        "Agentic Top&nbsp;10, NIST AI RMF, and CWE. <em>The craft of intelligence.</em></div>"
+    )
+
+
 _HEADERS: tuple[str, ...] = ("Severity", "Rule", "Location", "What &amp; why")
 
 
@@ -238,7 +318,9 @@ def _row(f: Finding) -> str:
     # Per-row searchable text + per-cell sort keys. Severity sorts by its numeric
     # rank (Blocker=50 … Info=10); location pads the line so it orders numerically
     # within a file. All attribute values are escaped (SEC-006 — no self-XSS).
-    searchable = " ".join([f.rule_id, loc, f.message, f.why_it_matters, *f.standards]).lower()
+    searchable = " ".join(
+        [f.rule_id, loc, f.message, f.why_it_matters, f.remediation, *f.standards]
+    ).lower()
     loc_key = f"{f.file}:{f.line:08d}".lower()
     return (
         f'<tr data-sev="{html.escape(f.severity.label)}" data-text="{html.escape(searchable)}">'
@@ -249,9 +331,38 @@ def _row(f: Finding) -> str:
         f'<td class=loc data-sort="{html.escape(loc_key)}">{html.escape(loc)}</td>'
         f'<td data-sort="{html.escape(f.message.lower())}">'
         f"<div class=msg>{html.escape(f.message)}</div>"
-        f"<div class=why>{html.escape(f.why_it_matters)}</div></td></tr>"
+        f"<div class=why>{html.escape(f.why_it_matters)}</div>"
+        f"{_fix(f)}</td></tr>"
     )
 
+
+def _fix(f: Finding) -> str:
+    if not f.remediation.strip():
+        return ""
+    return (
+        "<details class=fix><summary>How to fix</summary>"
+        f"<pre>{html.escape(f.remediation.rstrip())}</pre></details>"
+    )
+
+
+# Theme toggle — emitted always (works with zero findings). Flips the root
+# data-theme between dark/light and relabels the button. No storage, no network.
+_THEME_SCRIPT = """\
+<script>
+(function () {
+  var btn = document.getElementById('theme');
+  if (!btn) return;
+  var root = document.documentElement;
+  function set(t) {
+    root.setAttribute('data-theme', t);
+    btn.textContent = (t === 'light') ? 'Dark' : 'Light';
+  }
+  set('dark');
+  btn.addEventListener('click', function () {
+    set(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+})();
+</script>"""
 
 # Inline, dependency-free. Reads dataset/textContent and toggles display + reorders
 # rows; never injects markup (the cells are already escaped server-side).

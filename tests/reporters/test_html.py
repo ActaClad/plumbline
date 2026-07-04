@@ -101,10 +101,14 @@ def test_html_severity_sorts_by_rank_not_alphabetically() -> None:
     assert Severity.BLOCKER.value > Severity.MAJOR.value  # rank order, not text
 
 
-def test_html_no_toolbar_or_script_when_empty() -> None:
-    # Nothing to sort/filter on a clean scan — no toolbar, no script noise.
+def test_html_no_toolbar_or_sortfilter_script_when_empty() -> None:
+    # Nothing to sort/filter on a clean scan — no toolbar, no sort/filter script.
+    # (The tiny theme-toggle script is still emitted; it's useful on any report.)
     html = render_html(_result([], semantic_nodes=5, passed=True))
-    assert "id=q" not in html and "<script>" not in html
+    assert "id=q" not in html  # no filter box
+    assert "id=findings" not in html  # no findings table to wire up
+    assert "tBodies" not in html  # the sort/filter script is absent
+    assert "getElementById('theme')" in html  # theme toggle present even when empty
 
 
 def test_gate_verdict_rendered() -> None:
@@ -149,6 +153,10 @@ def test_committed_example_report_is_not_stale() -> None:
         "<script>",
         "data-sev=",
         "data-sort=",
+        "class=brand",  # branded header
+        "class=meta",  # scan-metadata strip
+        "class=fix",  # expandable remediation
+        "id=theme",  # light/dark toggle
     )
     stale = [m for m in markers if m in fresh and m not in example]
     assert not stale, (
@@ -162,3 +170,32 @@ def test_branding_attributes_actaclad() -> None:
     html = render_html(_result([_finding()]))
     assert "Plumbline" in html
     assert "by ActaClad" in html
+
+
+def test_header_has_wordmark_and_logo() -> None:
+    html = render_html(_result([_finding()]))
+    assert "class=brand" in html
+    assert "<svg class=logo" in html  # inline plumb-line mark (offline, no src=)
+
+
+def test_metadata_strip_reports_scan_shape() -> None:
+    # files_scanned=1, rules_loaded=20 (from _result); one finding.
+    html = render_html(_result([_finding()]))
+    assert "class=meta" in html
+    assert "<b>1</b> file" in html
+    assert "<b>20</b> rule" in html
+
+
+def test_remediation_is_shown_and_searchable() -> None:
+    html = render_html(_result([_finding()]))  # remediation="r"
+    assert "class=fix" in html
+    assert "How to fix" in html
+    # remediation text is folded into the row's searchable filter text.
+    assert 'data-text="' in html
+
+
+def test_theme_toggle_and_print_styles_present() -> None:
+    html = render_html(_result([_finding()]))
+    assert "id=theme" in html  # light/dark toggle button
+    assert "data-theme=light" in html  # light-theme CSS variables
+    assert "@media print" in html  # PDF/print stylesheet
