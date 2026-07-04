@@ -32,6 +32,6 @@ def safe_fetch():
 
 def safe_page(q):
     resp = client.chat.completions.create(
-        model=MODEL, messages=[{"role": "user", "content": q}], timeout=10, max_tokens=256
+        model=MODEL, messages=[{"role": "system", "content": "You are an assistant."}, {"role": "user", "content": q}], timeout=10, max_tokens=256
     )
     return render_template("page.html", body=resp.choices[0].message.content)  # autoescaped

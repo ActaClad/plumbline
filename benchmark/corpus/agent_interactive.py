@@ -13,7 +13,7 @@ def repl_with_break() -> None:
         if msg == "quit":
             break
         client.chat.completions.create(
-            model=MODEL, messages=[{"role": "user", "content": msg}], timeout=10, max_tokens=256
+            model=MODEL, messages=[{"role": "system", "content": "You are an assistant."}, {"role": "user", "content": msg}], timeout=10, max_tokens=256
         )
 
 
@@ -21,6 +21,6 @@ def repl_loop_on_prompt() -> None:
     line = input("> ")
     while line:
         client.chat.completions.create(
-            model=MODEL, messages=[{"role": "user", "content": line}], timeout=10, max_tokens=256
+            model=MODEL, messages=[{"role": "system", "content": "You are an assistant."}, {"role": "user", "content": line}], timeout=10, max_tokens=256
         )
         line = input("> ")

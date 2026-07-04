@@ -1,4 +1,4 @@
-# Benchmark precision report (22 files, 26 markers)
+# Benchmark precision report (23 files, 27 markers)
 
 | Rule | TP | FP | FN | Precision | Recall | High-eligible |
 |---|---|---|---|---|---|---|
@@ -20,7 +20,7 @@
 | PLB-OBS-001 | 0 | 0 | 0 | n/a | n/a | no |
 | PLB-OUT-001 | 1 | 0 | 0 | 100.0% | 100.0% | yes |
 | PLB-OUT-002 | 0 | 0 | 0 | n/a | n/a | no |
-| PLB-PRM-003 | 0 | 7 | 0 | 0.0% | n/a | no |
+| PLB-PRM-003 | 1 | 0 | 0 | 100.0% | 100.0% | yes |
 | PLB-RES-001 | 2 | 0 | 0 | 100.0% | 100.0% | yes |
 | PLB-RES-002 | 2 | 0 | 0 | 100.0% | 100.0% | yes |
 | PLB-RES-005 | 1 | 0 | 0 | 100.0% | 100.0% | yes |
