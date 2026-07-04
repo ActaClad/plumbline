@@ -1,9 +1,10 @@
-# Benchmark precision report (23 files, 27 markers)
+# Benchmark precision report (24 files, 28 markers)
 
 | Rule | TP | FP | FN | Precision | Recall | High-eligible |
 |---|---|---|---|---|---|---|
 | PLB-AGT-001 | 3 | 0 | 0 | 100.0% | 100.0% | yes |
 | PLB-AGT-002 | 1 | 0 | 0 | 100.0% | 100.0% | yes |
+| PLB-AGT-008 | 1 | 0 | 0 | 100.0% | 100.0% | yes |
 | PLB-COST-001 | 2 | 0 | 0 | 100.0% | 100.0% | yes |
 | PLB-EVAL-001 | 0 | 0 | 0 | n/a | n/a | no |
 | PLB-EVAL-003 | 0 | 0 | 0 | n/a | n/a | no |

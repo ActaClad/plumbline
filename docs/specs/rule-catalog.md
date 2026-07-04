@@ -210,6 +210,13 @@ Shared agent state written by multiple nodes with no defined merge strategy caus
 *Fix:* define explicit state reducers/channels (e.g., LangGraph state channels).
 *(Low confidence — advisory.)*
 
+**PLB-AGT-008 — AutoGen team with no turn cap or termination condition**
+Major / Medium | OWASP LLM10 · CWE-835
+Unlike CrewAI/LangChain, AutoGen's AgentChat teams have no default turn limit; a team with neither `max_turns` nor a `termination_condition` can loop forever. (ADR-0018)
+*Detection:* an AutoGen team constructor (`RoundRobinGroupChat`/`SelectorGroupChat`/`Swarm`/`MagenticOneGroupChat`), SDK imported, with neither bound keyword. (Self-contained AST rule.)
+*Fix:* set `max_turns=` or a `termination_condition=`.
+*(Medium/advisory until a `/benchmark` precision pass.)*
+
 ### Category 3 — Model Lifecycle & Configuration (`MDL`) — PILLAR: Reliability
 
 **PLB-MDL-001 — Hardcoded / unpinned model name**
@@ -493,7 +500,7 @@ A wildcard scope (`*`, `admin:*`, `full-access`) in the server's auth config tur
 | Category | Pillar | v1 rules | High-confidence |
 |---|---|---|---|
 | RES Resilience | Reliability | 10 | 5 |
-| AGT Agent Control Flow | Architecture | 7 | 3 |
+| AGT Agent Control Flow | Architecture | 8 | 3 |
 | MDL Model Lifecycle | Reliability | 8 | 2 |
 | OUT Output Validation | Reliability | 4 | 2 |
 | TOOL Tool Calling | Architecture | 4 | 2 |
@@ -505,7 +512,7 @@ A wildcard scope (`*`, `admin:*`, `full-access`) in the server's auth config tur
 | SEC Security | Security | 7 | 7 |
 | GOV Privacy/Governance | Security | 2 | 0 |
 | MCP Model Context Protocol | Security | 2 | 0 |
-| **Total** | | **60** | **25** |
+| **Total** | | **61** | **25** |
 
 **Pillar distribution of the launch set:** Reliability 20, Architecture & Agentic Maturity 18, Harness Engineering 7, Security 9. Compare to the old security-led catalog (Security was 14 of ~40). **The center of gravity has moved decisively off the crowded security space and onto reliability + architecture + harness — exactly the defensible wedge.**
 
