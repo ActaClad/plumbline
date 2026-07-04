@@ -479,6 +479,13 @@ A FastMCP server on a remote transport (`streamable-http`/`sse`) with no `auth=`
 *Fix:* configure `auth=`/`token_verifier=`, or bind to `127.0.0.1` for local-only use.
 *(Medium/advisory — auth can also come from ASGI middleware/a proxy this file-local view can't see.)*
 
+**PLB-MCP-003 — Over-broad / wildcard MCP OAuth scopes**
+Major / Medium | OWASP ASI03 / MCP02 / LLM06 · CWE-250
+A wildcard scope (`*`, `admin:*`, `full-access`) in the server's auth config turns one stolen token into total blast radius.
+*Detection:* `required_scopes=/scopes_supported=/scopes=` list literals whose string elements are wildcard/omnibus. (Pattern rule — no dataflow applies to a static scope list.)
+*Fix:* request the minimal, fully-qualified scopes a caller needs.
+*(Medium/advisory.)*
+
 ---
 
 ## 7. Rule count summary
@@ -497,8 +504,8 @@ A FastMCP server on a remote transport (`streamable-http`/`sse`) with no `auth=`
 | COST Cost Efficiency | Reliability | 2 | 1 |
 | SEC Security | Security | 7 | 7 |
 | GOV Privacy/Governance | Security | 2 | 0 |
-| MCP Model Context Protocol | Security | 1 | 0 |
-| **Total** | | **59** | **25** |
+| MCP Model Context Protocol | Security | 2 | 0 |
+| **Total** | | **60** | **25** |
 
 **Pillar distribution of the launch set:** Reliability 20, Architecture & Agentic Maturity 18, Harness Engineering 7, Security 9. Compare to the old security-led catalog (Security was 14 of ~40). **The center of gravity has moved decisively off the crowded security space and onto reliability + architecture + harness — exactly the defensible wedge.**
 
