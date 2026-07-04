@@ -80,3 +80,6 @@ precision pass.
 - Dogfood self-scan in CI; robustness battery (gnarly + malformed Python);
   real-world false-positive audit; packaging verification (clean-venv wheel
   install); linear-scaling performance check.
+
+[Unreleased]: https://github.com/ActaClad/plumbline/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/ActaClad/plumbline/releases/tag/v0.0.1
