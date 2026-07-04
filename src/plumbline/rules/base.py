@@ -33,7 +33,7 @@ from ..model import (
 )
 
 KNOWN_CATEGORIES: Final[frozenset[str]] = frozenset(
-    {"RES", "AGT", "MDL", "OUT", "TOOL", "RAG", "PRM", "EVAL", "OBS", "COST", "SEC", "GOV"}
+    {"RES", "AGT", "MDL", "OUT", "TOOL", "RAG", "PRM", "EVAL", "OBS", "COST", "SEC", "GOV", "MCP"}
 )
 
 

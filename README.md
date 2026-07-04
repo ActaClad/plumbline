@@ -61,14 +61,14 @@ Four pillars, in priority order:
 
 | Pillar | Examples of what it catches |
 |---|---|
-| **Reliability & Fault Tolerance** | missing timeouts/retries/fallbacks, bare excepts swallowing failures, unbounded memory, non-idempotent retried side effects, no output cap |
+| **Reliability & Fault Tolerance** | missing timeouts/retries/fallbacks, bare excepts swallowing failures, unbounded memory, non-idempotent retried side effects, no output cap, reasoning-model misconfiguration (sampling params / thinking budget), leaked streaming connections |
 | **Architecture & Agentic Maturity** | unbounded agent loops, no termination condition, no verification/self-critique node, untyped tools, RAG context overflow, prompt assembly anti-patterns |
 | **Harness Engineering** | no evaluation suite, no golden datasets / ground-truth checks, model/prompt changes not gated by evals, no tracing or correlation IDs |
-| **Security & Governance** | untrusted input into tool-enabled prompts, LLM output into eval/exec/shell/SQL, hardcoded secrets, unsanitized output rendering, PII into prompts |
+| **Security & Governance** | untrusted input into tool-enabled prompts, LLM output into eval/exec/shell/SQL, hardcoded secrets, unsanitized output rendering, PII into prompts, unauthenticated remote MCP servers |
 
-**25 rules implemented today** (12 High-confidence/gating, 13 advisory),
+**30 rules implemented today** (12 High-confidence/gating, 18 advisory),
 weighted to the differentiated wedge — Reliability and Architecture lead, ahead
-of Security. They are the validated core of a **54-rule taxonomy**; the rest is
+of Security. They are the validated core of a **59-rule taxonomy**; the rest is
 published as a contributor roadmap. A rule ships gating only with a measured
 precision number — advisory until then.
 
@@ -90,6 +90,9 @@ plumb scan ./my-agent-app
 # emit SARIF for GitHub code scanning / IDEs, JSON for tooling, and a
 # self-contained offline HTML report
 plumb scan ./my-agent-app --sarif plumbline.sarif --json plumbline.json --html report.html
+
+# ...or just open a shareable, branded HTML report in your browser
+plumb scan ./my-agent-app --open
 
 # adopt incrementally on an existing repo: accept today's findings, gate on new ones
 plumb baseline ./my-agent-app        # writes .plumbline-baseline.json

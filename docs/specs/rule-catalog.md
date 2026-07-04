@@ -161,6 +161,13 @@ A flaky tool/provider called in a hot path with no circuit breaker cascades fail
 *Fix:* add a circuit breaker to fail fast when a dependency is degraded.
 *(Low confidence — advisory.)*
 
+**PLB-RES-010 — Streamed response not used as a context manager**
+Major / Medium
+The SDK streaming helpers (`messages.stream`/`responses.stream`/`chat.completions.stream`) are context managers; used otherwise the HTTP connection is never guaranteed to close, exhausting the pool under load. (ADR-0018)
+*Detection:* a `.stream()` helper call (SDK imported in-file) that is not the context expression of a `with`/`async with`. Does not touch `create(..., stream=True)` (often iterated to completion legitimately).
+*Fix:* `with client.messages.stream(...) as stream: ...`.
+*(Medium/advisory until a `/benchmark` precision pass.)*
+
 ### Category 2 — Agent Orchestration & Control Flow (`AGT`) — PILLAR: Architecture & Agentic Maturity
 
 **PLB-AGT-001 — Agent loop without max-iteration limit**
@@ -235,6 +242,27 @@ A changed model identifier with no associated eval run is unverified behavior ch
 *Detection:* model config change in version control with no corresponding eval suite invocation in CI.
 *Fix:* gate model changes behind an evaluation run (links to EVAL category).
 *(Low confidence — advisory; requires CI/VCS context.)*
+
+**PLB-MDL-006 — Removed sampling parameter passed to a reasoning model**
+Critical / Medium
+Reasoning models (OpenAI o-series & GPT-5; Anthropic Opus 4.7/4.8 & Fable-5) removed `temperature`/`top_p`/`top_k`; passing one returns HTTP 400 on every call. (ADR-0018)
+*Detection:* resolved `model=` is in the curated `SAMPLING_UNSUPPORTED` table AND a removed param is provably present as an explicit keyword (a `**kwargs` spread is not flagged).
+*Fix:* remove the sampling params; a reasoning model self-regulates sampling — steer with reasoning-effort controls.
+*(Medium/advisory until a `/benchmark` precision pass, per the rule-stability promise.)*
+
+**PLB-MDL-007 — Anthropic extended-thinking budget misconfigured**
+Critical / Medium
+Extended thinking requires `budget_tokens >= 1024` AND `budget_tokens < max_tokens`; either violation is HTTP 400 on every call. (ADR-0018)
+*Detection:* literal comparison of the `thinking={...}` dict's `budget_tokens` against the 1024 floor and the `max_tokens` literal — fires only on provable integer literals.
+*Fix:* set `1024 <= budget_tokens < max_tokens`.
+*(Medium/advisory until a `/benchmark` precision pass.)*
+
+**PLB-MDL-008 — OpenAI reasoning model uses max_tokens not max_completion_tokens**
+Critical / Medium
+o-series/GPT-5 reject `max_tokens` on Chat Completions; the required arg is `max_completion_tokens` — HTTP 400 otherwise. (ADR-0018)
+*Detection:* resolved `model=` in `OPENAI_REASONING_MODELS` AND `max_tokens` provably present as an explicit keyword. Anthropic models are excluded (they require `max_tokens`).
+*Fix:* rename the argument to `max_completion_tokens`.
+*(Medium/advisory until a `/benchmark` precision pass.)*
 
 ### Category 4 — Output Validation & Structured Generation (`OUT`) — PILLAR: Reliability
 
@@ -440,15 +468,26 @@ Major / Medium
 *Detection:* a logging call whose argument includes full prompt or response content.
 *Fix:* log metadata and IDs, not raw content.
 
+### Category 13 — Model Context Protocol (`MCP`) — PILLAR: Security
+
+New category (ADR-0018) covering MCP server/client defects. The statically-detectable MCP surface is mostly security-pillar; carried as a topical hook, not a reliability headline. Runtime-only MCP failures (tool-poisoning, rug-pull, confused-deputy OAuth) are explicitly out of scope — they are AgentGuard's domain.
+
+**PLB-MCP-001 — Remote MCP server with no authentication**
+Critical / Medium | OWASP ASI03 / MCP07 / LLM06 · CWE-306
+A FastMCP server on a remote transport (`streamable-http`/`sse`) with no `auth=`/`token_verifier=` exposes every tool to anyone on the network.
+*Detection:* MCP SDK imported; `FastMCP(...)` constructed with no auth kwarg; a remote transport run that is not bound to loopback. (Sanctioned AST rule — no dataflow.)
+*Fix:* configure `auth=`/`token_verifier=`, or bind to `127.0.0.1` for local-only use.
+*(Medium/advisory — auth can also come from ASGI middleware/a proxy this file-local view can't see.)*
+
 ---
 
 ## 7. Rule count summary
 
 | Category | Pillar | v1 rules | High-confidence |
 |---|---|---|---|
-| RES Resilience | Reliability | 9 | 5 |
+| RES Resilience | Reliability | 10 | 5 |
 | AGT Agent Control Flow | Architecture | 7 | 3 |
-| MDL Model Lifecycle | Reliability | 5 | 2 |
+| MDL Model Lifecycle | Reliability | 8 | 2 |
 | OUT Output Validation | Reliability | 4 | 2 |
 | TOOL Tool Calling | Architecture | 4 | 2 |
 | RAG Knowledge Architecture | Architecture | 4 | 0 |
@@ -458,7 +497,8 @@ Major / Medium
 | COST Cost Efficiency | Reliability | 2 | 1 |
 | SEC Security | Security | 7 | 7 |
 | GOV Privacy/Governance | Security | 2 | 0 |
-| **Total** | | **54** | **25** |
+| MCP Model Context Protocol | Security | 1 | 0 |
+| **Total** | | **59** | **25** |
 
 **Pillar distribution of the launch set:** Reliability 20, Architecture & Agentic Maturity 18, Harness Engineering 7, Security 9. Compare to the old security-led catalog (Security was 14 of ~40). **The center of gravity has moved decisively off the crowded security space and onto reliability + architecture + harness — exactly the defensible wedge.**
 
