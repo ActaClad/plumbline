@@ -21,6 +21,13 @@ def test_ci_running_pytest_is_silent() -> None:
     assert run_project_rule(RULE, fixture_dir(RULE) / "good_ci_runs_tests") == []
 
 
+def test_ci_running_rye_test_is_silent() -> None:
+    # `rye test` is a real test invocation (Rye package manager, e.g. quivr);
+    # it must suppress the finding just like pytest/tox. Regression for the
+    # reported false positive on repos that run tests via `rye test`.
+    assert run_project_rule(RULE, fixture_dir(RULE) / "good_ci_runs_rye") == []
+
+
 def test_no_ci_is_silent_not_eval001_territory() -> None:
     # With no CI at all there is nothing to gate; EVAL-001 covers "no evals".
     assert run_project_rule(RULE, fixture_dir(RULE) / "good_no_ci") == []

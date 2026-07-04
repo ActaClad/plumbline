@@ -1,20 +1,33 @@
 # Plumbline dev tasks. `make dev` takes a fresh clone to green tests.
 # Targets use a local .venv so they work without an activated environment.
+# Cross-platform: works on Linux/macOS and on Windows (GNU make, e.g. via
+# Scoop/Chocolatey) — the venv layout and interpreter name differ per OS.
 
 VENV := .venv
-PY   := $(VENV)/bin/python
-PIP  := $(VENV)/bin/pip
-BIN  := $(VENV)/bin
+
+ifeq ($(OS),Windows_NT)
+	BIN    := $(VENV)/Scripts
+	PY     := $(BIN)/python.exe
+	PIP    := $(BIN)/pip.exe
+	PYTHON := python
+else
+	BIN    := $(VENV)/bin
+	PY     := $(BIN)/python
+	PIP    := $(BIN)/pip
+	PYTHON := python3
+endif
 
 .DEFAULT_GOAL := help
 .PHONY: help dev test lint fmt fmt-check typecheck check scan build clean
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+	@$(PYTHON) -c "import re,sys; \
+[print('  \033[36m%-12s\033[0m %s' % (m.group(1), m.group(2))) \
+for line in open('Makefile', encoding='utf-8') \
+for m in [re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)] if m]"
 
 dev: ## Create .venv and install Plumbline with dev + ai extras (one-command setup)
-	python3 -m venv $(VENV)
+	$(PYTHON) -m venv $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install -e ".[dev,ai]"
 	@echo "Done. Run 'make check' to verify, or activate with: source $(VENV)/bin/activate"
@@ -44,5 +57,8 @@ build: ## Build sdist + wheel
 	$(PY) -m build
 
 clean: ## Remove build/test caches and the venv
-	rm -rf $(VENV) dist build *.egg-info .pytest_cache .ruff_cache .mypy_cache
-	find . -type d -name __pycache__ -prune -exec rm -rf {} +
+	@$(PYTHON) -c "import shutil,os; \
+[shutil.rmtree(p, ignore_errors=True) for p in \
+['$(VENV)','dist','build','.pytest_cache','.ruff_cache','.mypy_cache']]; \
+[shutil.rmtree(os.path.join(r,d), ignore_errors=True) \
+for r,ds,fs in os.walk('.') for d in ds if d in ('__pycache__',) or d.endswith('.egg-info')]"

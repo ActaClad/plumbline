@@ -42,7 +42,7 @@ def test_scan_writes_html_report(tmp_path: Path) -> None:
     result = CliRunner().invoke(main, ["scan", str(tmp_path), "--html", str(out)])
     assert result.exit_code == 0
     assert out.exists()
-    text = out.read_text()
+    text = out.read_text(encoding="utf-8")
     assert "<html" in text and "Plumbline" in text
     assert "http://" not in text and "https://" not in text  # offline
 

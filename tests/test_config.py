@@ -50,7 +50,7 @@ def _finding(rule_id: str, severity: Severity, confidence: Confidence) -> Findin
 
 
 def test_example_file_matches_canonical_constant() -> None:
-    example = (REPO_ROOT / ".plumbline.toml.example").read_text()
+    example = (REPO_ROOT / ".plumbline.toml.example").read_text(encoding="utf-8")
     assert example == EXAMPLE_TOML, "regenerate .plumbline.toml.example from config.EXAMPLE_TOML"
 
 

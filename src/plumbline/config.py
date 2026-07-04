@@ -319,7 +319,9 @@ def load_config(scan_root: Path, explicit_path: Path | None = None) -> ConfigLoa
     if explicit_path is not None:
         if not explicit_path.is_file():
             raise ConfigError(f"--config: no such file: {explicit_path}")
-        return ConfigLoad(parse_config(explicit_path.read_text()), str(explicit_path), ())
+        return ConfigLoad(
+            parse_config(explicit_path.read_text(encoding="utf-8")), str(explicit_path), ()
+        )
 
     dotfile = scan_root / ".plumbline.toml"
     pyproject = scan_root / "pyproject.toml"
@@ -328,10 +330,12 @@ def load_config(scan_root: Path, explicit_path: Path | None = None) -> ConfigLoa
     if dotfile.is_file():
         if pyproject_has_table:
             notices.append("both .plumbline.toml and [tool.plumbline] exist; using .plumbline.toml")
-        return ConfigLoad(parse_config(dotfile.read_text()), str(dotfile), tuple(notices))
+        return ConfigLoad(
+            parse_config(dotfile.read_text(encoding="utf-8")), str(dotfile), tuple(notices)
+        )
 
     if pyproject_has_table:
-        raw = tomllib.loads(pyproject.read_text())
+        raw = tomllib.loads(pyproject.read_text(encoding="utf-8"))
         tool = raw.get("tool")
         table = tool.get("plumbline") if isinstance(tool, dict) else None
         return ConfigLoad(_build_config(_table(table, where="tool.plumbline")), str(pyproject), ())
@@ -343,7 +347,7 @@ def _pyproject_has_plumbline(pyproject: Path) -> bool:
     if not pyproject.is_file():
         return False
     try:
-        raw = tomllib.loads(pyproject.read_text())
+        raw = tomllib.loads(pyproject.read_text(encoding="utf-8"))
     except tomllib.TOMLDecodeError:
         return False
     tool = raw.get("tool")

@@ -40,6 +40,7 @@ _EVAL_INVOCATION_TOKENS: tuple[str, ...] = (
     "make test",
     "make eval",
     "npm test",
+    "rye test",
     "run: test",
     "evaluate",
     "/evals",
