@@ -47,7 +47,18 @@ _UNAMBIGUOUS_CALL_TAILS: tuple[tuple[str, ...], ...] = (
 _AMBIGUOUS_CALL_TAILS: tuple[tuple[str, ...], ...] = (("messages", "create"),)
 _EMBED_TAIL: tuple[str, ...] = ("embeddings", "create")
 
-_CALL_LEVEL_PARAMS = ("model", "temperature", "max_tokens", "tools", "stream")
+# `max_completion_tokens` (Chat Completions) and `max_output_tokens` (Responses API)
+# are the reasoning-model output caps — captured so COST-001 doesn't false-positive
+# on a call that is correctly bounded by one of them instead of `max_tokens`.
+_CALL_LEVEL_PARAMS = (
+    "model",
+    "temperature",
+    "max_tokens",
+    "max_completion_tokens",
+    "max_output_tokens",
+    "tools",
+    "stream",
+)
 _MERGED_PARAMS = ("timeout", "max_retries")
 
 
