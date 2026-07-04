@@ -44,7 +44,7 @@ and a 0–100 **Readiness Score** (a dashboard, not the gate).
 Requires **Python 3.11+**, `git`, and `make`.
 
 ```bash
-git clone https://github.com/durairajv/plumbline
+git clone https://github.com/ActaClad/plumbline
 cd plumbline
 make dev      # creates .venv and installs everything (dev + AI extras)
 ```
@@ -68,7 +68,7 @@ make check
 
 This runs exactly what CI runs: lint (`ruff`), format check, type check
 (`mypy`), and the full test suite. You should see **all tests passing**
-(~378 tests at time of writing) and no lint/type errors.
+(~470 tests at time of writing) and no lint/type errors.
 
 Run pieces individually if you want:
 
@@ -91,7 +91,7 @@ the core quality discipline — it's how we keep false positives down.
 List the rules that are loaded:
 
 ```bash
-plumb rules        # ~20 rules across the four pillars
+plumb rules        # ~30 rules across the four pillars
 ```
 
 Scan a deliberately-broken fixture and read the output:

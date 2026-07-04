@@ -14,7 +14,18 @@ milestones in `specs/architecture.md`) — it's the catch-net.
   PLB-MDL-005, PLB-RAG-003, PLB-EVAL-004, PLB-OBS-003, and the thinnest
   RAG/PRM/GOV rules — unless a design partner pulls one forward.
 - **MCP & A2A protocol rules** (the `MCP` category from the broader taxonomy) —
-  not in the launch-40; high-interest, add once core is stable.
+  MCP-001 (remote no-auth) and MCP-003 (over-broad scopes) shipped; MCP-002/004
+  (tool-param taint, hardcoded verifier token) and MCP-006 (tool-description
+  injection, advisory) remain — add once core is stable.
+- **PLB-AGT-009 — CrewAI Agent/Crew with no `max_rpm` / `max_execution_time`**
+  and **PLB-COST-003 — no reasoning-effort cap on a reasoning model.** Both are
+  "missing *optional* bound" smells: the params are usually omitted and (for
+  COST-003) have safe defaults, so a naive detector fires on most real code —
+  the same broad-fire noise class as PRM-003. Deferred intentionally; only ship
+  if scoped tightly enough to keep precision high (e.g. AGT-009 on the top-level
+  `Crew` only, not every `Agent`; COST-003 only on a provably-too-small
+  `max_completion_tokens` that starves the reasoning budget). Good-first-issue
+  candidates once that scoping is designed.
 - **JavaScript/TypeScript support.** v1 is Python only. Multi-language is a
   major effort gated behind a stable Python core and the adapter contract
   proving itself. Resist early.
