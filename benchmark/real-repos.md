@@ -130,6 +130,33 @@ silent** rather than false-fire, while the output/harness rules fired on real
 defects. Residual (recall, not FP): the nested config and the legacy-SDK `model`
 id are not yet unpacked (tracked in `docs/backlog.md`).
 
+## Batch 5 — a signal-to-noise find (aggregation, not a false positive)
+
+### Backsie backend (private, FastAPI auth services)
+
+Scanned an auth-heavy backend; **31× PLB-GOV-002** dominated the report — 16 in
+`user_auth_service.py`, 14 in `admin_auth_service.py`, 1 in `geo_service.py`.
+Triaged by hand: every one is the same pattern —
+`logger.<level>(f"…{email}…")` — i.e. an email (PII, tainted) written to a log
+sink. These are **true positives, not FPs**: an email is personal data under
+GDPR/DPDP, and it is landing in logs. GOV-002 is advisory (Major/Medium,
+non-gating), so it did not fail the gate.
+
+The problem was **presentation, not precision**: 31 near-identical rows bury
+signal and read as spam — the classic "noisy analyzer gets uninstalled" risk.
+Fixed at the **report** layer, not the rule: the HTML table now aggregates
+findings that share (rule, file, message, severity, confidence) into one row —
+"PII (email) → logs · 16 sites in user_auth_service.py" with every line listed —
+while SARIF/JSON, the gate, and the counts still see all 31 (presentation only).
+
+**Severity left unchanged (deliberate).** Unlike SEC-004 (downgraded because it
+was *gating* and *false*), GOV-002 is already advisory and these are *true*
+findings, so lowering severity would be gaming a noise problem — a governance
+finding's severity shouldn't depend on how many times it recurs. The principled
+precision refinement is **PII sensitivity tiering** (contact identifiers like
+email/username vs sensitive PII like SSN/card/health), which changes the taint
+PII source and needs an ADR — tracked in `docs/backlog.md`, not rushed for launch.
+
 ## Outcome
 
 **All four FP/recall classes the first validation found are now fixed:**
@@ -145,9 +172,9 @@ id are not yet unpacked (tracked in `docs/backlog.md`).
 Every High-confidence corpus TP held at 100% through all four fixes; each fix
 shipped with a regression fixture/test.
 
-**Honest read & what's left (9 repos total).** Across babyagi, llm, crewAI,
-crewAI-examples, gpt-researcher, open-interpreter, pydantic-ai, and the Gemini
-voice-agent, the **non-SEC-004 rules have flattened** — the last few app-shaped repos surfaced no
+**Honest read & what's left (10 repos total).** Across babyagi, llm, crewAI,
+crewAI-examples, gpt-researcher, open-interpreter, pydantic-ai, the Gemini
+voice-agent, and the Backsie backend, the **non-SEC-004 rules have flattened** — the last few app-shaped repos surfaced no
 new FP classes for the reliability/architecture/harness/taint rules or TOOL-001,
 which is the precision-before-publicity signal we wanted. **SEC-004 was the
 outlier** (a new FP sub-class on nearly every repo) and is now **advisory**, so

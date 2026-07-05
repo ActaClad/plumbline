@@ -218,6 +218,16 @@ codeFlows (ADR-0014). Deferred:
   content reaching a tool-capable model with **no delimiting/role-separation**
   between source and tool. Same call as TOOL-002/004 — defer until that signal
   exists. (Highest-FP rule in the set; must not ship as a gating Blocker.)
+- **PII sensitivity tiering for GOV-001/002 (needs ADR).** Today the PII taint
+  label is flat: a *contact identifier* (email, username) is treated the same as
+  *sensitive PII* (SSN, card, health, address). On a real auth-heavy backend
+  (Backsie), GOV-002 fired 31× on `logger.info(f"…{email}…")` — all true
+  positives, but all Major, which over-weights email-in-log. The refinement is to
+  have the PII source carry a sensitivity tier and map tier → severity (contact
+  identifier lower, sensitive PII higher). This changes a public taint-model
+  contract, so it needs an ADR. **Not** a severity downgrade of the existing rule
+  (these are true positives; the *noise* was fixed at the report layer via
+  finding aggregation — see benchmark/real-repos.md Batch 5).
 - **SEC taint recall is intra-procedural by design (ADR-0003).** The SEC rules
   miss cross-function source→sink flows; the benchmark recall column will read
   low and that is correct (precision over recall, CLAUDE.md §1.4). Do NOT loosen
