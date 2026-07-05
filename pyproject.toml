@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "actaclad-plumbline"
-version = "0.0.1"
+version = "0.0.2"
 description = "The reliability and architecture analyzer for LLM and agentic systems."
 readme = "README.md"
 requires-python = ">=3.11"

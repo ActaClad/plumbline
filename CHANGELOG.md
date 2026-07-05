@@ -6,6 +6,14 @@ versioning once it reaches 1.0.
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.0.2] — 2026-07-05
+
+First point release after launch — a new adapter and a report that reads as
+designed, both driven by real-repo scans. Detection stays deterministic; no rule
+gating changed.
+
 ### Added
 - **Google Gemini adapter** (`adapters/gemini.py`, adapter-contract §9b). Covers
   the `google-genai` SDK — `genai.Client(...)`, sync and async (`.aio`)
@@ -16,6 +24,27 @@ versioning once it reaches 1.0.
   first: Gemini's nested `GenerateContentConfig`/`http_options` params are left
   `UNKNOWN` (not `ABSENT`), so the High-confidence RES/COST/MDL rules stay silent
   rather than false-positive (unpacking that config is a tracked follow-up).
+- **HTML report — recurring-finding aggregation.** A rule that legitimately fires
+  many times in a file (e.g. 31× GOV-002 email-in-log across an auth service) now
+  collapses into one row — "N sites" with every line listed — instead of a wall of
+  near-identical rows. Presentation only: SARIF/JSON, the Quality Gate, the
+  summary strip, and pillar counts still see every finding, so the totals stay
+  honest. Deterministic and byte-reproducible.
+
+### Changed
+- **HTML report rebranded to the ActaClad palette** — dark theme is near-black +
+  gold (was GitHub-dark blue-grey); light theme is warm cream/paper + gold
+  (matching actaclad.com). Adds the gold plumb-line mark and a faint AC-hexagon
+  watermark. Semantic ok/warn/bad stay green/gold/red so pass/fail reads at a
+  glance. Determinism and the offline/no-network guarantee are unchanged.
+
+### Docs
+- Install note (pipx / `uv tool install`, Python 3.11+) and a problem-first
+  TL;DR in the README; the generation-time skill pack surfaced up front; a
+  sharper Contributing section (report-a-false-positive first).
+- Real-repo validation grows to 10 repos (`benchmark/real-repos.md`): the Gemini
+  voice-agent (recall gap → adapter) and the Backsie backend (a signal-to-noise
+  find → report aggregation).
 
 ## [0.0.1] — 2026-07-04
 
@@ -90,5 +119,6 @@ precision pass.
   real-world false-positive audit; packaging verification (clean-venv wheel
   install); linear-scaling performance check.
 
-[Unreleased]: https://github.com/ActaClad/plumbline/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/ActaClad/plumbline/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/ActaClad/plumbline/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/ActaClad/plumbline/releases/tag/v0.0.1
