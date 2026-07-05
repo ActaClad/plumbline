@@ -1,0 +1,415 @@
+<title>Plumbline launch carousel — mockup</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --ink:      #0d0d0d;
+    --ink-2:    #141210;
+    --panel:    #1b1712;
+    --gold:     #c8951e;
+    --gold-2:   #d9ae5a;
+    --cream:    #ede6d6;
+    --dim:      #9a9488;   /* warm grey, biased toward the cream/gold */
+    --dim-2:    #6f6a60;
+    --line:     rgba(237,230,214,.14);
+    --line-2:   rgba(237,230,214,.08);
+    --sev:      #e5735b;   /* semantic: finding severity — not the accent */
+    --hex:      rgba(200,149,30,.07);
+
+    --font-display: Georgia, "Times New Roman", serif;
+    --font-sans: ui-rounded, "SF Pro Rounded", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #17140f 0%, var(--ink) 55%) fixed;
+    color: var(--cream);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: clamp(28px, 6vw, 64px) 20px 96px;
+  }
+
+  /* ---------- page intro ---------- */
+  .lead { margin-bottom: 44px; }
+  .kicker {
+    font-size: 12px;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 14px;
+  }
+  .lead h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(30px, 7vw, 44px);
+    line-height: 1.04;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+    margin: 0 0 14px;
+  }
+  .lead p { color: var(--dim); font-size: 15px; margin: 0 0 20px; max-width: 46ch; }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    font-size: 12px; letter-spacing: .04em;
+  }
+  .chip {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 12px;
+    color: var(--dim);
+    background: rgba(255,255,255,.015);
+  }
+  .chip b { color: var(--cream); font-weight: 600; }
+
+  /* ---------- per-slide caption ---------- */
+  .slot { margin-top: 52px; }
+  .cap {
+    display: flex; align-items: baseline; gap: 12px;
+    margin: 0 0 14px; padding-left: 2px;
+  }
+  .cap .n {
+    font-family: var(--font-mono);
+    font-size: 12px; color: var(--gold);
+    letter-spacing: .1em;
+  }
+  .cap .t { font-size: 13px; color: var(--cream); font-weight: 600; }
+  .cap .d { font-size: 12.5px; color: var(--dim); }
+
+  /* ---------- the artboard (true 4:5) ---------- */
+  .board {
+    container-type: inline-size;
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 60px -24px rgba(0,0,0,.8);
+  }
+  .board::after { /* faint inner vignette top */
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(90% 55% at 30% 0%, rgba(200,149,30,.06), transparent 60%);
+    pointer-events: none;
+  }
+
+  /* AC hexagon watermark, bottom-left, half off-canvas (echoes brand) */
+  .hex {
+    position: absolute; z-index: 0;
+    width: 62cqw; height: 62cqw;
+    left: -18cqw; bottom: -16cqw;
+    opacity: 1;
+  }
+  .hex svg { width: 100%; height: 100%; display: block; }
+
+  /* left connector rail with dot terminals */
+  .rail {
+    position: absolute; z-index: 2;
+    left: 8cqw; top: 9cqw; bottom: 9cqw;
+    width: .55cqw;
+    background: linear-gradient(var(--line), rgba(237,230,214,.22), var(--line));
+    border-radius: 2px;
+  }
+  .rail::before, .rail::after {
+    content: ""; position: absolute; left: 50%;
+    width: 2.6cqw; height: 2.6cqw; border-radius: 50%;
+    transform: translateX(-50%);
+  }
+  .rail::before { top: -1.3cqw; background: var(--cream); }
+  .rail::after  { bottom: -1.3cqw; border: .5cqw solid var(--gold); background: var(--ink); box-sizing: border-box; }
+
+  .inner {
+    position: absolute; z-index: 3; inset: 0;
+    padding: 10cqw 9cqw 8cqw 15cqw;
+    display: flex; flex-direction: column;
+  }
+
+  .eyebrow {
+    font-size: 2.7cqw; letter-spacing: .3em; text-transform: uppercase;
+    color: var(--gold); margin: 0;
+  }
+  .mark {
+    font-family: var(--font-mono); font-size: 2.7cqw; color: var(--dim);
+    letter-spacing: .12em;
+  }
+
+  .h {
+    font-family: var(--font-display); font-weight: 700;
+    line-height: 1.03; letter-spacing: -.015em;
+    text-wrap: balance; color: var(--cream); margin: 0;
+  }
+  .sub { color: var(--dim); font-size: 3.5cqw; line-height: 1.42; margin: 0; }
+
+  /* gold highlight box, echoing the "Live" treatment in the brand carousel */
+  .box {
+    display: inline-block; background: var(--gold); color: #120d02;
+    padding: .02em .28em; border-radius: .06em; font-style: normal;
+  }
+  .gold { color: var(--gold-2); }
+
+  .foot {
+    margin-top: auto; display: flex; align-items: center; justify-content: space-between;
+    font-size: 2.4cqw; letter-spacing: .22em; text-transform: uppercase; color: var(--dim-2);
+  }
+  .foot .pg { font-family: var(--font-mono); letter-spacing: .1em; }
+
+  .spacer { flex: 1 1 auto; }
+
+  /* ---- slide 1 ---- */
+  .s1 .h { font-size: 10.2cqw; }
+  .s1 .sub { margin-top: 5cqw; font-size: 3.7cqw; max-width: 62cqw; }
+  .s1 .logo {
+    display: inline-flex; align-items: center; gap: 2.2cqw;
+    font-family: var(--font-display); font-size: 4.4cqw; color: var(--cream); font-weight: 700;
+    letter-spacing: -.01em;
+  }
+  .s1 .logo .g { font-family: var(--font-mono); color: var(--gold); font-size: 4.2cqw; font-weight: 400; }
+
+  /* ---- slide 2 ---- */
+  .s2 .h { font-size: 6.1cqw; margin-top: 3cqw; }
+  .s2 .h .q { color: var(--dim); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4cqw; margin-top: 7cqw; }
+  .col h4 {
+    font-size: 2.6cqw; letter-spacing: .18em; text-transform: uppercase;
+    margin: 0 0 3cqw; padding-bottom: 2.4cqw; border-bottom: 1px solid var(--line);
+  }
+  .col.sec h4 { color: var(--dim); }
+  .col.plb h4 { color: var(--gold); }
+  .col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2.4cqw; }
+  .col li { font-size: 3.05cqw; line-height: 1.28; }
+  .col.sec li { color: var(--dim); }
+  .col.plb li { color: var(--cream); }
+  .col li::before { content: ""; display: inline-block; width: 1.5cqw; height: 1.5cqw; margin-right: 2cqw;
+    border-radius: 2px; transform: translateY(-.2cqw); }
+  .col.sec li::before { background: var(--dim-2); }
+  .col.plb li::before { background: var(--gold); }
+
+  /* ---- slide 3 ---- */
+  .s3 .h { font-size: 6.6cqw; margin-top: 3cqw; }
+  .s3 .h .g { color: var(--gold-2); }
+  .term {
+    margin-top: 6cqw; background: #0a0a0a; border: 1px solid var(--line);
+    border-radius: 2.2cqw; overflow: hidden; font-family: var(--font-mono);
+  }
+  .term .bar { display: flex; gap: 1.6cqw; padding: 2.6cqw 3cqw; border-bottom: 1px solid var(--line-2); }
+  .term .bar i { width: 2.1cqw; height: 2.1cqw; border-radius: 50%; background: #2f2b25; display: block; }
+  .term .body { padding: 3.4cqw 3.6cqw; font-size: 2.62cqw; line-height: 1.85; }
+  .term .p { color: var(--dim); }
+  .term .sev { color: var(--sev); }
+  .term .id { color: var(--cream); }
+  .term .loc { color: var(--dim); }
+  .term .sum { color: var(--cream); }
+  .term .fail { color: var(--sev); }
+  .term .score .v { color: var(--gold); }
+  .term .score { color: var(--dim); }
+  .s3 .cap3 { margin-top: 5cqw; color: var(--cream); font-size: 3.1cqw; }
+  .s3 .cap3 b { color: var(--gold-2); font-weight: 600; }
+
+  /* ---- slide 4 ---- */
+  .s4 .h { font-size: 7.6cqw; margin-top: 3cqw; }
+  .s4 .install {
+    margin-top: 6.5cqw; font-family: var(--font-mono); font-size: 3.5cqw;
+    background: var(--panel); border: 1px solid var(--line); color: var(--cream);
+    border-radius: 1.6cqw; padding: 3.4cqw 4cqw; display: flex; align-items: center; gap: 2.4cqw;
+  }
+  .s4 .install .pr { color: var(--gold); }
+  .s4 .line { margin-top: 5.5cqw; color: var(--dim); font-size: 3.35cqw; line-height: 1.4; max-width: 66cqw; }
+  .s4 .repo {
+    margin-top: 6.5cqw; font-family: var(--font-mono); font-size: 4.1cqw;
+    color: var(--gold-2); letter-spacing: -.01em;
+  }
+  .s4 .repo .sl { color: var(--dim); }
+
+  /* ---------- handoff notes ---------- */
+  .notes {
+    margin-top: 72px; border-top: 1px solid var(--line); padding-top: 28px;
+  }
+  .notes h2 { font-family: var(--font-display); font-size: 22px; margin: 0 0 16px; font-weight: 700; }
+  .notes .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+  @media (max-width: 480px){ .notes .grid { grid-template-columns: 1fr; } }
+  .notes h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 8px; }
+  .notes p, .notes li { font-size: 13.5px; color: var(--dim); margin: 0 0 6px; }
+  .notes ul { margin: 0; padding-left: 16px; }
+  .sw { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .sw span { font-family: var(--font-mono); font-size: 11px; color: var(--cream);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 7px; }
+  .sw i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  .reveal { opacity: 0; transform: translateY(14px); animation: rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; } }
+</style>
+
+<div class="wrap">
+
+  <header class="lead">
+    <p class="kicker">Plumbline · OSS launch</p>
+    <h1>LinkedIn carousel — 4-slide mockup</h1>
+    <p>A rendered preview of the launch carousel in the ActaClad brand, so the flow and copy can be judged before it's rebuilt in Canva. Each artboard below is true <b>4:5 (1080×1350)</b> — swipe order top to bottom.</p>
+    <div class="meta">
+      <span class="chip"><b>Ratio</b> &nbsp;4:5 · 1080×1350</span>
+      <span class="chip"><b>Palette</b> &nbsp;black + gold</span>
+      <span class="chip"><b>Theme</b> &nbsp;dark (brand)</span>
+    </div>
+  </header>
+
+  <!-- ================= SLIDE 1 — HOOK ================= -->
+  <section class="slot">
+    <div class="cap"><span class="n">01</span><span class="t">Hook</span><span class="d">— stop the scroll</span></div>
+    <div class="board s1 reveal">
+      <div class="hex" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><polygon points="50,3 93,27 93,73 50,97 7,73 7,27" fill="none" stroke="rgba(200,149,30,.09)" stroke-width="2"/><polygon points="50,20 78,36 78,64 50,80 22,64 22,36" fill="none" stroke="rgba(200,149,30,.09)" stroke-width="1.5"/></svg>
+      </div>
+      <div class="rail" aria-hidden="true"></div>
+      <div class="inner">
+        <p class="eyebrow">The reliability wedge</p>
+        <div class="spacer"></div>
+        <h2 class="h">Your agent didn't get hacked.<br><em class="box">It fell over.</em></h2>
+        <p class="sub">A static analyzer for the <span class="gold">reliability</span> of LLM &amp; agentic code.</p>
+        <div class="spacer"></div>
+        <div class="foot">
+          <span class="logo"><span class="g">&lt;/&gt;</span> Plumbline</span>
+          <span>actaclad.com</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE 2 — THE GAP ================= -->
+  <section class="slot">
+    <div class="cap"><span class="n">02</span><span class="t">The gap</span><span class="d">— why existing tools miss it</span></div>
+    <div class="board s2 reveal">
+      <div class="hex" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><polygon points="50,3 93,27 93,73 50,97 7,73 7,27" fill="none" stroke="rgba(200,149,30,.09)" stroke-width="2"/></svg>
+      </div>
+      <div class="rail" aria-hidden="true"></div>
+      <div class="inner">
+        <p class="eyebrow">The gap</p>
+        <h2 class="h">Every AI scanner asks <span class="q">“is this dangerous?”</span><br>None asked <span class="gold">“will this fall over?”</span></h2>
+        <div class="cols">
+          <div class="col sec">
+            <h4>Security scanners</h4>
+            <ul>
+              <li>Prompt injection</li>
+              <li>OWASP LLM Top 10</li>
+              <li>Insecure output handling</li>
+            </ul>
+          </div>
+          <div class="col plb">
+            <h4>Plumbline</h4>
+            <ul>
+              <li>No timeout / no retry</li>
+              <li>Unbounded agent loops</li>
+              <li>Unguarded output parsing</li>
+              <li>Silent model swaps</li>
+            </ul>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <div class="foot"><span>Reliability · Architecture · Harness · Security</span><span>actaclad.com</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE 3 — PROOF ================= -->
+  <section class="slot">
+    <div class="cap"><span class="n">03</span><span class="t">Proof</span><span class="d">— a real, cold scan</span></div>
+    <div class="board s3 reveal">
+      <div class="rail" aria-hidden="true"></div>
+      <div class="inner">
+        <p class="eyebrow">Proof · simonw/llm, no config</p>
+        <h2 class="h">3 findings. <span class="g">93/100.</span> On a well-built tool.</h2>
+        <div class="term" aria-hidden="true">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <div class="body">
+            <div class="p">$ plumb scan ./llm</div>
+            <div>&nbsp;</div>
+            <div><span class="sev">Critical/High</span> &nbsp;<span class="id">PLB-OUT-001</span> &nbsp;<span class="loc">openai_models.py:1027</span></div>
+            <div><span class="sev">Critical/High</span> &nbsp;<span class="id">PLB-OUT-001</span> &nbsp;<span class="loc">openai_models.py:1143</span></div>
+            <div><span class="loc">Major/Medium</span> &nbsp;<span class="id">PLB-OBS-001</span> &nbsp;<span class="loc">openai_models.py:961</span></div>
+            <div>&nbsp;</div>
+            <div class="sum">3 findings · 32 rules · <span class="fail">gate failed</span></div>
+            <div class="score">Readiness <span class="v">93/100</span> · Rel 80 · Arch 100 · Harness 99 · Sec 100</div>
+          </div>
+        </div>
+        <p class="cap3"><b>Deterministic.</b> No LLM in detection. No network. Runs fully offline.</p>
+        <div class="spacer"></div>
+        <div class="foot"><span>Same code in · same findings out</span><span>actaclad.com</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE 4 — CTA ================= -->
+  <section class="slot">
+    <div class="cap"><span class="n">04</span><span class="t">Call to action</span><span class="d">— get them to the repo</span></div>
+    <div class="board s4 reveal">
+      <div class="hex" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><polygon points="50,3 93,27 93,73 50,97 7,73 7,27" fill="none" stroke="rgba(200,149,30,.09)" stroke-width="2"/><polygon points="50,20 78,36 78,64 50,80 22,64 22,36" fill="none" stroke="rgba(200,149,30,.09)" stroke-width="1.5"/></svg>
+      </div>
+      <div class="rail" aria-hidden="true"></div>
+      <div class="inner">
+        <p class="eyebrow">Open source · Apache-2.0</p>
+        <h2 class="h">Every rule open.<br>No held-back <span class="gold">“pro”</span> pack.</h2>
+        <div class="install"><span class="pr">$</span> pip install actaclad-plumbline</div>
+        <p class="line">Point it at your messiest agent and tell us what it gets wrong. A false positive is the most useful bug you can file.</p>
+        <div class="spacer"></div>
+        <div class="repo">github.com<span class="sl">/</span>ActaClad<span class="sl">/</span>plumbline</div>
+        <div class="foot" style="margin-top:5cqw"><span>Link in the first comment ↓</span><span>actaclad.com</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HANDOFF NOTES ================= -->
+  <section class="notes">
+    <h2>Canva handoff</h2>
+    <div class="grid">
+      <div>
+        <h3>Palette</h3>
+        <div class="sw">
+          <span><i style="background:#0d0d0d;border:1px solid #333"></i>#0D0D0D</span>
+          <span><i style="background:#c8951e"></i>#C8951E</span>
+          <span><i style="background:#d9ae5a"></i>#D9AE5A</span>
+          <span><i style="background:#ede6d6"></i>#EDE6D6</span>
+          <span><i style="background:#e5735b"></i>#E5735B</span>
+        </div>
+        <p style="margin-top:10px">Gold is the single accent; the red is only finding-severity on slide 3, not brand.</p>
+      </div>
+      <div>
+        <h3>Type</h3>
+        <ul>
+          <li>Headlines: a high-contrast display serif (Canva: <b>Playfair Display</b> / Fraunces) — Georgia is the on-screen stand-in here.</li>
+          <li>Labels &amp; body: a rounded geometric sans (<b>Poppins</b> / your brand sans).</li>
+          <li>Scan &amp; install: a mono (<b>JetBrains Mono</b> / IBM Plex Mono).</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Recurring elements</h3>
+        <ul>
+          <li>Left connector rail with dot terminals (cream top, gold-ring bottom).</li>
+          <li>Faded AC hexagon, bottom-left, bleeding off-canvas.</li>
+          <li><code>ACTACLAD.COM</code> footer on every slide.</li>
+          <li>One gold "highlight-box" punch word per idea (the brand "Live" treatment).</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Notes</h3>
+        <ul>
+          <li>Export at 1080×1350 (4:5) — max feed height on LinkedIn.</li>
+          <li>Keep the slide-1 hook identical to the blog / HN / X post.</li>
+          <li>Slide 3's terminal can be swapped for a clean frame of the demo GIF.</li>
+          <li>Repo link goes in the first comment, not the post body (reach).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
