@@ -141,17 +141,17 @@ crewAI); **SEC-004** test-fixture secrets (substring placeholder + absolute
 distinct-char entropy + test-path — 26→0); **LiteLLM recall gap** (new adapter —
 babyagi 0→16). Still open:
 
-- **Google Gemini (`google-genai`) adapter — HIGH priority (real-repo miss).**
-  A production voice-agent (`google-genai>=1.70`) scanned to `0 findings /
-  Readiness N/A` because *every* LLM call goes through the unsupported Gemini SDK:
-  `from google import genai` → `genai.Client(api_key=...)` →
-  `client.aio.models.generate_content(...)` (note the **async `.aio` client** —
-  the call site is `client.aio.models.generate_content`, not `client.models.*`),
-  plus `google.genai.live.AsyncSession` for the streaming/voice path. The adapter
-  must recognize both the sync `client.models.generate_content` and the async
-  `client.aio.models.generate_content` shapes, and emit LLM_CALL / model-config /
-  output tags so RES/OUT/COST/MDL rules fire. This is the first stack where a
-  whole real app is invisible — bump ahead of the long tail below.
+- **Google Gemini (`google-genai`) adapter — SHIPPED (`adapters/gemini.py`,
+  adapter-contract §9b).** Emits LLM_CLIENT_CREATE / LLM_CALL / EMBEDDING_CALL for
+  the new SDK (`genai.Client` + sync/async `.aio` `generate_content`, streaming,
+  Live `connect`, `embed_content`) and the legacy `google.generativeai` SDK. The
+  voice-agent that read `Readiness N/A` now scores 99/100 with 3 real advisory
+  findings (incl. OUT-002 branching on raw Gemini output) and zero High-conf FPs.
+  **Follow-up (medium):** unpack the nested `config=GenerateContentConfig(...)`
+  (`max_output_tokens`, `tools`, `temperature`) and the client `http_options`
+  timeout, currently left UNKNOWN — so RES-001/002, COST-001, and the MDL
+  reasoning/temp rules do not yet reach Gemini calls. Also: cross-module client
+  linking (intra-file today, like the framework/LiteLLM adapters).
 - **Remaining unsupported stacks.** `instructor`, raw `requests`/`httpx` to an LLM
   endpoint, and other wrappers are still invisible. Add adapters as they show up
   in real-repo scans.

@@ -6,7 +6,16 @@ versioning once it reaches 1.0.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- **Google Gemini adapter** (`adapters/gemini.py`, adapter-contract §9b). Covers
+  the `google-genai` SDK — `genai.Client(...)`, sync and async (`.aio`)
+  `models.generate_content` (+ streaming), Gemini Live `connect`, and
+  `embed_content` — and the legacy `google.generativeai` SDK. A whole class of
+  real apps was previously invisible: a production Gemini voice-agent scanned to
+  `Readiness N/A`; it now scores and surfaces real reliability findings. Precision-
+  first: Gemini's nested `GenerateContentConfig`/`http_options` params are left
+  `UNKNOWN` (not `ABSENT`), so the High-confidence RES/COST/MDL rules stay silent
+  rather than false-positive (unpacking that config is a tracked follow-up).
 
 ## [0.0.1] — 2026-07-04
 

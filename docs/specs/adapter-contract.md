@@ -232,6 +232,41 @@ D3 precedent): a bare call → ABSENT (RES-001/002 silent on defaults), an expli
 wrapper imported cross-module is not linked (intra-file, like the framework
 adapters).
 
+## 9b. The `gemini` adapter (Google Gemini)
+
+**Version assumption:** the current `google-genai` SDK (≥ 1.0) and the legacy
+`google.generativeai` SDK. Priority **15**, per-file (`project_triggered=False` —
+the call tails, esp. the legacy bare `generate_content`, are too generic to widen
+project-wide). `trigger_imports = {"google"}` (the only importable root for both
+SDKs; the adapter self-scopes by matching the exact genai import identity, so an
+unrelated `google.cloud.*` import gates it on but emits nothing). Added after a
+real-repo scan of a production voice-agent read `0 findings / Readiness N/A` —
+every LLM call went through the unrecognized Gemini SDK.
+
+| Pattern (incl. async `.aio`, aliased / from-import forms) | Emits |
+|---|---|
+| `genai.Client(...)` (`from google import genai`), `Client(...)` (`from google.genai import Client`), legacy `genai.GenerativeModel(...)` | `LLM_CLIENT_CREATE` |
+| `<client>.models.generate_content(...)`, `.aio.models.generate_content(...)`, the `…generate_content_stream` forms, `<client>.aio.live.connect(...)` (Live/voice), legacy `<model>.generate_content(...)` | `LLM_CALL` |
+| `<client>.models.embed_content(...)`, `.aio.models.embed_content(...)`, legacy `<model>.embed_content(...)` | `EMBEDDING_CALL` |
+
+Legacy bare tails (`model.generate_content`, `embed_content`) are honored **only
+when a `google.generativeai` import is present in the file** — otherwise they are
+too generic to be safe. The new-SDK chained forms match first, so a legacy import
+never double-tags a new-SDK call.
+
+**Resolution — call-site only, and deliberately partial (precision over recall).**
+Gemini nests its generation config inside `config=GenerateContentConfig(...)`
+(`max_output_tokens`, `tools`, `temperature`, …) and the client timeout inside
+`http_options`, so — unlike the flat kwargs of OpenAI/LiteLLM — those are not
+resolvable at the call site in v1. The adapter resolves `model` and `provider`
+(`"google"`) and marks `timeout`/`max_tokens`/`max_retries`/`tools`/`temperature`
+as **UNKNOWN, not ABSENT**, so High RES/COST/MDL rules stay silent (§2) rather
+than false-positive. What still fires: the app is scored (not N/A), the harness
+OBS/EVAL rules, and taint/output rules (OUT-001/002) on `generate_content` output.
+Known residual (tracked in `docs/backlog.md`): the nested `GenerateContentConfig`
+is not yet unpacked, so RES-001/002/COST-001/MDL rules do not reach Gemini calls;
+and, like the framework/LiteLLM adapters, a cross-module client is not linked.
+
 ## 10. Derived semantics (`core/derive.py`, ADR-0012 D1)
 
 After every adapter has run, the engine runs one deterministic derivation pass

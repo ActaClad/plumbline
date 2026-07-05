@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from .base import Adapter
 from .crewai import CrewAIAdapter
+from .gemini import GeminiAdapter
 from .langchain import LangChainAdapter
 from .litellm import LiteLLMAdapter
 from .openai_sdk import OpenAISDKAdapter
@@ -17,6 +18,7 @@ ADAPTERS: tuple[Adapter, ...] = (
     LangChainAdapter(),
     CrewAIAdapter(),
     LiteLLMAdapter(),
+    GeminiAdapter(),
     OpenAISDKAdapter(),
 )
 
