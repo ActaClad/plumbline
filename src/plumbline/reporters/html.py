@@ -53,14 +53,17 @@ _LOGO = (
 )
 
 _STYLE = """\
-:root { --bg:#0f1419; --card:#1a2029; --fg:#e6e6e6; --muted:#8a94a6; --line:#2a3340;
-  --accent:#4c9aff; --ok:#3fb950; --warn:#d29922; --bad:#f85149;
-  --okbg:rgba(63,185,80,.15); --warnbg:rgba(210,153,34,.15); --badbg:rgba(248,81,73,.15);
-  --chip:#2a3340; }
-:root[data-theme=light] { --bg:#f6f8fa; --card:#ffffff; --fg:#1f2328; --muted:#59636e;
-  --line:#d1d9e0; --accent:#0969da; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e;
-  --okbg:rgba(26,127,55,.10); --warnbg:rgba(154,103,0,.12); --badbg:rgba(207,34,46,.10);
-  --chip:#eaeef2; }
+/* ActaClad brand — dark (default): near-black + gold. Semantic ok/warn/bad stay
+   green/gold/red so pass/fail reads at a glance (info design ≠ brand accent). */
+:root { --bg:#0d0d0d; --card:#1a1610; --fg:#ede6d6; --muted:#9a9488; --line:#2c2620;
+  --accent:#d9ae5a; --ok:#5cb87a; --warn:#c8951e; --bad:#e5735b;
+  --okbg:rgba(92,184,122,.15); --warnbg:rgba(200,149,30,.16); --badbg:rgba(229,115,91,.16);
+  --chip:#241f16; }
+/* light: warm cream/paper + gold, matching actaclad.com's light mode. */
+:root[data-theme=light] { --bg:#f5f1e8; --card:#fffdf8; --fg:#2a241a; --muted:#6f685a;
+  --line:#e3dccc; --accent:#a9781a; --ok:#2f8a52; --warn:#9a6f10; --bad:#c14a35;
+  --okbg:rgba(47,138,82,.12); --warnbg:rgba(154,111,16,.14); --badbg:rgba(193,74,53,.12);
+  --chip:#efe8d8; }
 * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--fg);
   font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; }
 .wrap { max-width:960px; margin:0 auto; padding:32px 20px; }

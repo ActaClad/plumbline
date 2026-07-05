@@ -200,27 +200,28 @@
   .s3 .cmd { margin-top: 5cqw; font-family: var(--font-mono); font-size: 2.85cqw; color: var(--dim); }
   .s3 .cmd .fl { color: var(--gold); }
   /* The branded HTML report (its real GitHub-dark palette, as a "screenshot") */
+  /* mirrors the rebranded HTML report: warm-dark card, gold accent, cream text */
   .report {
-    margin-top: 3cqw; background: #0f1419; border: 1px solid #2a3340;
+    margin-top: 3cqw; background: #1a1610; border: 1px solid #2c2620;
     border-radius: 2.4cqw; overflow: hidden;
   }
   .report .rtop {
     display: flex; align-items: baseline; justify-content: space-between;
-    padding: 3cqw 3.4cqw; border-bottom: 1px solid #1c242e;
+    padding: 3cqw 3.4cqw; border-bottom: 1px solid #241f16;
   }
-  .report .rmark { font-family: var(--font-mono); font-size: 2.7cqw; color: #e6e6e6; }
-  .report .rby { font-size: 2.05cqw; color: #8a94a6; }
+  .report .rmark { font-family: var(--font-mono); font-size: 2.7cqw; color: var(--gold-2); }
+  .report .rby { font-size: 2.05cqw; color: var(--dim); }
   .report .rbody { display: flex; gap: 4.5cqw; padding: 4cqw 3.6cqw; align-items: center; }
-  .report .rscore { font-family: var(--font-display); font-size: 13cqw; font-weight: 700; color: #e6e6e6; line-height: .82; }
-  .report .rscore small { font-size: 3.4cqw; color: #8a94a6; font-weight: 400; }
-  .report .rscore .lab { display: block; font-family: var(--font-sans); font-size: 2.15cqw; color: #8a94a6; letter-spacing: .16em; text-transform: uppercase; margin-top: 1.6cqw; }
+  .report .rscore { font-family: var(--font-display); font-size: 13cqw; font-weight: 700; color: var(--cream); line-height: .82; }
+  .report .rscore small { font-size: 3.4cqw; color: var(--dim); font-weight: 400; }
+  .report .rscore .lab { display: block; font-family: var(--font-sans); font-size: 2.15cqw; color: var(--dim); letter-spacing: .16em; text-transform: uppercase; margin-top: 1.6cqw; }
   .report .rpil { flex: 1; display: flex; flex-direction: column; gap: 2.2cqw; }
   .report .row { display: grid; grid-template-columns: 20cqw 1fr 6cqw; gap: 2cqw; align-items: center; font-size: 2.35cqw; }
-  .report .row .nm { color: #c9cdd4; }
-  .report .row .track { height: 1.5cqw; background: #2a3340; border-radius: 1cqw; overflow: hidden; }
+  .report .row .nm { color: #d8d0c0; }
+  .report .row .track { height: 1.5cqw; background: #2c2620; border-radius: 1cqw; overflow: hidden; }
   .report .row .fill { height: 100%; border-radius: 1cqw; display: block; }
-  .report .row .val { color: #8a94a6; font-variant-numeric: tabular-nums; text-align: right; }
-  .report .rgate { padding: 2.7cqw 3.6cqw; background: rgba(248,81,73,.14); color: #f85149; font-size: 2.5cqw; font-weight: 600; }
+  .report .row .val { color: var(--dim); font-variant-numeric: tabular-nums; text-align: right; }
+  .report .rgate { padding: 2.7cqw 3.6cqw; background: rgba(229,115,91,.14); color: var(--sev); font-size: 2.5cqw; font-weight: 600; }
   .s3 .cap3 { margin-top: 5cqw; color: var(--cream); font-size: 3.1cqw; }
   .s3 .cap3 b { color: var(--gold-2); font-weight: 600; }
 
@@ -347,10 +348,10 @@
           <div class="rbody">
             <div class="rscore">93<small>/100</small><span class="lab">Readiness</span></div>
             <div class="rpil">
-              <div class="row"><span class="nm">Reliability</span><span class="track"><i class="fill" style="width:80%;background:#d29922"></i></span><span class="val">80</span></div>
-              <div class="row"><span class="nm">Architecture</span><span class="track"><i class="fill" style="width:100%;background:#3fb950"></i></span><span class="val">100</span></div>
-              <div class="row"><span class="nm">Harness</span><span class="track"><i class="fill" style="width:99%;background:#3fb950"></i></span><span class="val">99</span></div>
-              <div class="row"><span class="nm">Security</span><span class="track"><i class="fill" style="width:100%;background:#3fb950"></i></span><span class="val">100</span></div>
+              <div class="row"><span class="nm">Reliability</span><span class="track"><i class="fill" style="width:80%;background:#c8951e"></i></span><span class="val">80</span></div>
+              <div class="row"><span class="nm">Architecture</span><span class="track"><i class="fill" style="width:100%;background:#5cb87a"></i></span><span class="val">100</span></div>
+              <div class="row"><span class="nm">Harness</span><span class="track"><i class="fill" style="width:99%;background:#5cb87a"></i></span><span class="val">99</span></div>
+              <div class="row"><span class="nm">Security</span><span class="track"><i class="fill" style="width:100%;background:#5cb87a"></i></span><span class="val">100</span></div>
             </div>
           </div>
           <div class="rgate">✗ Quality Gate failed — 2 High-confidence criticals (PLB-OUT-001)</div>
