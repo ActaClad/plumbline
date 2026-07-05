@@ -1,11 +1,14 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Plumbline report</title><style>:root { --bg:#0f1419; --card:#1a2029; --fg:#e6e6e6; --muted:#8a94a6; --line:#2a3340;
-  --accent:#4c9aff; --ok:#3fb950; --warn:#d29922; --bad:#f85149;
-  --okbg:rgba(63,185,80,.15); --warnbg:rgba(210,153,34,.15); --badbg:rgba(248,81,73,.15);
-  --chip:#2a3340; }
-:root[data-theme=light] { --bg:#f6f8fa; --card:#ffffff; --fg:#1f2328; --muted:#59636e;
-  --line:#d1d9e0; --accent:#0969da; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e;
-  --okbg:rgba(26,127,55,.10); --warnbg:rgba(154,103,0,.12); --badbg:rgba(207,34,46,.10);
-  --chip:#eaeef2; }
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Plumbline report</title><style>/* ActaClad brand — dark (default): near-black + gold. Semantic ok/warn/bad stay
+   green/gold/red so pass/fail reads at a glance (info design ≠ brand accent). */
+:root { --bg:#0d0d0d; --card:#1a1610; --fg:#ede6d6; --muted:#9a9488; --line:#2c2620;
+  --accent:#d9ae5a; --ok:#5cb87a; --warn:#c8951e; --bad:#e5735b;
+  --okbg:rgba(92,184,122,.15); --warnbg:rgba(200,149,30,.16); --badbg:rgba(229,115,91,.16);
+  --chip:#241f16; }
+/* light: warm cream/paper + gold, matching actaclad.com's light mode. */
+:root[data-theme=light] { --bg:#f5f1e8; --card:#fffdf8; --fg:#2a241a; --muted:#6f685a;
+  --line:#e3dccc; --accent:#a9781a; --ok:#2f8a52; --warn:#9a6f10; --bad:#c14a35;
+  --okbg:rgba(47,138,82,.12); --warnbg:rgba(154,111,16,.14); --badbg:rgba(193,74,53,.12);
+  --chip:#efe8d8; }
 * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--fg);
   font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; }
 .wrap { max-width:960px; margin:0 auto; padding:32px 20px; }
@@ -20,7 +23,12 @@ h1 { font-size:20px; margin:0; letter-spacing:.2px; } .brand .sp { flex:1; }
   padding:0 0 18px; border-bottom:1px solid var(--line); margin-bottom:20px; }
 .meta b { color:var(--fg); font-weight:600; }
 .hero { display:flex; gap:28px; align-items:center; background:var(--card);
-  border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:20px; }
+  border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:20px;
+  position:relative; overflow:hidden; }
+.hero > div { position:relative; z-index:1; }
+.hexwm { position:absolute; z-index:0; right:-46px; bottom:-58px; width:224px; height:224px;
+  color:var(--accent); opacity:.09; pointer-events:none; }
+.hexwm svg { width:100%; height:100%; display:block; }
 .score { font-size:52px; font-weight:700; line-height:1; }
 .score small { font-size:18px; color:var(--muted); font-weight:400; }
 .pillars { flex:1; display:grid; gap:10px; }
@@ -47,6 +55,9 @@ th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);
 .major { background:var(--warnbg); color:var(--warn); }
 .minor,.info { background:var(--chip); color:var(--muted); }
 .loc { color:var(--muted); font-family:ui-monospace,monospace; font-size:12px; }
+.loc .sn { color:var(--accent); font-weight:600; }
+.loc .sites { color:var(--muted); font-size:11px; margin-top:4px; line-height:1.7;
+  word-break:break-word; }
 .msg { color:var(--fg); } .why { color:var(--muted); font-size:13px; }
 .fix { margin-top:8px; } .fix > summary { cursor:pointer; color:var(--accent);
   font-size:12px; font-weight:600; list-style:none; }
@@ -73,12 +84,12 @@ th.sortable { cursor:pointer; user-select:none; } th.sortable:hover { color:var(
 .footer b { color:var(--fg); font-weight:600; }
 @media print {
   :root { --bg:#fff; --card:#fff; --fg:#111; --muted:#555; --line:#ccc; }
-  body { background:#fff; } .themebtn, .toolbar { display:none; }
+  body { background:#fff; } .themebtn, .toolbar, .hexwm { display:none; }
   .hero, table { break-inside:avoid; } tr { break-inside:avoid; }
   .fix pre { display:block !important; } .fix[open] > summary::before,
   .fix > summary::before { content:''; } .fix > summary { color:var(--muted); }
 }
-</style></head><body><div class=wrap><div class=brand><svg class=logo viewBox='0 0 24 24' width=26 height=26 fill=none stroke=currentColor stroke-width=1.7 stroke-linecap=round stroke-linejoin=round aria-hidden=true><path d='M4 5h16'/><path d='M12 5v10'/><path d='M12 15l3.2 4.5H8.8Z'/></svg><h1>Plumbline</h1><span class=sp></span><button class=themebtn id=theme type=button>Light</button></div><p class=sub>Reliability &amp; architecture analysis for agentic systems · by ActaClad</p><div class=meta><span><b>49</b> files scanned</span><span><b>25</b> rules run</span><span><b>3</b> findings</span><span>Plumbline v0.0.1</span></div><div class=hero><div><div class=score>93<small>/100</small></div><div class=why>Readiness Score</div></div><div class=pillars><div class=pillar><span>Reliability</span><span class=bar><i style='width:80%;background:var(--ok)'></i></span><span>80</span><span class='count has'>2 issues</span></div><div class=pillar><span>Architecture &amp; Agentic Maturity</span><span class=bar><i style='width:100%;background:var(--ok)'></i></span><span>100</span><span class='count'>no issues</span></div><div class=pillar><span>Harness Engineering</span><span class=bar><i style='width:99%;background:var(--ok)'></i></span><span>99</span><span class='count has'>1 issue</span></div><div class=pillar><span>Security</span><span class=bar><i style='width:100%;background:var(--ok)'></i></span><span>100</span><span class='count'>no issues</span></div></div></div><div class='gate fail'>✗ Quality Gate failed — 2 blocking findings (Blockers and High-confidence Criticals), listed below</div><div class=summary><span class=total>3 findings</span><span class=pill>2 Critical</span><span class=pill>1 Major</span></div><div class=toolbar><input id=q type=search placeholder="Filter findings…" aria-label="Filter findings"><span class=sevfilter><button class=sevchip data-sev="Critical">Critical</button><button class=sevchip data-sev="Major">Major</button></span><span id=visct class=why></span></div><table id=findings><thead><tr><th class=sortable>Severity<span class=arrow></span></th><th class=sortable>Rule<span class=arrow></span></th><th class=sortable>Location<span class=arrow></span></th><th class=sortable>What &amp; why<span class=arrow></span></th></tr></thead><tbody><tr data-sev="Major" data-text="plb-obs-001 llm/default_plugins/openai_models.py:961:26 this project ships llm/agent code with no in-code tracing or instrumentation; production failures will be undiagnosable. (if you enable tracing via env vars / auto-instrumentation, ignore this.) note: harness rules reason about the whole repo — scan the project root (including tests/ and ci), not just src/. an llm/agent app with no tracing is unobservable in production — failures can&#x27;t be traced. instrument the app so production runs are traceable.
+</style></head><body><div class=wrap><div class=brand><svg class=logo viewBox='0 0 24 24' width=26 height=26 fill=none stroke=currentColor stroke-width=1.7 stroke-linecap=round stroke-linejoin=round aria-hidden=true><path d='M4 5h16'/><path d='M12 5v10'/><path d='M12 15l3.2 4.5H8.8Z'/></svg><h1>Plumbline</h1><span class=sp></span><button class=themebtn id=theme type=button>Light</button></div><p class=sub>Reliability &amp; architecture analysis for agentic systems · by ActaClad</p><div class=meta><span><b>49</b> files scanned</span><span><b>32</b> rules run</span><span><b>3</b> findings</span><span>Plumbline v0.0.1</span></div><div class=hero><div class=hexwm aria-hidden=true><svg viewBox='0 0 100 100' fill=none stroke=currentColor stroke-width=2><polygon points='50,3 93,27 93,73 50,97 7,73 7,27'/><polygon points='50,20 78,36 78,64 50,80 22,64 22,36' stroke-width=1.5/></svg></div><div><div class=score>93<small>/100</small></div><div class=why>Readiness Score</div></div><div class=pillars><div class=pillar><span>Reliability</span><span class=bar><i style='width:80%;background:var(--ok)'></i></span><span>80</span><span class='count has'>2 issues</span></div><div class=pillar><span>Architecture &amp; Agentic Maturity</span><span class=bar><i style='width:100%;background:var(--ok)'></i></span><span>100</span><span class='count'>no issues</span></div><div class=pillar><span>Harness Engineering</span><span class=bar><i style='width:99%;background:var(--ok)'></i></span><span>99</span><span class='count has'>1 issue</span></div><div class=pillar><span>Security</span><span class=bar><i style='width:100%;background:var(--ok)'></i></span><span>100</span><span class='count'>no issues</span></div></div></div><div class='gate fail'>✗ Quality Gate failed — 2 blocking findings (Blockers and High-confidence Criticals), listed below</div><div class=summary><span class=total>3 findings</span><span class=pill>2 Critical</span><span class=pill>1 Major</span></div><div class=toolbar><input id=q type=search placeholder="Filter findings…" aria-label="Filter findings"><span class=sevfilter><button class=sevchip data-sev="Critical">Critical</button><button class=sevchip data-sev="Major">Major</button></span><span id=visct class=why></span></div><table id=findings><thead><tr><th class=sortable>Severity<span class=arrow></span></th><th class=sortable>Rule<span class=arrow></span></th><th class=sortable>Location<span class=arrow></span></th><th class=sortable>What &amp; why<span class=arrow></span></th></tr></thead><tbody><tr data-sev="Major" data-text="plb-obs-001 llm/default_plugins/openai_models.py:961:26 this project ships llm/agent code with no in-code tracing or instrumentation; production failures will be undiagnosable. (if you enable tracing via env vars / auto-instrumentation, ignore this.) note: harness rules reason about the whole repo — scan the project root (including tests/ and ci), not just src/. an llm/agent app with no tracing is unobservable in production — failures can&#x27;t be traced. instrument the app so production runs are traceable.
 
 - an observability sdk: opentelemetry, langsmith, langfuse, phoenix/arize,
   logfire, helicone, traceloop, …
@@ -95,7 +106,7 @@ apply — plumbline cannot see env-var activation; ignore or suppress it.
 
 If you already enable tracing via environment variables
 (LANGCHAIN_TRACING_V2=true, OTEL_* auto-instrumentation), this finding does not
-apply — Plumbline cannot see env-var activation; ignore or suppress it.</pre></details></td></tr><tr data-sev="Critical" data-text="plb-out-001 llm/default_plugins/openai_models.py:1027:35 llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request. `json.loads` on raw llm output with no guard crashes on the first malformed generation. validate model output against a schema and handle parse failure (retry or fallback).
+apply — Plumbline cannot see env-var activation; ignore or suppress it.</pre></details></td></tr><tr data-sev="Critical" data-text="plb-out-001 llm/default_plugins/openai_models.py 1027:35, 1143:35 llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request. `json.loads` on raw llm output with no guard crashes on the first malformed generation. validate model output against a schema and handle parse failure (retry or fallback).
 
 bad:
     data = json.loads(resp.choices[0].message.content)
@@ -106,28 +117,7 @@ good:
     except json.jsondecodeerror:
         data = repair_or_retry(...)
     # better: use the provider&#x27;s structured-output / response_format and validate
-"><td data-sort="40"><span class="tag critical">Critical</span><div class=why>High</div></td><td data-sort="plb-out-001"><strong>PLB-OUT-001</strong></td><td class=loc data-sort="llm/default_plugins/openai_models.py:00001027">llm/default_plugins/openai_models.py:1027:35</td><td data-sort="llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request."><div class=msg>LLM output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request.</div><div class=why>`json.loads` on raw LLM output with no guard crashes on the first malformed generation.</div><details class=fix><summary>How to fix</summary><pre>Validate model output against a schema and handle parse failure (retry or fallback).
-
-Bad:
-    data = json.loads(resp.choices[0].message.content)
-
-Good:
-    try:
-        data = json.loads(resp.choices[0].message.content)
-    except json.JSONDecodeError:
-        data = repair_or_retry(...)
-    # better: use the provider&#x27;s structured-output / response_format and validate</pre></details></td></tr><tr data-sev="Critical" data-text="plb-out-001 llm/default_plugins/openai_models.py:1143:35 llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request. `json.loads` on raw llm output with no guard crashes on the first malformed generation. validate model output against a schema and handle parse failure (retry or fallback).
-
-bad:
-    data = json.loads(resp.choices[0].message.content)
-
-good:
-    try:
-        data = json.loads(resp.choices[0].message.content)
-    except json.jsondecodeerror:
-        data = repair_or_retry(...)
-    # better: use the provider&#x27;s structured-output / response_format and validate
-"><td data-sort="40"><span class="tag critical">Critical</span><div class=why>High</div></td><td data-sort="plb-out-001"><strong>PLB-OUT-001</strong></td><td class=loc data-sort="llm/default_plugins/openai_models.py:00001143">llm/default_plugins/openai_models.py:1143:35</td><td data-sort="llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request."><div class=msg>LLM output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request.</div><div class=why>`json.loads` on raw LLM output with no guard crashes on the first malformed generation.</div><details class=fix><summary>How to fix</summary><pre>Validate model output against a schema and handle parse failure (retry or fallback).
+"><td data-sort="40"><span class="tag critical">Critical</span><div class=why>High</div></td><td data-sort="plb-out-001"><strong>PLB-OUT-001</strong></td><td class=loc data-sort="llm/default_plugins/openai_models.py:00001027">llm/default_plugins/openai_models.py<span class=sn> · 2 sites</span><div class=sites>1027:35, 1143:35</div></td><td data-sort="llm output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request."><div class=msg>LLM output is parsed with json.loads and no error handling; a malformed generation will raise and crash the request.</div><div class=why>`json.loads` on raw LLM output with no guard crashes on the first malformed generation.</div><details class=fix><summary>How to fix</summary><pre>Validate model output against a schema and handle parse failure (retry or fallback).
 
 Bad:
     data = json.loads(resp.choices[0].message.content)

@@ -119,6 +119,9 @@ th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);
 .major { background:var(--warnbg); color:var(--warn); }
 .minor,.info { background:var(--chip); color:var(--muted); }
 .loc { color:var(--muted); font-family:ui-monospace,monospace; font-size:12px; }
+.loc .sn { color:var(--accent); font-weight:600; }
+.loc .sites { color:var(--muted); font-size:11px; margin-top:4px; line-height:1.7;
+  word-break:break-word; }
 .msg { color:var(--fg); } .why { color:var(--muted); font-size:13px; }
 .fix { margin-top:8px; } .fix > summary { cursor:pointer; color:var(--accent);
   font-size:12px; font-weight:600; list-style:none; }
@@ -323,29 +326,66 @@ def _findings_table(findings: Iterable[Finding]) -> str:
     if not rows:
         return "<table><tr><td class=empty>No findings.</td></tr></table>"
     head = "".join(f"<th class=sortable>{h}<span class=arrow></span></th>" for h in _HEADERS)
-    body = "".join(_row(f) for f in rows)
+    body = "".join(_group_row(g) for g in _group(rows))
     return f"<table id=findings><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
 
 
-def _row(f: Finding) -> str:
-    sev = _SEV_CLASS.get(f.severity, "info")
+def _group(rows: list[Finding]) -> list[list[Finding]]:
+    """Collapse identical findings — same rule, file, message, severity, and
+    confidence, differing only by location — into one visual row per recurring
+    defect. Presentation only: SARIF/JSON/gate/summary still see every finding.
+    `rows` is pre-sorted by `finding_sort_key`; dict preserves that order, so the
+    group order and each group's first member are deterministic.
+    """
+    groups: dict[tuple[object, ...], list[Finding]] = {}
+    for f in rows:
+        key = (f.rule_id, f.file, f.message, f.severity.value, f.confidence.value)
+        groups.setdefault(key, []).append(f)
+    return list(groups.values())
+
+
+def _loc(f: Finding) -> str:
     col = f":{f.column + 1}" if f.column is not None else ""
-    loc = f"{f.file}:{f.line}{col}"
+    return f"{f.line}{col}"
+
+
+def _loc_cell(group: list[Finding]) -> tuple[str, str]:
+    """(location <td>, searchable location text) for a group. Single finding →
+    `file:line:col`; a recurring defect → `file · N sites` with every line listed
+    (visible, so the reader can still fix each one). Sorts by the first line."""
+    ordered = sorted(group, key=lambda g: (g.line, g.column if g.column is not None else -1))
+    file = ordered[0].file
+    loc_key = f"{file}:{ordered[0].line:08d}".lower()
+    if len(ordered) == 1:
+        full = f"{file}:{_loc(ordered[0])}"
+        return (f'<td class=loc data-sort="{html.escape(loc_key)}">{html.escape(full)}</td>', full)
+    lines = ", ".join(_loc(g) for g in ordered)
+    cell = (
+        f'<td class=loc data-sort="{html.escape(loc_key)}">{html.escape(file)}'
+        f"<span class=sn> · {len(ordered)} sites</span>"
+        f"<div class=sites>{html.escape(lines)}</div></td>"
+    )
+    return cell, f"{file} {lines}"
+
+
+def _group_row(group: list[Finding]) -> str:
+    f = group[0]
+    sev = _SEV_CLASS.get(f.severity, "info")
     std = f" · {html.escape(', '.join(f.standards))}" if f.standards else ""
-    # Per-row searchable text + per-cell sort keys. Severity sorts by its numeric
-    # rank (Blocker=50 … Info=10); location pads the line so it orders numerically
-    # within a file. All attribute values are escaped (SEC-006 — no self-XSS).
+    loc_cell, loc_text = _loc_cell(group)
+    # Searchable over every occurrence's location + the shared text. Severity
+    # sorts by numeric rank (Blocker=50 … Info=10). All attr values escaped
+    # (SEC-006 — no self-XSS).
     searchable = " ".join(
-        [f.rule_id, loc, f.message, f.why_it_matters, f.remediation, *f.standards]
+        [f.rule_id, loc_text, f.message, f.why_it_matters, f.remediation, *f.standards]
     ).lower()
-    loc_key = f"{f.file}:{f.line:08d}".lower()
     return (
         f'<tr data-sev="{html.escape(f.severity.label)}" data-text="{html.escape(searchable)}">'
         f'<td data-sort="{f.severity.value}"><span class="tag {sev}">{f.severity.label}</span>'
         f"<div class=why>{f.confidence.label}</div></td>"
         f'<td data-sort="{html.escape(f.rule_id.lower())}">'
         f"<strong>{html.escape(f.rule_id)}</strong>{std}</td>"
-        f'<td class=loc data-sort="{html.escape(loc_key)}">{html.escape(loc)}</td>'
+        f"{loc_cell}"
         f'<td data-sort="{html.escape(f.message.lower())}">'
         f"<div class=msg>{html.escape(f.message)}</div>"
         f"<div class=why>{html.escape(f.why_it_matters)}</div>"

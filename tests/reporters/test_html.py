@@ -14,7 +14,7 @@ _EXAMPLE_REPORT = (
 )
 
 
-def _finding(message: str = "m", why: str = "w") -> Finding:
+def _finding(message: str = "m", why: str = "w", line: int = 10) -> Finding:
     return Finding(
         rule_id="PLB-SEC-002",
         title="t",
@@ -25,7 +25,7 @@ def _finding(message: str = "m", why: str = "w") -> Finding:
         message=message,
         why_it_matters=why,
         file="app.py",
-        line=10,
+        line=line,
         column=4,
         end_line=None,
         snippet=None,
@@ -130,6 +130,32 @@ def test_summary_strip_counts_findings_by_severity() -> None:
     assert "2 Blocker" in html  # both fixtures are Blocker severity
 
 
+def test_identical_findings_aggregate_into_one_row() -> None:
+    # The same defect (same rule/file/message) recurring at many lines collapses
+    # to ONE table row showing the count + every line — not N near-identical rows
+    # (the real-repo noise case: 31× GOV-002 email-in-log across one file).
+    findings = [_finding(line=n) for n in (10, 20, 30)]
+    html = render_html(_result(findings))
+    # One grouped <tr> in the table body (not three).
+    body = html.split("<tbody>", 1)[1].split("</tbody>", 1)[0]
+    assert body.count("<tr") == 1
+    assert "3 sites" in html  # the count is surfaced
+    # Every location stays visible/actionable (acceptance criterion).
+    assert "class=sites" in html
+    for line in ("10:5", "20:5", "30:5"):  # column 4 -> :5 (1-indexed)
+        assert line in html
+    # But the summary strip and pillar counts still reflect ALL findings.
+    assert "3 findings" in html
+    assert "3 issue" in html
+
+
+def test_distinct_messages_do_not_aggregate() -> None:
+    # Same rule + file but different messages are different defects — not grouped.
+    findings = [_finding(message="a", line=10), _finding(message="b", line=20)]
+    body = render_html(_result(findings)).split("<tbody>", 1)[1].split("</tbody>", 1)[0]
+    assert body.count("<tr") == 2
+
+
 def test_pillar_bars_show_issue_counts() -> None:
     html = render_html(_result([_finding()]))  # one Security finding
     assert "1 issue" in html  # the Security pillar reports its count
@@ -143,7 +169,9 @@ def test_committed_example_report_is_not_stale() -> None:
     # regenerated, or it silently shows users an outdated report. Every structural
     # marker the CURRENT reporter emits must also appear in the committed sample.
     assert _EXAMPLE_REPORT.exists(), f"missing {_EXAMPLE_REPORT}"
-    fresh = render_html(_result([_finding()]))
+    # Two identical findings so `fresh` exercises the aggregation markup, the way
+    # the committed sample does (llm's 2× PLB-OUT-001 in one file collapse).
+    fresh = render_html(_result([_finding(line=10), _finding(line=20)]))
     example = _EXAMPLE_REPORT.read_text(encoding="utf-8")
     markers = (
         "id=findings",
@@ -156,6 +184,7 @@ def test_committed_example_report_is_not_stale() -> None:
         "class=brand",  # branded header
         "class=meta",  # scan-metadata strip
         "class=fix",  # expandable remediation
+        "class=sites",  # aggregated recurring-defect row
         "id=theme",  # light/dark toggle
     )
     stale = [m for m in markers if m in fresh and m not in example]
