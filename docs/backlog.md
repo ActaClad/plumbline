@@ -141,6 +141,17 @@ crewAI); **SEC-004** test-fixture secrets (substring placeholder + absolute
 distinct-char entropy + test-path — 26→0); **LiteLLM recall gap** (new adapter —
 babyagi 0→16). Still open:
 
+- **Google Gemini (`google-genai`) adapter — HIGH priority (real-repo miss).**
+  A production voice-agent (`google-genai>=1.70`) scanned to `0 findings /
+  Readiness N/A` because *every* LLM call goes through the unsupported Gemini SDK:
+  `from google import genai` → `genai.Client(api_key=...)` →
+  `client.aio.models.generate_content(...)` (note the **async `.aio` client** —
+  the call site is `client.aio.models.generate_content`, not `client.models.*`),
+  plus `google.genai.live.AsyncSession` for the streaming/voice path. The adapter
+  must recognize both the sync `client.models.generate_content` and the async
+  `client.aio.models.generate_content` shapes, and emit LLM_CALL / model-config /
+  output tags so RES/OUT/COST/MDL rules fire. This is the first stack where a
+  whole real app is invisible — bump ahead of the long tail below.
 - **Remaining unsupported stacks.** `instructor`, raw `requests`/`httpx` to an LLM
   endpoint, and other wrappers are still invisible. Add adapters as they show up
   in real-repo scans.

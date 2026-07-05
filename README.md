@@ -81,6 +81,12 @@ where applicable.
 ```bash
 pip install actaclad-plumbline
 
+# Requires Python 3.11+ to *run* (it scans code of any Python version — it parses,
+# never imports, your source). On a stock-macOS Python 3.9, or an externally
+# managed one (Homebrew / uv / PEP 668), install it as an isolated CLI instead:
+#   pipx install actaclad-plumbline        # or, if you use uv:
+#   uv tool install actaclad-plumbline     # (uvx --from actaclad-plumbline plumb scan  to try without installing)
+
 # scan a project — the Quality Gate runs by default
 # (exit 1 on any Blocker or High-confidence Critical), so it's CI-ready as-is.
 # Prints findings + the Readiness Score (a 0–100 dashboard; the gate, not the
