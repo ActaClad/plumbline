@@ -52,6 +52,15 @@ _LOGO = (
     "aria-hidden=true><path d='M4 5h16'/><path d='M12 5v10'/><path d='M12 15l3.2 4.5H8.8Z'/></svg>"
 )
 
+# Faint AC-hexagon watermark for the hero card (brand motif from the launch
+# carousel). Monochrome via currentColor -> inherits the gold accent; offline-safe.
+_HEXWM = (
+    "<div class=hexwm aria-hidden=true><svg viewBox='0 0 100 100' fill=none "
+    "stroke=currentColor stroke-width=2>"
+    "<polygon points='50,3 93,27 93,73 50,97 7,73 7,27'/>"
+    "<polygon points='50,20 78,36 78,64 50,80 22,64 22,36' stroke-width=1.5/></svg></div>"
+)
+
 _STYLE = """\
 /* ActaClad brand — dark (default): near-black + gold. Semantic ok/warn/bad stay
    green/gold/red so pass/fail reads at a glance (info design ≠ brand accent). */
@@ -78,7 +87,12 @@ h1 { font-size:20px; margin:0; letter-spacing:.2px; } .brand .sp { flex:1; }
   padding:0 0 18px; border-bottom:1px solid var(--line); margin-bottom:20px; }
 .meta b { color:var(--fg); font-weight:600; }
 .hero { display:flex; gap:28px; align-items:center; background:var(--card);
-  border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:20px; }
+  border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:20px;
+  position:relative; overflow:hidden; }
+.hero > div { position:relative; z-index:1; }
+.hexwm { position:absolute; z-index:0; right:-46px; bottom:-58px; width:224px; height:224px;
+  color:var(--accent); opacity:.09; pointer-events:none; }
+.hexwm svg { width:100%; height:100%; display:block; }
 .score { font-size:52px; font-weight:700; line-height:1; }
 .score small { font-size:18px; color:var(--muted); font-weight:400; }
 .pillars { flex:1; display:grid; gap:10px; }
@@ -131,7 +145,7 @@ th.sortable { cursor:pointer; user-select:none; } th.sortable:hover { color:var(
 .footer b { color:var(--fg); font-weight:600; }
 @media print {
   :root { --bg:#fff; --card:#fff; --fg:#111; --muted:#555; --line:#ccc; }
-  body { background:#fff; } .themebtn, .toolbar { display:none; }
+  body { background:#fff; } .themebtn, .toolbar, .hexwm { display:none; }
   .hero, table { break-inside:avoid; } tr { break-inside:avoid; }
   .fix pre { display:block !important; } .fix[open] > summary::before,
   .fix > summary::before { content:''; } .fix > summary { color:var(--muted); }
@@ -209,13 +223,13 @@ def _meta(result: ScanResult) -> str:
 def _hero(scores: Scores, counts: Mapping[Pillar, int]) -> str:
     if not scores.applicable:
         return (
-            "<div class=hero><div class=score>N/A</div>"
+            f"<div class=hero>{_HEXWM}<div class=score>N/A</div>"
             "<div class=pillars><div class=why>No LLM/agent code detected — scoring "
             "does not apply (ADR-0008 D3).</div></div></div>"
         )
     bars = "".join(_pillar_bar(p, scores.pillars[p], counts.get(p, 0)) for p in Pillar)
     return (
-        f"<div class=hero><div><div class=score>{scores.readiness}<small>/100</small></div>"
+        f"<div class=hero>{_HEXWM}<div><div class=score>{scores.readiness}<small>/100</small></div>"
         "<div class=why>Readiness Score</div></div>"
         f"<div class=pillars>{bars}</div></div>"
     )
