@@ -7,6 +7,12 @@
 
 **The reliability and architecture analyzer for LLM & agentic systems.**
 
+[![PyPI](https://img.shields.io/pypi/v/actaclad-plumbline?style=flat-square&color=c8951e&label=pypi)](https://pypi.org/project/actaclad-plumbline/)
+[![Python](https://img.shields.io/pypi/pyversions/actaclad-plumbline?style=flat-square)](https://pypi.org/project/actaclad-plumbline/)
+[![CI](https://img.shields.io/github/actions/workflow/status/ActaClad/plumbline/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/ActaClad/plumbline/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
+[![SARIF](https://img.shields.io/badge/output-SARIF%202.1.0-informational?style=flat-square)](docs/sarif-code-scanning.md)
+
 *A plumb line tells a builder whether a structure is true. Plumbline tells you
 whether your agent code is built to survive production.*
 
@@ -17,6 +23,18 @@ whether your agent code is built to survive production.*
 </div>
 
 ---
+
+> **TL;DR** — Your agent didn't get hacked; it fell over. Plumbline is a
+> deterministic static analyzer for the *reliability* of LLM & agentic Python. It
+> catches missing timeouts, unbounded agent loops, and unguarded model-output
+> parsing — the production failures security scanners walk right past. It runs
+> fully offline, gates CI with SARIF output, and can export its rules as a
+> prevention **skill-pack for your coding agent** (Claude Code, Cursor, …).
+
+```bash
+pipx install actaclad-plumbline    # or: uv tool install actaclad-plumbline
+cd your-agent && plumb scan         # inside a repo, the path is optional
+```
 
 ## The problem
 
@@ -54,6 +72,12 @@ collects no usage data — your source code never leaves your machine. The only
 time Plumbline talks to the network is the *optional* AI fix-suggestion layer,
 and only when you explicitly enable it. Your security team can verify this:
 analysis runs fully offline.
+
+**Two ways to use it — catch *and* prevent.** Run `plumb scan` in CI as the
+deterministic gate; and `plumb export-skills` turns the same rule knowledge into
+a prevention skill-pack your coding agent loads, so it writes timeout-wrapped,
+bounded-loop, validated-I/O code *by default* — shifting these defects left of
+the diff. ([Skill pack ↓](#prevent-dont-just-detect-the-skill-pack))
 
 ## What it checks
 
@@ -209,13 +233,24 @@ runtime one.
 
 ## Contributing
 
-New to the project? [**ONBOARDING.md**](ONBOARDING.md) takes you from clone to
-"I've run it myself" in ~30 minutes.
+Plumbline gets better every time someone points it at real code. Contributions
+are wanted, and the bar to your first one is deliberately low — **three ways to
+help, smallest first:**
 
-Plumbline is built to be extended. One rule = one detector module + a
-vulnerable fixture + a clean fixture. See [CONTRIBUTING.md](CONTRIBUTING.md) and
-[`docs/rule-authoring.md`](docs/rule-authoring.md). The full rule taxonomy is
-published as a roadmap — pick an unclaimed rule and open a PR.
+1. **Report a false positive.** It's the single most valuable bug you can file:
+   we turn it into a fix *and* a regression test, in public. Use the
+   [false-positive template](.github/ISSUE_TEMPLATE/false_positive_report.md).
+2. **Point it at your agent and tell us what it missed.** Recall gaps — a
+   framework we don't adapt yet, a defect class we don't catch — drive the
+   roadmap. (A real-repo Gemini miss became a whole new adapter this way.)
+3. **Add a rule.** One rule = one detector module + a vulnerable fixture + a
+   clean fixture — an afternoon's work. The full taxonomy is published as a
+   roadmap; pick an unclaimed rule and open a PR.
+
+New here? [**ONBOARDING.md**](ONBOARDING.md) takes you from clone to "I've run it
+myself" in ~30 minutes; then see [CONTRIBUTING.md](CONTRIBUTING.md) and
+[`docs/rule-authoring.md`](docs/rule-authoring.md). If Plumbline caught something
+real for you, a star helps other engineers find it.
 
 ## License
 
