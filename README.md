@@ -87,6 +87,10 @@ pip install actaclad-plumbline
 # score, decides pass/fail).
 plumb scan ./my-agent-app
 
+# the path is optional — inside a repo, bare `plumb scan` scans the current
+# directory. Pass one or more paths to narrow it (e.g. `plumb scan src/ tests/`).
+plumb scan
+
 # emit SARIF for GitHub code scanning / IDEs, JSON for tooling, and a
 # self-contained offline HTML report
 plumb scan ./my-agent-app --sarif plumbline.sarif --json plumbline.json --html report.html
