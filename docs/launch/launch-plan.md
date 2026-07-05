@@ -38,6 +38,43 @@ Eastern** (Show HN rewards Tue–Thu US morning; avoid Fri/weekend).
 | **T+1** | **Reddit** | Tailored posts (below) — *after* you know the HN reaction and can reference it. |
 | T+2 … T+7 | Follow-ups | The pre-launch FP catch, the Gemini-adapter dogfood story, a rule deep-dive. Sustains the launch past day one. |
 
+## Accounts & posting identity
+
+We have **no HN / X / Reddit presence yet** and a strong **personal LinkedIn**
+(the July-1 founder post pulled ~100 reactions). Who you post *as* differs by
+platform — and on some, a company account actively backfires. The rule of thumb:
+**HN and Reddit reward a real person who built the thing; a company account
+announcing itself is an anti-pattern there. X and LinkedIn-page are fine as the
+brand.**
+
+| Platform | Post as | Why |
+|---|---|---|
+| **Hacker News** | **Personal (the maker)** — never a company account | No "company page" exists on HN; a brand account posting Show HN reads as marketing and gets flagged. HN ranks by **upvotes, not followers**, so having no audience doesn't hurt — **this is the best channel for us.** |
+| **X / Twitter** | **Company (@actaclad) is fine** (worth owning long-term) | Company accounts are normal on X. But a **zero-follower account gets ~no organic reach** day one — the thread is an artifact to embed/link from HN + LinkedIn and a seed for later, not a launch driver. |
+| **Reddit** | **Personal with some karma** — not a brand/new account | Reddit filters corporate + low-karma/new accounts hard (auto-removal, self-promo rules). A fresh "actaclad" account will likely be removed. Defer Reddit, or use a personal account and genuinely participate first. |
+| **LinkedIn** | **Personal drives; company page is of-record** (see below) | Personal reach ≫ company-page reach on LinkedIn. |
+
+**Warm the accounts first.** Create the HN (and Reddit, if used) accounts a few
+days before launch and leave one or two genuine comments — a zero-history account
+posting on day one trips spam filters. Set expectations: with no following on
+HN/X/Reddit, **HN is the equalizer** (merit-ranked); treat X/Reddit as secondary.
+
+**Growing the ActaClad LinkedIn page — the counter-intuitive part.** The goal
+(more page followers) is right, but **launching *from* the company page is the
+wrong mechanism** — LinkedIn throttles company-page reach to a fraction of
+personal. The split that actually grows the page:
+
+1. **Post natively from the personal profile** (the reach driver — write a post,
+   not a reshare).
+2. **@-mention/tag the ActaClad page** in it + a plain *"Follow ActaClad for
+   more."* — the tag is what converts profile clicks into follows.
+3. **Also post from the company page** (announcement + carousel, of-record) and
+   **reshare it from personal within the hour.**
+4. **Repo link in the first comment**, not the body.
+
+Personal drives reach and funnels follows to the page via the tag + CTA; the page
+is the destination and archive, not the megaphone.
+
 ## Channel playbook
 
 ### Hacker News — the anchor
@@ -113,6 +150,9 @@ hook as the blog/HN/X — keep it identical across all channels for coherence.
 - [ ] **Final copy pass** — pick HN title (#1), strip char-count annotations from
   the X thread, confirm repo URL case (`ActaClad/plumbline`).
 - [ ] **Publish the blog** (dev.to/Hashnode), embed the GIF, swap real links.
+- [ ] **Create + warm the accounts** a few days early — personal HN account
+  (and Reddit, if used); the ActaClad X handle. Leave 1–2 genuine comments so
+  they're not zero-history on launch day. (See *Accounts & posting identity*.)
 - [ ] **Clear the HN day** — you must be in the thread all day.
 - [ ] **Website analytics** — enable Vercel Web Analytics / add GA4 so launch-day
   UTM traffic from these posts is actually measured (company TODO).
