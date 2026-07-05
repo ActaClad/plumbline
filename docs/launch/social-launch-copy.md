@@ -211,6 +211,41 @@ Link in the comments. 👇
 > Recommended: **#1** — it rewards the click with the credibility artifact, not a
 > sales page.
 
+### ActaClad company-page post (of-record + carousel)
+
+> Post from the **ActaClad page**, not Durai's profile. Its job is different from
+> the personal post: a crisp product announcement that carries the 4-slide
+> carousel and is the of-record artifact. **Reshare Durai's personal post within
+> the hour** — the personal post drives reach; the page amplifies and archives.
+> Attach the carousel. Repo link in the first comment (same reach rule). ~110 words.
+
+```
+Plumbline is open source today.
+
+Most agentic systems don't break because they were attacked. They break because
+they were engineered badly — a model call with no timeout, no retry on a 429,
+json.loads() on raw model output that dies on the first malformed response, an
+agent loop with no iteration cap.
+
+Every AI-code scanner asks "is this dangerous?" Plumbline asks a different
+question: "will this fall over in production?" — and answers it at design time,
+deterministically, from your source alone. No network. No telemetry. SARIF and a
+pass/fail gate that drop straight into CI.
+
+Apache-2.0. Every rule open.
+
+Built by ActaClad — the design-time companion to our runtime trust platform,
+AgentGuard.
+
+Repo in the comments 👇
+```
+
+> Company-page first comment: `github.com/ActaClad/plumbline — pip install
+> actaclad-plumbline, point it at your agent, and tell us what it gets wrong.`
+> Keep the page voice product-first and factual; save the founder narrative and
+> the honest-limits story for Durai's personal post (they read as confidence
+> there, as hedging on a company page).
+
 ---
 
 ## Reply snippets — the "how is this different from <X>?" question
