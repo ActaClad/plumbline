@@ -82,6 +82,25 @@ $ plumb scan ./llm --sarif results.sarif    # upload to the GitHub Security tab
 # No network, no telemetry — analysis runs fully offline.
 ```
 
+## Beat 3.5 — the shareable report (≈8s) — the money visual
+
+```bash
+$ plumb scan ./llm --open        # writes + opens a branded, self-contained HTML report
+```
+
+The branded report (Readiness 93/100, the four pillar bars, the gate banner) is
+the most screenshot-able artifact Plumbline produces — put it on carousel slide 3
+and in the blog. **Recording note:** the report opens in a *browser*, and terminal
+recorders (VHS/asciinema) capture only the terminal. To show it in the video, do
+one of:
+- a **QuickTime screen recording** that runs `plumb scan ./llm --open` and lets the
+  browser open the report (best — shows the CLI→report flow end to end); or
+- generate it once (`plumb scan ./llm --html llm-report.html`) and drop a **still**
+  into the blog / carousel.
+
+Keep the terminal GIF (Beats 1–3, via `demo.tape`) as the deterministic core; the
+report is the polished companion still/clip.
+
 ## Beat 4 — the close (≈10s)
 
 ```

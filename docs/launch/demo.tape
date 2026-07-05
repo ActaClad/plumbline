@@ -17,6 +17,10 @@
 #
 # Verified 2026-07-05 against plumb 0.0.1 (32 rules): 3 findings, Readiness 93/100.
 # If you re-run on a later Plumbline, eyeball the output and update the launch copy.
+#
+# The scan's last line tips `--open` (the branded HTML report). VHS records only
+# the terminal, so the report itself needs a separate QuickTime screen-rec of
+# `plumb scan ./llm --open` (browser) — see demo-script.md Beat 3.5.
 
 Output plumbline-demo.gif
 
