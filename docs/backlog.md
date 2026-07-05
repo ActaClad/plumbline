@@ -151,7 +151,11 @@ babyagi 0→16). Still open:
   (`max_output_tokens`, `tools`, `temperature`) and the client `http_options`
   timeout, currently left UNKNOWN — so RES-001/002, COST-001, and the MDL
   reasoning/temp rules do not yet reach Gemini calls. Also: cross-module client
-  linking (intra-file today, like the framework/LiteLLM adapters).
+  linking (intra-file today, like the framework/LiteLLM adapters); and legacy
+  `model.generate_content()` leaves `model` ABSENT (the id is on the
+  `GenerativeModel(...)` constructor, not the call) — link it to recover MDL
+  coverage. All three are recall gaps, not FPs. (Adapter verified on the
+  voice-agent: 3/3 findings true positives, zero High-conf FPs.)
 - **Remaining unsupported stacks.** `instructor`, raw `requests`/`httpx` to an LLM
   endpoint, and other wrappers are still invisible. Add adapters as they show up
   in real-repo scans.
