@@ -121,7 +121,7 @@ unreliable. So, plainly:
 
 ```
 pip install actaclad-plumbline
-plumb scan ./your-agent
+cd your-agent && plumb scan
 ```
 
 It's Apache-2.0 and genuinely open — every rule, the full catalog, no held-back

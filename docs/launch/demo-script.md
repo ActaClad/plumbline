@@ -89,7 +89,7 @@ $ plumb scan ./llm --sarif results.sarif    # upload to the GitHub Security tab
 # the differentiated ones (reliability + architecture) lead.
 # Open source, Apache-2.0. Add a rule in an afternoon.
 #
-#   pip install actaclad-plumbline   →   plumb scan ./your-agent
+#   pip install actaclad-plumbline   →   cd your-agent && plumb scan
 #
 # github.com/actaclad/plumbline
 ```

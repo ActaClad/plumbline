@@ -139,7 +139,7 @@ the whole product — and it's public.
 Apache-2.0. Every rule open, no "pro" pack.
 
   pip install actaclad-plumbline
-  plumb scan ./your-agent
+  cd your-agent && plumb scan
 
 Point it at your messiest agent and tell us what it gets wrong.
 
