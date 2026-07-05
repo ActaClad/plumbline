@@ -105,6 +105,31 @@ real-world precision is below the ~90% the High/gating bar requires (its curated
 The taint SEC rules (002/003/005/006) stay High/gating — they are deterministic
 source→sink and clean on real code.
 
+## Batch 4 — a Gemini app (recall gap → new adapter)
+
+### voice-agent (private production app, `google-genai`, 40 files)
+
+A real production **Gemini voice-agent** (outbound calls in Indian languages) —
+private, so the source is not clonable, but the same by-hand triage applies. It
+first scanned to **`0 findings / Readiness N/A`**: `semantic_node_count: 0`
+because *every* LLM call goes through the `google-genai` SDK
+(`client.aio.models.generate_content(...)`), which had no adapter. Added one
+(`adapters/gemini.py`); re-scan:
+
+| Rule | Count | Verdict |
+|---|---|---|
+| OUT-002 (branch on raw output) | 1 | **TRUE POSITIVE** — `raw = (response.text or "").strip().lower(); if raw == "none":` branches on raw Gemini text by string equality, no schema. Brittle/injectable — exactly the target. |
+| OBS-001 (no tracing) | 1 | True (advisory) — no LLM tracing (structlog is app logging, not model instrumentation). |
+| EVAL-001 (no eval suite) | 1 | True (advisory) — a pytest suite exists, but no LLM eval / golden-dataset gate. |
+
+**3 findings, all true positives, zero false positives; Readiness N/A → 99/100.**
+The precision design held: Gemini nests its generation config in
+`config=GenerateContentConfig(...)` and the client timeout in `http_options`, so
+the adapter leaves those UNKNOWN — and RES-001/COST-001 correctly **stayed
+silent** rather than false-fire, while the output/harness rules fired on real
+defects. Residual (recall, not FP): the nested config and the legacy-SDK `model`
+id are not yet unpacked (tracked in `docs/backlog.md`).
+
 ## Outcome
 
 **All four FP/recall classes the first validation found are now fixed:**
@@ -120,9 +145,9 @@ source→sink and clean on real code.
 Every High-confidence corpus TP held at 100% through all four fixes; each fix
 shipped with a regression fixture/test.
 
-**Honest read & what's left (8 repos total).** Across babyagi, llm, crewAI,
-crewAI-examples, gpt-researcher, open-interpreter, and pydantic-ai, the
-**non-SEC-004 rules have flattened** — the last few app-shaped repos surfaced no
+**Honest read & what's left (9 repos total).** Across babyagi, llm, crewAI,
+crewAI-examples, gpt-researcher, open-interpreter, pydantic-ai, and the Gemini
+voice-agent, the **non-SEC-004 rules have flattened** — the last few app-shaped repos surfaced no
 new FP classes for the reliability/architecture/harness/taint rules or TOOL-001,
 which is the precision-before-publicity signal we wanted. **SEC-004 was the
 outlier** (a new FP sub-class on nearly every repo) and is now **advisory**, so
