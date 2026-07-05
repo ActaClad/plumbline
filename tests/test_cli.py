@@ -4,9 +4,29 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from click.testing import CliRunner
+from rich.console import Console
 
 from plumbline.cli import main
+
+
+@pytest.fixture(autouse=True)
+def _plain_console(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Force ANSI-free CLI output for the whole module.
+
+    `cli._out`/`_err` are `Console()` built at import, so they capture the color
+    setting once — and a developer/CI shell that forces color (FORCE_COLOR /
+    CLICOLOR_FORCE) makes rich inject SGR codes into the captured output, which
+    splits tokens (`PLB-RES-\x1b[0m001`) and breaks substring assertions.
+    `force_terminal=False` makes rich treat the capture as a plain file and emit
+    no ANSI at all (color *or* bold/underline), so these text checks are
+    environment-independent.
+    """
+    from plumbline import cli
+
+    monkeypatch.setattr(cli, "_out", Console(force_terminal=False, no_color=True))
+    monkeypatch.setattr(cli, "_err", Console(stderr=True, force_terminal=False, no_color=True))
 
 
 def _write(root: Path, rel: str, src: str) -> None:
