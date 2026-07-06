@@ -178,8 +178,8 @@
 
   /* ---- slide 2 — outcomes checklist ---- */
   .s2 .h { font-size: 6.4cqw; margin-top: 2cqw; }
-  .checks { margin-top: 6cqw; display: grid; grid-template-columns: 1fr 1fr; gap: 3.2cqw 4.5cqw; }
-  .ck { display: flex; align-items: flex-start; gap: 2.2cqw; font-size: 3.2cqw; line-height: 1.26; color: var(--cream); }
+  .checks { margin-top: 7cqw; display: grid; grid-template-columns: 1fr 1fr; gap: 4.5cqw 4.5cqw; }
+  .ck { display: flex; align-items: flex-start; gap: 2.4cqw; font-size: 3.7cqw; line-height: 1.25; color: var(--cream); }
   .ck .tk { color: var(--gold); font-weight: 700; flex: none; }
   .statbar { margin-top: 6.5cqw; display: flex; flex-wrap: wrap; gap: 2.2cqw 2.6cqw; }
   .statbar .st { font-size: 2.55cqw; color: var(--dim); border: 1px solid var(--line);
@@ -283,7 +283,6 @@
         <div class="spacer"></div>
         <h2 class="h">Your AI agent didn't get hacked.<br><em class="box">It fell over.</em></h2>
         <p class="sub">Security scanners tell you if your AI can be attacked. Plumbline tells you if it can <span class="gold">survive production.</span></p>
-        <p class="intro">Introducing <b>Plumbline</b> — an open-source static analyzer for LLM &amp; agentic apps.</p>
         <div class="spacer"></div>
         <div class="foot">
           <span class="logo"><span class="g">&lt;/&gt;</span> Plumbline</span>
@@ -309,10 +308,8 @@
           <div class="ck"><span class="tk">✓</span> Missing retries &amp; timeouts</div>
           <div class="ck"><span class="tk">✓</span> Unguarded output parsing</div>
           <div class="ck"><span class="tk">✓</span> Uncapped token cost</div>
-          <div class="ck"><span class="tk">✓</span> Deprecated / misconfigured models</div>
           <div class="ck"><span class="tk">✓</span> No eval suite or tracing</div>
-          <div class="ck"><span class="tk">✓</span> Readiness score + fixes</div>
-          <div class="ck"><span class="tk">✓</span> Skill-pack export for your coding agent</div>
+          <div class="ck"><span class="tk">✓</span> Skill-pack export for your agent</div>
         </div>
         <div class="statbar">
           <span class="st"><b>60</b>-rule catalog</span>
@@ -351,7 +348,7 @@
           </div>
           <div class="rgate">✗ Quality Gate failed — 2 High-confidence criticals (PLB-OUT-001)</div>
         </div>
-        <p class="cap3"><b>Caught here:</b> unguarded output parsing (OUT-001), no tracing (OBS-001). Deterministic · no LLM in detection · offline.</p>
+        <p class="cap3"><b>Caught:</b> unguarded output parsing, no tracing. Deterministic · offline.</p>
         <div class="spacer"></div>
         <div class="foot"><span>CLI · SARIF · JSON · HTML</span><span>actaclad.com</span></div>
       </div>

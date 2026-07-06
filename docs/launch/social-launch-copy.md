@@ -162,12 +162,11 @@ github.com/actaclad/plumbline
 > suppresses reach on posts with external links in the body. ~200 words.
 
 ```
-A few weeks ago we launched ActaClad with one goal: build AI that organizations
-can actually trust in production.
-
-Today we're open-sourcing our first developer tool.
-
 Your AI agent didn't get hacked. It fell over.
+
+A few weeks ago we launched ActaClad to build AI that organizations can actually
+trust in production. Today we're open-sourcing our first developer tool — and it's
+about exactly that.
 
 No timeout. No retry when the provider 429s. A json.loads() on raw model output
 that died on the first response wrapped in a markdown fence.
@@ -251,9 +250,8 @@ It catches the defects that take agents down after they ship — infinite loops,
 missing retries and timeouts, unguarded output parsing, runaway token cost —
 deterministically, at design time, from your source alone.
 
-✓ Reliability rules across 4 pillars
-✓ Readiness score
-✓ Branded HTML reports
+✓ 32 rules across 4 pillars (60-rule catalog)
+✓ Readiness score + branded HTML report
 ✓ Suggested fixes
 ✓ SARIF + a pass/fail CI gate
 ✓ Apache-2.0 — every rule open
