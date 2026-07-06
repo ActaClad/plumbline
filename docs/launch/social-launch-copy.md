@@ -87,11 +87,12 @@ So we built one. 🧵
 
 **2/ (the gap)** — ~250 chars
 ```
-Plumbline is a static analyzer for the RELIABILITY of LLM/agentic code.
+Security scanners tell you if your AI can be attacked.
+Plumbline tells you if it can survive production.
 
-The security scanners (OWASP LLM Top 10, prompt injection) do useful work — but
-most agents break from bad engineering, not attacks. Runaway loops, no fallback,
-unguarded output parsing. That's the gap.
+The scanners (OWASP LLM Top 10, prompt injection) do useful work — but most agents
+break from bad engineering, not attacks: runaway loops, no fallback, unguarded
+output parsing. That's the gap.
 ```
 
 **3/ (proof — attach GIF)** — ~240 chars
@@ -161,34 +162,54 @@ github.com/actaclad/plumbline
 > suppresses reach on posts with external links in the body. ~200 words.
 
 ```
+A few weeks ago we launched ActaClad with one goal: build AI that organizations
+can actually trust in production.
+
+Today we're open-sourcing our first developer tool.
+
 Your AI agent didn't get hacked. It fell over.
 
 No timeout. No retry when the provider 429s. A json.loads() on raw model output
-that crashed on the first response wrapped in a markdown fence.
+that died on the first response wrapped in a markdown fence.
 
 I kept seeing teams ship agents that passed every security check and still broke
 in production — because the failures weren't attacks. They were engineering
 defects no tool was looking for.
 
-So we built Plumbline: an open-source static analyzer that asks a different
-question than the security scanners. Not "is this code dangerous?" but "will this
-system fall over in production?"
+Security scanners tell you if your AI can be attacked.
+Plumbline tells you if it can survive production.
 
-It's deterministic — no LLM in the detection path, no network, no telemetry — and
-it drops into CI with a pass/fail gate and SARIF straight into the GitHub
-Security tab.
+Infinite agent loops. Missing retries. Missing timeouts. Unguarded output
+parsing. Runaway token cost.
 
-A cold scan of a well-built OSS tool: 3 findings, 93/100, two of them real
+These aren't security bugs. They're production bugs.
+
+So we built Plumbline — an open-source static analyzer for Python LLM & agentic
+apps that finds these reliability defects before they ship. Deterministic — no
+LLM in the detection path, no network, no telemetry — and it drops into CI with a
+pass/fail gate and SARIF straight into the GitHub Security tab.
+
+A cold scan of a well-built OSS tool: 3 findings, 93/100 — two of them real
 crash-in-prod bugs the security scanners walk right past.
 
-It's early and I'll say so: 32 rules today of a ~60-rule roadmap, Python only. One
-rule even threw false positives on real code during validation — we found it,
-fixed it, shipped the test before launch. That loop is the whole point.
+And I'll be honest about where it is: 32 rules today of a ~60-rule catalog,
+Python only. One rule even threw false positives on real code during validation —
+we found it, fixed it, and shipped the regression test before this post. That
+loop is the whole point.
 
-Apache-2.0. Point it at your messiest agent and tell me what it gets wrong.
-Link in the comments. 👇
+Apache-2.0. Every rule open. No "pro" pack.
 
-#LLM #AIengineering #AgenticAI #reliability #opensource
+  pip install actaclad-plumbline
+
+Point it at your messiest agent and tell me what it gets wrong. Issues, PRs, and
+contributions all welcome.
+
+🔗 GitHub link in the comments.
+
+Built by ActaClad — the design-time companion to AgentGuard, our runtime AI trust
+platform.
+
+#OpenSource #Python #LLMOps #AgenticAI #AIEngineering #ActaClad
 ```
 
 > Notes: first 2 lines carry the whole post above the fold — they must work
@@ -220,22 +241,29 @@ Link in the comments. 👇
 > Attach the carousel. Repo link in the first comment (same reach rule). ~110 words.
 
 ```
-Plumbline is open source today.
+Today we're open-sourcing Plumbline — an AI reliability static analyzer for
+Python LLM & agentic applications.
 
-Most agentic systems don't break because they were attacked. They break because
-they were engineered badly — a model call with no timeout, no retry on a 429,
-json.loads() on raw model output that dies on the first malformed response, an
-agent loop with no iteration cap.
+Security scanners tell you if your AI can be attacked.
+Plumbline tells you if it can survive production.
 
-Every AI-code scanner asks "is this dangerous?" Plumbline asks a different
-question: "will this fall over in production?" — and answers it at design time,
-deterministically, from your source alone. No network. No telemetry. SARIF and a
-pass/fail gate that drop straight into CI.
+It catches the defects that take agents down after they ship — infinite loops,
+missing retries and timeouts, unguarded output parsing, runaway token cost —
+deterministically, at design time, from your source alone.
 
-Apache-2.0. Every rule open.
+✓ Reliability rules across 4 pillars
+✓ Readiness score
+✓ Branded HTML reports
+✓ Suggested fixes
+✓ SARIF + a pass/fail CI gate
+✓ Apache-2.0 — every rule open
 
-Built by ActaClad — the design-time companion to our runtime trust platform,
-AgentGuard.
+  pip install actaclad-plumbline
+
+Point it at your AI project and tell us what we missed.
+
+Built by ActaClad — engineering the trust layer for production AI; the
+design-time companion to AgentGuard, our runtime platform.
 
 Repo in the comments 👇
 ```

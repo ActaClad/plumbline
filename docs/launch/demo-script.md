@@ -18,8 +18,9 @@
 ## Beat 0 — the hook (≈8s, on-screen title card or first comment line)
 
 ```
-# Your agent didn't get hacked. It fell over.
-# Plumbline is a STATIC analyzer for the reliability of LLM/agent code.
+# Your AI agent didn't get hacked. It fell over.
+# Security scanners tell you if your AI can be attacked.
+# Plumbline tells you if it can survive production.  (a static analyzer for LLM/agent code)
 # Let's point it at a real, well-built OSS tool — simonw/llm — cold.
 ```
 

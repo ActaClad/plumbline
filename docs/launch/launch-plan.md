@@ -120,27 +120,31 @@ HN-day presence.
 
 ## The 4-page LinkedIn carousel — spec
 
-**Deliverable note:** below is per-slide *copy + visual direction* (and I can turn
-it into an HTML artifact mockup on request). **Final designed PNGs need Canva/a
-designer** — this is the brief for that.
+**Deliverable note:** a rendered HTML mockup of all four slides lives at
+`docs/launch/carousel-mockup.html` (open it, or the published artifact). Below is
+the copy/visual brief; **final designed PNGs are rebuilt in Canva** from it.
 
 **Brand system** (from the company launch carousel — match it exactly):
 - Background near-black `#0D0D0D`; accent gold/amber `#C8951E`; text cream
   `#EDE6D6`; subtle dark-brown geometric "AC" hex motif; the white rounded
   connector-line-with-dots motif.
 - Bold **display serif** for headlines; rounded **sans** for body/labels.
-- Format **1080×1350 (4:5)** for maximum feed height (or 1080×1080).
+- Format **1080×1350 (4:5)** for maximum feed height.
 - The Plumbline `</>` mark on slide 1; "ACTACLAD.COM" footer on each.
+
+**Locked at 4 slides** (keeps both the outcomes checklist *and* the proof):
 
 | # | Headline | Body / visual |
 |---|---|---|
-| **1 — Hook** | **"Your agent didn't get hacked. It fell over."** | Sub: *"A static analyzer for the reliability of LLM & agentic code."* Plumbline mark. Minimal — the line carries it. |
-| **2 — The gap** | **"Every AI scanner asks: *is this dangerous?* None asked: *will this fall over?*"** | Two columns. Left "Security scanners": prompt injection, OWASP LLM Top 10. Right "Plumbline": no timeout, runaway loops, unguarded output parsing, silent model swaps. Right column in gold. |
-| **3 — Proof** | **"3 findings. Readiness 93/100. On a well-built tool."** | The scan money-shot (a clean frame of the GIF, or a styled terminal card). Caption: *"Deterministic. No LLM in detection. Runs fully offline."* |
-| **4 — CTA** | **"Open source. Apache-2.0. Every rule open."** | `pip install actaclad-plumbline`. *"Point it at your messiest agent and tell us what it gets wrong."* `github.com/ActaClad/plumbline` (also in first comment). |
+| **1 — Hook + category** | **"Your AI agent didn't get hacked. It fell over."** | Sub (the canonical line): *"Security scanners tell you if your AI can be attacked. Plumbline tells you if it can survive production."* Then *"Introducing Plumbline — open-source static analyzer for LLM & agentic apps."* |
+| **2 — What it checks** | **"These aren't security bugs. They're production bugs."** | Outcomes checklist (✓): infinite loops · missing retries & timeouts · unguarded output parsing · uncapped token cost · deprecated/misconfigured models · no eval/tracing · Readiness score + fixes · skill-pack export for your coding agent. Stat bar: **60-rule catalog · 32 available today · Apache-2.0 · 100% open**. |
+| **3 — Proof** | **"3 findings. 93/100. On a well-built tool."** | The real branded HTML report card (score + pillar bars + gate). Caption: *"Caught here: unguarded output parsing, no tracing. Deterministic · no LLM in detection · offline."* |
+| **4 — CTA** | **"Ready in under 30 seconds."** | `pip install actaclad-plumbline` → `cd your-agent && plumb scan --open` → `plumb export-skills`. ✔ HTML report ✔ Readiness score ✔ Suggested fixes ✔ Zero config. *"Point it at your messiest AI project. Tell us what we missed."* `github.com/ActaClad/plumbline` (also in first comment). |
 
-Keep emoji at ~zero (engineer-credibility brand). The slide-1 line is the same
-hook as the blog/HN/X — keep it identical across all channels for coherence.
+Keep emoji at ~zero (engineer-credibility brand). **The slide-1 hook + canonical
+category line are identical across the blog / HN / X / both LinkedIn posts** —
+never a paraphrase. **Stats stay honest:** "60-rule catalog · 32 today," never
+"60 reliability rules."
 
 ## Pre-launch checklist
 

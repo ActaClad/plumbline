@@ -8,7 +8,7 @@
 
 ---
 
-## Your agent didn't get hacked. It fell over.
+## Your AI agent didn't get hacked. It fell over.
 
 There is a whole category of tools that scan AI code, and they all ask the same
 question: *is this dangerous?* Prompt injection, insecure output handling, the
@@ -26,10 +26,11 @@ date.
 These are **reliability and architecture defects**, and no static analyzer was
 looking for them. So we built one.
 
-**Plumbline is a static analyzer for the reliability of LLM and agentic Python.**
-It asks a different question than the security scanners: not *"is this code
-dangerous?"* but *"will this system fall over in production?"* — and it answers it
-at design time, before the incident, from the source alone.
+**Security scanners tell you if your AI can be attacked. Plumbline tells you if it
+can survive production.** It's a static analyzer for the reliability of LLM and
+agentic Python — it asks a different question than the security scanners: not
+*"is this code dangerous?"* but *"will this system fall over in production?"* — and
+it answers it at design time, before the incident, from the source alone.
 
 ## What it looks like
 
