@@ -5,7 +5,7 @@
 
 # Plumbline
 
-**The reliability and architecture analyzer for LLM & agentic systems.**
+**Security scanners tell you if your AI can be attacked.<br>Plumbline tells you if it can survive production.**
 
 [![PyPI](https://img.shields.io/pypi/v/actaclad-plumbline?style=flat-square&color=c8951e&label=pypi)](https://pypi.org/project/actaclad-plumbline/)
 [![Python](https://img.shields.io/pypi/pyversions/actaclad-plumbline?style=flat-square)](https://pypi.org/project/actaclad-plumbline/)
@@ -13,8 +13,9 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
 [![SARIF](https://img.shields.io/badge/output-SARIF%202.1.0-informational?style=flat-square)](docs/sarif-code-scanning.md)
 
-*A plumb line tells a builder whether a structure is true. Plumbline tells you
-whether your agent code is built to survive production.*
+*The open-source reliability & architecture analyzer for LLM & agentic Python. A
+plumb line checks whether a structure is built true; this one does the same for
+your agents — your agent didn't get hacked, it fell over.*
 
 `pip install actaclad-plumbline`
 

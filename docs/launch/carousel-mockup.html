@@ -165,8 +165,10 @@
   .spacer { flex: 1 1 auto; }
 
   /* ---- slide 1 ---- */
-  .s1 .h { font-size: 10.2cqw; }
-  .s1 .sub { margin-top: 5cqw; font-size: 3.7cqw; max-width: 62cqw; }
+  .s1 .h { font-size: 9.2cqw; }
+  .s1 .sub { margin-top: 5cqw; font-size: 3.5cqw; max-width: 74cqw; }
+  .s1 .intro { margin-top: 4.5cqw; font-size: 3cqw; color: var(--dim); line-height: 1.4; }
+  .s1 .intro b { color: var(--cream); font-weight: 600; }
   .s1 .logo {
     display: inline-flex; align-items: center; gap: 2.2cqw;
     font-family: var(--font-display); font-size: 4.4cqw; color: var(--cream); font-weight: 700;
@@ -174,24 +176,15 @@
   }
   .s1 .logo .g { font-family: var(--font-mono); color: var(--gold); font-size: 4.2cqw; font-weight: 400; }
 
-  /* ---- slide 2 ---- */
-  .s2 .h { font-size: 6.1cqw; margin-top: 3cqw; }
-  .s2 .h .q { color: var(--dim); }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4cqw; margin-top: 7cqw; }
-  .col h4 {
-    font-size: 2.6cqw; letter-spacing: .18em; text-transform: uppercase;
-    margin: 0 0 3cqw; padding-bottom: 2.4cqw; border-bottom: 1px solid var(--line);
-  }
-  .col.sec h4 { color: var(--dim); }
-  .col.plb h4 { color: var(--gold); }
-  .col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2.4cqw; }
-  .col li { font-size: 3.05cqw; line-height: 1.28; }
-  .col.sec li { color: var(--dim); }
-  .col.plb li { color: var(--cream); }
-  .col li::before { content: ""; display: inline-block; width: 1.5cqw; height: 1.5cqw; margin-right: 2cqw;
-    border-radius: 2px; transform: translateY(-.2cqw); }
-  .col.sec li::before { background: var(--dim-2); }
-  .col.plb li::before { background: var(--gold); }
+  /* ---- slide 2 — outcomes checklist ---- */
+  .s2 .h { font-size: 6.4cqw; margin-top: 2cqw; }
+  .checks { margin-top: 6cqw; display: grid; grid-template-columns: 1fr 1fr; gap: 3.2cqw 4.5cqw; }
+  .ck { display: flex; align-items: flex-start; gap: 2.2cqw; font-size: 3.2cqw; line-height: 1.26; color: var(--cream); }
+  .ck .tk { color: var(--gold); font-weight: 700; flex: none; }
+  .statbar { margin-top: 6.5cqw; display: flex; flex-wrap: wrap; gap: 2.2cqw 2.6cqw; }
+  .statbar .st { font-size: 2.55cqw; color: var(--dim); border: 1px solid var(--line);
+    border-radius: 999px; padding: 1.3cqw 3cqw; }
+  .statbar .st b { color: var(--gold-2); font-weight: 600; }
 
   /* ---- slide 3 ---- */
   .s3 .h { font-size: 6.6cqw; margin-top: 3cqw; }
@@ -226,14 +219,18 @@
   .s3 .cap3 b { color: var(--gold-2); font-weight: 600; }
 
   /* ---- slide 4 ---- */
-  .s4 .h { font-size: 7.6cqw; margin-top: 3cqw; }
+  .s4 .h { font-size: 7.8cqw; margin-top: 3cqw; }
   .s4 .install {
-    margin-top: 6.5cqw; font-family: var(--font-mono); font-size: 3.5cqw;
+    margin-top: 5.5cqw; font-family: var(--font-mono); font-size: 3cqw; line-height: 2.05;
     background: var(--panel); border: 1px solid var(--line); color: var(--cream);
-    border-radius: 1.6cqw; padding: 3.4cqw 4cqw; display: flex; align-items: center; gap: 2.4cqw;
+    border-radius: 1.6cqw; padding: 3.6cqw 4cqw; word-break: break-word;
   }
   .s4 .install .pr { color: var(--gold); }
-  .s4 .line { margin-top: 5.5cqw; color: var(--dim); font-size: 3.35cqw; line-height: 1.4; max-width: 66cqw; }
+  .s4 .install .cm { color: var(--dim-2); }
+  .s4 .ctarow { margin-top: 5cqw; display: flex; flex-wrap: wrap; gap: 2.2cqw 4cqw; }
+  .s4 .ctarow span { font-size: 3cqw; color: var(--cream); }
+  .s4 .ctarow .tk { color: var(--gold); font-weight: 700; margin-right: 1cqw; }
+  .s4 .line { margin-top: 5cqw; color: var(--dim); font-size: 3.3cqw; line-height: 1.4; max-width: 70cqw; }
   .s4 .repo {
     margin-top: 6.5cqw; font-family: var(--font-mono); font-size: 4.1cqw;
     color: var(--gold-2); letter-spacing: -.01em;
@@ -282,10 +279,11 @@
       </div>
       <div class="rail" aria-hidden="true"></div>
       <div class="inner">
-        <p class="eyebrow">The reliability wedge</p>
+        <p class="eyebrow">Security is only half the story</p>
         <div class="spacer"></div>
-        <h2 class="h">Your agent didn't get hacked.<br><em class="box">It fell over.</em></h2>
-        <p class="sub">A static analyzer for the <span class="gold">reliability</span> of LLM &amp; agentic code.</p>
+        <h2 class="h">Your AI agent didn't get hacked.<br><em class="box">It fell over.</em></h2>
+        <p class="sub">Security scanners tell you if your AI can be attacked. Plumbline tells you if it can <span class="gold">survive production.</span></p>
+        <p class="intro">Introducing <b>Plumbline</b> — an open-source static analyzer for LLM &amp; agentic apps.</p>
         <div class="spacer"></div>
         <div class="foot">
           <span class="logo"><span class="g">&lt;/&gt;</span> Plumbline</span>
@@ -297,33 +295,30 @@
 
   <!-- ================= SLIDE 2 — THE GAP ================= -->
   <section class="slot">
-    <div class="cap"><span class="n">02</span><span class="t">The gap</span><span class="d">— why existing tools miss it</span></div>
+    <div class="cap"><span class="n">02</span><span class="t">What it checks</span><span class="d">— outcomes, not features</span></div>
     <div class="board s2 reveal">
       <div class="hex" aria-hidden="true">
         <svg viewBox="0 0 100 100"><polygon points="50,3 93,27 93,73 50,97 7,73 7,27" fill="none" stroke="rgba(200,149,30,.09)" stroke-width="2"/></svg>
       </div>
       <div class="rail" aria-hidden="true"></div>
       <div class="inner">
-        <p class="eyebrow">The gap</p>
-        <h2 class="h">Every AI scanner asks <span class="q">“is this dangerous?”</span><br>None asked <span class="gold">“will this fall over?”</span></h2>
-        <div class="cols">
-          <div class="col sec">
-            <h4>Security scanners</h4>
-            <ul>
-              <li>Prompt injection</li>
-              <li>OWASP LLM Top 10</li>
-              <li>Insecure output handling</li>
-            </ul>
-          </div>
-          <div class="col plb">
-            <h4>Plumbline</h4>
-            <ul>
-              <li>No timeout / no retry</li>
-              <li>Unbounded agent loops</li>
-              <li>Unguarded output parsing</li>
-              <li>Silent model swaps</li>
-            </ul>
-          </div>
+        <p class="eyebrow">What Plumbline checks</p>
+        <h2 class="h">These aren't security bugs.<br>They're <span class="gold">production bugs.</span></h2>
+        <div class="checks">
+          <div class="ck"><span class="tk">✓</span> Infinite agent loops</div>
+          <div class="ck"><span class="tk">✓</span> Missing retries &amp; timeouts</div>
+          <div class="ck"><span class="tk">✓</span> Unguarded output parsing</div>
+          <div class="ck"><span class="tk">✓</span> Uncapped token cost</div>
+          <div class="ck"><span class="tk">✓</span> Deprecated / misconfigured models</div>
+          <div class="ck"><span class="tk">✓</span> No eval suite or tracing</div>
+          <div class="ck"><span class="tk">✓</span> Readiness score + fixes</div>
+          <div class="ck"><span class="tk">✓</span> Skill-pack export for your coding agent</div>
+        </div>
+        <div class="statbar">
+          <span class="st"><b>60</b>-rule catalog</span>
+          <span class="st"><b>32</b> available today</span>
+          <span class="st">Apache-2.0</span>
+          <span class="st">100% open source</span>
         </div>
         <div class="spacer"></div>
         <div class="foot"><span>Reliability · Architecture · Harness · Security</span><span>actaclad.com</span></div>
@@ -356,7 +351,7 @@
           </div>
           <div class="rgate">✗ Quality Gate failed — 2 High-confidence criticals (PLB-OUT-001)</div>
         </div>
-        <p class="cap3"><b>Deterministic.</b> No LLM in detection. Runs offline. One shareable report.</p>
+        <p class="cap3"><b>Caught here:</b> unguarded output parsing (OUT-001), no tracing (OBS-001). Deterministic · no LLM in detection · offline.</p>
         <div class="spacer"></div>
         <div class="foot"><span>CLI · SARIF · JSON · HTML</span><span>actaclad.com</span></div>
       </div>
@@ -372,13 +367,19 @@
       </div>
       <div class="rail" aria-hidden="true"></div>
       <div class="inner">
-        <p class="eyebrow">Open source · Apache-2.0</p>
-        <h2 class="h">Every rule open.<br>No held-back <span class="gold">“pro”</span> pack.</h2>
-        <div class="install"><span class="pr">$</span> pip install actaclad-plumbline</div>
-        <p class="line">Point it at your messiest agent and tell us what it gets wrong. A false positive is the most useful bug you can file.</p>
+        <p class="eyebrow">Apache-2.0 · every rule open</p>
+        <h2 class="h">Ready in under <span class="gold">30 seconds.</span></h2>
+        <div class="install"><span class="pr">$</span> pip install actaclad-plumbline<br><span class="pr">$</span> cd your-agent &amp;&amp; plumb scan --open<br><span class="pr">$</span> plumb export-skills <span class="cm"># skill-pack for your coding agent</span></div>
+        <div class="ctarow">
+          <span><span class="tk">✔</span>HTML report</span>
+          <span><span class="tk">✔</span>Readiness score</span>
+          <span><span class="tk">✔</span>Suggested fixes</span>
+          <span><span class="tk">✔</span>Zero config</span>
+        </div>
+        <p class="line">Point it at your messiest AI project. Tell us what we missed.</p>
         <div class="spacer"></div>
         <div class="repo">github.com<span class="sl">/</span>ActaClad<span class="sl">/</span>plumbline</div>
-        <div class="foot" style="margin-top:5cqw"><span>Link in the first comment ↓</span><span>actaclad.com</span></div>
+        <div class="foot" style="margin-top:4cqw"><span>Link in the first comment ↓</span><span>actaclad.com</span></div>
       </div>
     </div>
   </section>
@@ -419,8 +420,9 @@
         <h3>Notes</h3>
         <ul>
           <li>Export at 1080×1350 (4:5) — max feed height on LinkedIn.</li>
-          <li>Keep the slide-1 hook identical to the blog / HN / X post.</li>
-          <li>Slide 3 shows the branded HTML report (`plumb scan --open`) — for the final, screenshot the real report at 1080px wide for crisp text.</li>
+          <li><b>Canonical line</b> (slide-1 sub) — use verbatim everywhere (README, blog, HN, X, both LinkedIn posts): <em>"Security scanners tell you if your AI can be attacked. Plumbline tells you if it can survive production."</em> The hook stays on top of it.</li>
+          <li><b>Stats are honest:</b> "60-rule catalog · 32 available today" — never "60 reliability rules" (four pillars; 32 shipped). The outcomes list maps only to rules that fire.</li>
+          <li>Slide 3 shows the real branded HTML report (`plumb scan --open`) — screenshot it at 1080px wide for crisp text.</li>
           <li>Repo link goes in the first comment, not the post body (reach).</li>
         </ul>
       </div>
