@@ -111,7 +111,7 @@ report is the polished companion still/clip.
 #
 #   pip install actaclad-plumbline   →   cd your-agent && plumb scan
 #
-# github.com/actaclad/plumbline
+# github.com/ActaClad/plumbline
 ```
 
 ---

@@ -134,7 +134,7 @@ of unclaimed ones.
 
 Point it at your messiest agent. Tell us what it gets wrong.
 
-→ **github.com/actaclad/plumbline**
+→ **github.com/ActaClad/plumbline**
 
 ---
 

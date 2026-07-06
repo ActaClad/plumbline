@@ -57,7 +57,7 @@ posting this. If you hit one, that's the most useful bug you can file.
 Apache-2.0, every rule open, no held-back "pro" pack. Would love for you to point
 it at your messiest agent and tell me what it gets wrong.
 
-Repo: github.com/actaclad/plumbline
+Repo: github.com/ActaClad/plumbline
 ```
 
 > HN notes: no emoji, no bold, no "🚀". Lead with the problem, not the feature
@@ -144,7 +144,7 @@ Apache-2.0. Every rule open, no "pro" pack.
 
 Point it at your messiest agent and tell us what it gets wrong.
 
-github.com/actaclad/plumbline
+github.com/ActaClad/plumbline
 ```
 
 > Strip the char-count annotations before posting. The "didn't get hacked /
@@ -214,7 +214,7 @@ platform.
 > Notes: first 2 lines carry the whole post above the fold — they must work
 > alone. Kept exactly one emoji (the comment pointer); the engineer-credibility
 > brand wants near-zero. The honest-limits line stays — on LinkedIn it reads as
-> confidence, and it's true. First comment = `github.com/actaclad/plumbline`
+> confidence, and it's true. First comment = `github.com/ActaClad/plumbline`
 > plus one line ("Repo + the honest real-repo validation writeup here:").
 > A LinkedIn-native variant of the demo GIF (square/4:5, captioned — most people
 > watch muted) outperforms a link to a video.
@@ -224,9 +224,9 @@ platform.
 > Pick one. Keep it to a line or two — its job is just to carry the link the body
 > can't. Drop it in the comments within a minute of posting.
 
-1. `Repo + the honest real-repo validation writeup (every finding triaged by hand): github.com/actaclad/plumbline`
-2. `Here it is — Apache-2.0, every rule open: github.com/actaclad/plumbline. The false-positive we caught and fixed pre-launch is written up in benchmark/real-repos.md.`
-3. `github.com/actaclad/plumbline — `pip install actaclad-plumbline` and point it at your messiest agent. FP reports are the most useful issue you can file.`
+1. `Repo + the honest real-repo validation writeup (every finding triaged by hand): github.com/ActaClad/plumbline`
+2. `Here it is — Apache-2.0, every rule open: github.com/ActaClad/plumbline. The false-positive we caught and fixed pre-launch is written up in benchmark/real-repos.md.`
+3. `github.com/ActaClad/plumbline — `pip install actaclad-plumbline` and point it at your messiest agent. FP reports are the most useful issue you can file.`
 
 > Recommended: **#1** — it rewards the click with the credibility artifact, not a
 > sales page.
