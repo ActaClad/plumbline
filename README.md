@@ -274,4 +274,8 @@ real for you, a star helps other engineers find it.
 
 ## License
 
-Apache-2.0 © ActaClad Innovations. *The craft of intelligence.*
+Apache-2.0 — free for commercial and private use, modification, and
+distribution. Every rule is open; contributions are welcome via issues and PRs.
+See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+© 2026 ActaClad Technologies Pvt. Ltd. *The craft of intelligence.*
