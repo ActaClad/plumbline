@@ -29,12 +29,16 @@ your agents — your agent didn't get hacked, it fell over.*
 > deterministic static analyzer for the *reliability* of LLM & agentic Python. It
 > catches missing timeouts, unbounded agent loops, and unguarded model-output
 > parsing — the production failures security scanners walk right past. It runs
-> fully offline, gates CI with SARIF output, and can export its rules as a
-> prevention **skill-pack for your coding agent** (Claude Code, Cursor, …).
+> fully offline and gates CI with SARIF output. Two things worth knowing up front:
+> **`--open`** writes a shareable, branded **HTML report**, and **`export-skills`**
+> turns the rules into a prevention **skill-pack for your coding agent** (Claude
+> Code, Cursor, …) so it writes safe code by default.
 
 ```bash
-pipx install actaclad-plumbline    # or: uv tool install actaclad-plumbline
-cd your-agent && plumb scan         # inside a repo, the path is optional
+pipx install actaclad-plumbline        # or: uv tool install actaclad-plumbline
+
+cd your-agent && plumb scan --open      # scan, and open a shareable HTML report ↗
+plumb export-skills                     # export the rules as a skill-pack for your coding agent ↗
 ```
 
 <p align="center">
@@ -130,8 +134,15 @@ plumb scan
 # self-contained offline HTML report
 plumb scan ./my-agent-app --sarif plumbline.sarif --json plumbline.json --html report.html
 
-# ...or just open a shareable, branded HTML report in your browser
+# ── the two commands most people miss ──────────────────────────────────────
+# open a shareable, branded HTML report (Readiness score, pillars, gate) in your
+# browser — no config, fully offline:
 plumb scan ./my-agent-app --open
+
+# export the rule set as a prevention skill-pack your coding agent loads, so it
+# writes timeout-wrapped, bounded-loop, validated-I/O code by DEFAULT (shift-left):
+plumb export-skills --out skill-pack
+# ───────────────────────────────────────────────────────────────────────────
 
 # adopt incrementally on an existing repo: accept today's findings, gate on new ones
 plumb baseline ./my-agent-app        # writes .plumbline-baseline.json
