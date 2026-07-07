@@ -37,6 +37,10 @@ pipx install actaclad-plumbline    # or: uv tool install actaclad-plumbline
 cd your-agent && plumb scan         # inside a repo, the path is optional
 ```
 
+<p align="center">
+  <img src="docs/launch/plumbline-demo.gif" alt="Plumbline cold-scanning simonw/llm — 3 findings, Readiness 93/100" width="820">
+</p>
+
 ## The problem
 
 Agentic systems demo beautifully and break invisibly. They rarely fail because
@@ -167,6 +171,10 @@ Each finding tells you:
 
 Plus a **Readiness Score** per pillar (a stakeholder roll-up — the pass/fail
 Quality Gate is what you wire into CI).
+
+<p align="center">
+  <img src="docs/launch/report.png" alt="Plumbline HTML report — Readiness 93/100, pillar breakdown, and the Quality Gate verdict" width="860">
+</p>
 
 ## Why Plumbline
 

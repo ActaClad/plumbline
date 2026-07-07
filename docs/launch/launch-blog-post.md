@@ -37,6 +37,8 @@ it answers it at design time, before the incident, from the source alone.
 Here is a cold scan of [`simonw/llm`](https://github.com/simonw/llm) — a widely
 used, well-engineered CLI — pinned at a real commit, with no configuration:
 
+![Plumbline cold-scanning simonw/llm — 3 findings, Readiness 93/100](plumbline-demo.gif)
+
 <!-- Re-verified against the shipped 32-rule build (plumb 0.0.1) on
 simonw/llm @ 0d593ea, 2026-07-05: same 3 findings, same 93/100 — only the
 loaded-rule count moved 25 -> 32. Re-verify before publishing if on a later
@@ -67,6 +69,12 @@ are the same defect twice:
 That is a real bug in a real tool. It is **not** a security issue — which is
 exactly why the security scanners walk past it. That gap is the whole reason
 Plumbline exists.
+
+And it's not just a terminal dump — `plumb scan --open` writes a shareable,
+self-contained HTML report: the Readiness Score, the four-pillar breakdown, and
+the Quality Gate verdict, all offline.
+
+![Plumbline HTML report — Readiness 93/100, pillar breakdown, and the gate verdict](report.png)
 
 ## How it works (and why you can trust the output)
 
