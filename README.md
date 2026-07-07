@@ -278,4 +278,4 @@ Apache-2.0 — free for commercial and private use, modification, and
 distribution. Every rule is open; contributions are welcome via issues and PRs.
 See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-© 2026 ActaClad Technologies Pvt. Ltd. *The craft of intelligence.*
+© 2026 ActaClad Innovations Private Limited. *The craft of intelligence.*

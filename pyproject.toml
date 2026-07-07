@@ -9,7 +9,7 @@ description = "The reliability and architecture analyzer for LLM and agentic sys
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
-authors = [{ name = "ActaClad Technologies" }]
+authors = [{ name = "ActaClad Innovations Private Limited" }]
 keywords = [
     "llm", "agent", "agentic", "static-analysis", "reliability",
     "ai-engineering", "observability", "code-analysis", "sarif",
