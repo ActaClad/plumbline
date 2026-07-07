@@ -176,15 +176,14 @@
   }
   .s1 .logo .g { font-family: var(--font-mono); color: var(--gold); font-size: 4.2cqw; font-weight: 400; }
 
-  /* ---- slide 2 — outcomes checklist ---- */
-  .s2 .h { font-size: 6.4cqw; margin-top: 2cqw; }
-  .checks { margin-top: 7cqw; display: grid; grid-template-columns: 1fr 1fr; gap: 4.5cqw 4.5cqw; }
-  .ck { display: flex; align-items: flex-start; gap: 2.4cqw; font-size: 3.7cqw; line-height: 1.25; color: var(--cream); }
-  .ck .tk { color: var(--gold); font-weight: 700; flex: none; }
-  .statbar { margin-top: 6.5cqw; display: flex; flex-wrap: wrap; gap: 2.2cqw 2.6cqw; }
-  .statbar .st { font-size: 2.55cqw; color: var(--dim); border: 1px solid var(--line);
-    border-radius: 999px; padding: 1.3cqw 3cqw; }
-  .statbar .st b { color: var(--gold-2); font-weight: 600; }
+  /* ---- slide 2 — meet Plumbline + open source (the beat) ---- */
+  .s2 .h { font-size: 13cqw; margin-top: 1cqw; letter-spacing: -.02em; }
+  .s2 .sub { margin-top: 3.5cqw; font-size: 3.7cqw; max-width: 80cqw; }
+  .osrow { margin-top: 7cqw; display: flex; flex-wrap: wrap; gap: 2.6cqw; }
+  .osrow .os { font-size: 3cqw; font-weight: 700; color: #140d02; background: var(--gold);
+    border-radius: 999px; padding: 1.7cqw 3.6cqw; }
+  .catline { margin-top: 8cqw; font-size: 3.2cqw; color: var(--dim); line-height: 1.45; max-width: 84cqw; }
+  .catline b { color: var(--cream); font-weight: 600; }
 
   /* ---- slide 3 ---- */
   .s3 .h { font-size: 6.6cqw; margin-top: 3cqw; }
@@ -217,6 +216,7 @@
   .report .rgate { padding: 2.7cqw 3.6cqw; background: rgba(229,115,91,.14); color: var(--sev); font-size: 2.5cqw; font-weight: 600; }
   .s3 .cap3 { margin-top: 5cqw; color: var(--cream); font-size: 3.1cqw; }
   .s3 .cap3 b { color: var(--gold-2); font-weight: 600; }
+  .s3 .cap3b { margin-top: 2.2cqw; color: var(--dim); font-size: 2.7cqw; line-height: 1.4; }
 
   /* ---- slide 4 ---- */
   .s4 .h { font-size: 7.8cqw; margin-top: 3cqw; }
@@ -279,10 +279,10 @@
       </div>
       <div class="rail" aria-hidden="true"></div>
       <div class="inner">
-        <p class="eyebrow">Security is only half the story</p>
+        <p class="eyebrow">AI in production</p>
         <div class="spacer"></div>
         <h2 class="h">Your AI agent didn't get hacked.<br><em class="box">It fell over.</em></h2>
-        <p class="sub">Security scanners tell you if your AI can be attacked. Plumbline tells you if it can <span class="gold">survive production.</span></p>
+        <p class="sub">AI demos beautifully — then breaks in production. Not from attacks. From <span class="gold">reliability.</span></p>
         <div class="spacer"></div>
         <div class="foot">
           <span class="logo"><span class="g">&lt;/&gt;</span> Plumbline</span>
@@ -294,31 +294,24 @@
 
   <!-- ================= SLIDE 2 — THE GAP ================= -->
   <section class="slot">
-    <div class="cap"><span class="n">02</span><span class="t">What it checks</span><span class="d">— outcomes, not features</span></div>
+    <div class="cap"><span class="n">02</span><span class="t">Meet Plumbline</span><span class="d">— open source, the reframe</span></div>
     <div class="board s2 reveal">
       <div class="hex" aria-hidden="true">
         <svg viewBox="0 0 100 100"><polygon points="50,3 93,27 93,73 50,97 7,73 7,27" fill="none" stroke="rgba(200,149,30,.09)" stroke-width="2"/></svg>
       </div>
       <div class="rail" aria-hidden="true"></div>
       <div class="inner">
-        <p class="eyebrow">What Plumbline checks</p>
-        <h2 class="h">These aren't security bugs.<br>They're <span class="gold">production bugs.</span></h2>
-        <div class="checks">
-          <div class="ck"><span class="tk">✓</span> Infinite agent loops</div>
-          <div class="ck"><span class="tk">✓</span> Missing retries &amp; timeouts</div>
-          <div class="ck"><span class="tk">✓</span> Unguarded output parsing</div>
-          <div class="ck"><span class="tk">✓</span> Uncapped token cost</div>
-          <div class="ck"><span class="tk">✓</span> No eval suite or tracing</div>
-          <div class="ck"><span class="tk">✓</span> Skill-pack export for your agent</div>
+        <p class="eyebrow">Introducing</p>
+        <h2 class="h">Plumbline</h2>
+        <p class="sub">The <span class="gold">open-source</span> reliability analyzer for LLM &amp; agentic AI.</p>
+        <div class="osrow">
+          <span class="os">Free</span>
+          <span class="os">Apache-2.0</span>
+          <span class="os">Every rule open</span>
         </div>
-        <div class="statbar">
-          <span class="st"><b>60</b>-rule catalog</span>
-          <span class="st"><b>32</b> available today</span>
-          <span class="st">Apache-2.0</span>
-          <span class="st">100% open source</span>
-        </div>
+        <p class="catline">Security scanners check if your AI can be <b>attacked</b>. Plumbline checks if it can <b>survive production</b>.</p>
         <div class="spacer"></div>
-        <div class="foot"><span>Reliability · Architecture · Harness · Security</span><span>actaclad.com</span></div>
+        <div class="foot"><span>60-rule catalog · 32 today</span><span>actaclad.com</span></div>
       </div>
     </div>
   </section>
@@ -348,7 +341,8 @@
           </div>
           <div class="rgate">✗ Quality Gate failed — 2 High-confidence criticals (PLB-OUT-001)</div>
         </div>
-        <p class="cap3"><b>Caught:</b> unguarded output parsing, no tracing. Deterministic · offline.</p>
+        <p class="cap3"><b>Caught here:</b> unguarded output parsing, no tracing.</p>
+        <p class="cap3b">Also finds: runaway loops · missing timeouts &amp; retries · uncapped token cost · no eval suite. Deterministic · no LLM in detection · offline.</p>
         <div class="spacer"></div>
         <div class="foot"><span>CLI · SARIF · JSON · HTML</span><span>actaclad.com</span></div>
       </div>
@@ -373,7 +367,7 @@
           <span><span class="tk">✔</span>Suggested fixes</span>
           <span><span class="tk">✔</span>Zero config</span>
         </div>
-        <p class="line">Point it at your messiest AI project. Tell us what we missed.</p>
+        <p class="line">Point it at your messiest AI project. Tell us what we missed — issues &amp; PRs welcome.</p>
         <div class="spacer"></div>
         <div class="repo">github.com<span class="sl">/</span>ActaClad<span class="sl">/</span>plumbline</div>
         <div class="foot" style="margin-top:4cqw"><span>Link in the first comment ↓</span><span>actaclad.com</span></div>
@@ -416,10 +410,11 @@
       <div>
         <h3>Notes</h3>
         <ul>
-          <li>Export at 1080×1350 (4:5) — max feed height on LinkedIn.</li>
-          <li><b>Canonical line</b> (slide-1 sub) — use verbatim everywhere (README, blog, HN, X, both LinkedIn posts): <em>"Security scanners tell you if your AI can be attacked. Plumbline tells you if it can survive production."</em> The hook stays on top of it.</li>
-          <li><b>Stats are honest:</b> "60-rule catalog · 32 available today" — never "60 reliability rules" (four pillars; 32 shipped). The outcomes list maps only to rules that fire.</li>
-          <li>Slide 3 shows the real branded HTML report (`plumb scan --open`) — screenshot it at 1080px wide for crisp text.</li>
+          <li><b>Storyline: functional → technical.</b> S1 the problem in plain words (any reader) → S2 meet Plumbline + <b>open source, loud</b> + the reframe → S3 proof for engineers → S4 get it. One idea per slide.</li>
+          <li><b>Open source is a beat, not a footnote</b> — the gold "Free · Apache-2.0 · Every rule open" pills on S2 are the point; keep them prominent.</li>
+          <li><b>Canonical line</b> (slide-2 sub-beat) — use verbatim everywhere (README, blog, HN, X, both LinkedIn posts): <em>"Security scanners tell you if your AI can be attacked. Plumbline tells you if it can survive production."</em></li>
+          <li><b>Stats are honest:</b> "60-rule catalog · 32 today" — never "60 reliability rules" (four pillars; 32 shipped).</li>
+          <li>Slide 3 = the real branded HTML report (<code>docs/launch/report.png</code>, or <code>plumb scan --open</code> at 1080px+). Export slides at 1080×1350 (4:5).</li>
           <li>Repo link goes in the first comment, not the post body (reach).</li>
         </ul>
       </div>
